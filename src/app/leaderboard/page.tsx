@@ -148,7 +148,7 @@ function LeaderboardContent() {
             }`}
           >
             <Trophy className="w-4 h-4" />
-            <span>Master Hub Global</span>
+            <span>Atlas Global</span>
           </button>
 
           <button
@@ -240,7 +240,7 @@ function LeaderboardContent() {
                 <h2 className="text-xl sm:text-2xl font-black text-white">
                   Los Reyes de{" "}
                   {currentTab === "global"
-                    ? "Master Hub"
+                    ? "Atlas"
                     : currentTab === "cinema"
                       ? "la Pantalla"
                       : "la Partida"}

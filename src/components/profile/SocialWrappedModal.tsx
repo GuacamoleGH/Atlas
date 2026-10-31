@@ -629,7 +629,7 @@ export default function SocialWrappedModal({
     ctx.fillStyle = "#9ca3af";
     ctx.font = "24px monospace";
     ctx.fillText(
-      user.username ? `masterhub.app/u/${user.username}` : "masterhub.app",
+      user.username ? `atlas.app/u/${user.username}` : "atlas.app",
       W / 2,
       footerY + 45,
     );
@@ -712,8 +712,8 @@ export default function SocialWrappedModal({
       ? `Gamer Wrapped de ${user.displayName}`
       : `Cinephile Wrapped de ${user.displayName}`;
     const shareText = isGaming
-      ? `¡Mira mis estadísticas gamer en MasterHub! #MasterHub #Gaming #Videojuegos`
-      : `¡Mira mis estadísticas de cine y series en MasterHub! #MasterHub #Cine #Peliculas`;
+      ? `¡Mira mis estadísticas gamer en Atlas! #Atlas #Gaming #Videojuegos`
+      : `¡Mira mis estadísticas de cine y series en Atlas! #Atlas #Cine #Peliculas`;
 
     if (navigator.share && dataUrl) {
       try {
@@ -809,7 +809,7 @@ export default function SocialWrappedModal({
           ) : dataUrl ? (
             <img
               src={dataUrl}
-              alt="MasterHub Wrapped"
+              alt="Atlas Wrapped"
               className="max-h-[55vh] rounded-xl shadow-2xl border border-cine-700/80 object-contain"
             />
           ) : null}

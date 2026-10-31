@@ -101,7 +101,7 @@ export default async function MasterHubPage() {
       <div className="text-center space-y-4 max-w-2xl mx-auto">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cine-900 border border-cine-700/80 text-xs font-mono text-cine-300 shadow-inner">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span>MasterHub • v4.0</span>
+          <span>Atlas • v4.0</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">

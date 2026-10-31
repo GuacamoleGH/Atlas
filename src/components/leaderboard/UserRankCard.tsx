@@ -29,7 +29,7 @@ export default function UserRankCard({
 
   const categoryName =
     category === "global"
-      ? "Master Hub Global"
+      ? "Atlas Global"
       : category === "cinema"
         ? "Cinefilia & Sofa Knowledge"
         : "Gaming & Game Knowledge";

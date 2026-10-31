@@ -26,10 +26,10 @@ export default function MasterHubScoreBadge({
     return (
       <div
         className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-cine-900/60 border border-cine-800 text-cine-400 text-xs font-medium"
-        title="Sin votos comunitarios aún en Master Hub"
+        title="Sin votos comunitarios aún en Atlas"
       >
         <Sparkles className="w-3.5 h-3.5 text-cine-500" />
-        <span>Master Hub: Sin votos</span>
+        <span>Atlas: Sin votos</span>
       </div>
     );
   }
@@ -43,7 +43,7 @@ export default function MasterHubScoreBadge({
           ? "bg-purple-950/50 border-purple-500/35 text-purple-300 hover:border-purple-500/60"
           : "bg-amber-500/15 border-amber-500/30 text-amber-400 hover:border-amber-500/50"
       }`}
-      title={`Master Hub Score: ${score.toFixed(1)} / 10 (${voteLabel})`}
+      title={`Atlas Score: ${score.toFixed(1)} / 10 (${voteLabel})`}
     >
       <div className="flex items-center gap-1 font-semibold tracking-wide">
         <Sparkles
@@ -52,7 +52,7 @@ export default function MasterHubScoreBadge({
           }`}
         />
         <span className="text-[11px] uppercase tracking-wider opacity-90">
-          Master Hub
+          Atlas
         </span>
       </div>
 

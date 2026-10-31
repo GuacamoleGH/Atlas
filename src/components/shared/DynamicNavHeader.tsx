@@ -39,13 +39,13 @@ export default function DynamicNavHeader() {
             className="flex items-center gap-2 text-xs font-semibold text-cine-400 hover:text-white transition-colors bg-cine-900/80 px-3 py-1.5 rounded-xl border border-cine-800"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Volver al Hub</span>
+            <span>Volver a Atlas</span>
           </Link>
           <Link
             href="/"
             className="font-extrabold text-white text-base tracking-tight"
           >
-            Master<span className="text-purple-400">Hub</span>
+            At<span className="text-purple-400">las</span>
           </Link>
         </div>
       </header>
@@ -67,11 +67,11 @@ export default function DynamicNavHeader() {
             className="flex items-center gap-2.5 group shrink-0 z-10"
           >
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/20 via-purple-500/20 to-cyan-500/20 border border-purple-500/30 flex items-center justify-center">
-              <span className="text-sm font-black text-white">MH</span>
+              <span className="text-sm font-black text-white">A</span>
             </div>
             <div className="flex flex-col">
               <span className="font-black text-white text-base tracking-tight">
-                Master<span className="text-purple-400">Hub</span>
+                At<span className="text-purple-400">las</span>
               </span>
               <span className="text-[9px] uppercase tracking-widest text-cine-400 font-mono -mt-1">
                 Centro de Mando

@@ -271,7 +271,7 @@ export async function GET() {
     const globalRanking: LeaderboardUserEntry[] = globalSorted.map((u, idx) => {
       const rank = idx + 1;
       let title = "Explorador Digital";
-      if (rank === 1) title = "Soberano del Master Hub";
+      if (rank === 1) title = "Soberano de Atlas";
       else if (rank === 2) title = "Archivista Legendario";
       else if (rank === 3) title = "Erudito Multimedia";
       else if (rank <= 10) title = "Coleccionista Élite";

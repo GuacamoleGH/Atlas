@@ -170,7 +170,7 @@ function PublicProfileContent() {
         setError(null);
         const res = await fetch(`/api/u/${encodeURIComponent(username)}`);
         if (res.status === 404) {
-          setError("El usuario que buscas no existe en Master Hub.");
+          setError("El usuario que buscas no existe en Atlas.");
           return;
         }
         if (!res.ok) {
@@ -464,7 +464,7 @@ function PublicProfileContent() {
 
                 <p className="text-xs sm:text-sm text-cine-300 max-w-xl leading-relaxed">
                   {user.bio ||
-                    "Explorador y analista del catálogo universal de cine y series en MasterHub."}
+                    "Explorador y analista del catálogo universal de cine y series en Atlas."}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-cine-400">
@@ -576,7 +576,7 @@ function PublicProfileContent() {
 
                 <p className="text-xs sm:text-sm text-cine-300 max-w-xl leading-relaxed">
                   {user.bio ||
-                    "Explorador de mundos interactivos y coleccionista de aventuras gamer en MasterHub."}
+                    "Explorador de mundos interactivos y coleccionista de aventuras gamer en Atlas."}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-cine-400">

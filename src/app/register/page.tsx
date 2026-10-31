@@ -101,7 +101,7 @@ export default function RegisterPage() {
               <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
             </h1>
             <p className="text-xs text-cine-400 mt-1">
-              Únete a Master Hub y mantén tu colección y puntuaciones aisladas
+              Únete a Atlas y mantén tu colección y puntuaciones aisladas
             </p>
           </div>
 

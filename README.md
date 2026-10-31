@@ -1,10 +1,10 @@
-# 🛸 Master Hub: Multi-Universo Personal (Cinephile & Gamer Hub)
+# 🌍 Atlas: Multi-Universo Personal (Cinephile & Gamer Hub)
 
 > Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.0)**. Desplegado en **Vercel** con base de datos en la nube en **Supabase PostgreSQL**.
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/🌐_Web_Oficial-Visitar_MasterHub-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white)](https://master-hub-guacamolegh.vercel.app)
+[![Live Demo](https://img.shields.io/badge/🌐_Web_Oficial-Visitar_Atlas-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white)](https://master-hub-guacamolegh.vercel.app)
 [![Next.js](https://img.shields.io/badge/Next.js_14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase_PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 
@@ -18,8 +18,8 @@
 
 ### 🛸 v5.0.0 — Perfil Público Unificado con Slider, Amigos Separados & Core Refactor _(Versión Actual)_
 
-- **Perfil Público Unificado en MasterHub (`/u/[username]`):**
-  - Mantiene el contexto global del Launcher **MasterHub (Centro de Mando)** sin forzar al usuario a entrar al header de un solo universo.
+- **Perfil Público Unificado en Atlas (`/u/[username]`):**
+  - Mantiene el contexto global del Launcher **Atlas (Centro de Mando)** sin forzar al usuario a entrar al header de un solo universo.
   - **Selector Deslizante Dual (Slider / Switcher):** Alterna fluidamente entre **Cinephile Hub** (estética dorada/ámbar) y **Gamer Hub** (estética neón púrpura/cian) con audio háptico (`sounds.switch()`) y sincronización de query params (`?tab=cinema` o `?tab=gaming`) sin recarga de página.
   - **Compartir Inteligente:** El botón de compartir copia la URL con la pestaña activa para que el receptor aterrice directamente en el universo correspondiente.
   - **Catálogo Completo Integrado (`WatchedCatalogSection`):** Visualización navegable de todo el historial de visionados o biblioteca de juegos directamente en el perfil.
@@ -29,20 +29,20 @@
   - **Amigos Gamer (`/games/friends`):** Espacio independiente dentro de Gamer Hub enfocado en compañeros de videojuegos y bibliotecas compartidas.
 - **Vitrina Top 5:**
   - Ampliación de la vitrina favorita de Top 4 a **Top 5**, destacando las mejores obras (películas y series combinadas en Cine, o videojuegos en Gaming).
-- **MasterHub Wrapped Dual (`SocialWrappedModal`):**
+- **Atlas Wrapped Dual (`SocialWrappedModal`):**
   - Generación de historias en formato 9:16 tanto para **Cinephile Wrapped** como para **Gamer Wrapped** con métricas y títulos destacados de cada universo.
 - **Limpieza de Gamificación:**
   - Retirada del sistema de medallas/trofeos redundante para priorizar la velocidad, la analítica pura (Sofa Knowledge, Game Knowledge, Critic vs You) y el medidor de afinidad.
 
 ### 🏆 v4.0.0 — Gamification, Trophy Room, SFX 2.0 & Social Wrapped
 
-- **MasterHub Wrapped — Tarjeta Social Compartible (`SocialWrappedModal`):**
+- **Atlas Wrapped — Tarjeta Social Compartible (`SocialWrappedModal`):**
   - Generador visual de tarjetas en alta resolución 9:16 (1080x1920) renderizado directamente con **HTML5 Canvas**, optimizado para Instagram Stories, Twitter/X y WhatsApp Status.
   - Descarga instantánea en archivo PNG de alta calidad y soporte para la **Web Share API** nativa en dispositivos móviles.
 - **Motor de Audio Arcade SFX 2.0 (`lib/sounds.ts`):**
   - Nuevos efectos sintetizados mediante **Web Audio API** nativa (sin assets externos, sin latencia):
     - `playPirate()`: Tintineo náutico de doblones de oro al marcar la plataforma Pirata 🏴‍☠️.
-    - `playShutter()`: Clic de obturador mecánico de cámara analógica para MasterHub Wrapped.
+    - `playShutter()`: Clic de obturador mecánico de cámara analógica para Atlas Wrapped.
     - `playLevelUp()`: Acorde ascendente de subida de nivel.
     - `playSwitch()`: Conmutación háptica entre universos y pestañas.
   - Botón de audio interactivo (`SoundToggle`) incorporado en la cabecera principal del Launcher.
@@ -64,7 +64,7 @@
 - **Salón de la Fama & Leaderboard Global (`/leaderboard`):**
   - Podio interactivo con los tres mejores usuarios de la comunidad.
   - Pestañas independientes: **General**, **Cine & Series** y **Videojuegos**.
-  - Algoritmo de puntuación **Master Hub Score** basado en volumen de obras registradas, nivel de experiencia y precisión cultural acumulada.
+  - Algoritmo de puntuación **Atlas Score** basado en volumen de obras registradas, nivel de experiencia y precisión cultural acumulada.
 - **Perfiles Sociales Públicos:**
   - Páginas públicas compartibles con biografía, estadísticas de carrera, desglose de notas y vitrina de favoritos.
   - **Medidor de Afinidad Cultural:** Calcula el porcentaje de coincidencia de gustos y criterios entre dos usuarios.
@@ -149,7 +149,7 @@ prueba/
 │   │   ├── games/u/[username]/# Redirección canónica a /u/[username]?tab=gaming
 │   │   └── api/               # Endpoints REST (auth, leaderboard, reviews, games, movies, series, u)
 │   ├── components/
-│   │   ├── DynamicNavHeader.tsx # Barra de navegación inteligente multi-universo (MasterHub, Cine, Juegos)
+│   │   ├── DynamicNavHeader.tsx # Barra de navegación inteligente multi-universo (Atlas, Cine, Juegos)
 │   │   ├── DynamicFooter.tsx    # Pie de página dinámico por universo
 │   │   ├── leaderboard/         # Componentes del ranking (PodiumCard, LeaderboardRow, UserRankCard)
 │   │   ├── reviews/             # Componentes de muro de opiniones (ReviewFeedCard)
@@ -178,7 +178,7 @@ prueba/
 
 - Pantalla de bienvenida modular para acceder a cualquier universo activo (**v5.0 Multi-Universo**).
 - Tarjetas vivas con estadísticas de Cinephile Hub y Gamer Hub.
-- Barra de navegación centralizada **MasterHub (Centro de Mando)** que acompaña también en la vista de perfiles públicos.
+- Barra de navegación centralizada **Atlas (Centro de Mando)** que acompaña también en la vista de perfiles públicos.
 
 ### 2. 🎮 Gamer Hub (`/games/...`)
 

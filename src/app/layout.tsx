@@ -7,7 +7,7 @@ import { ToastProvider } from "@/components/shared/ToastContext";
 import GlobalSoundListener from "@/components/shared/GlobalSoundListener";
 
 export const metadata: Metadata = {
-  title: "Cinephile & Gamer Hub",
+  title: "Atlas | Cinephile & Gamer Hub",
   description:
     "Centro de mando personal para cine y videojuegos con Sofa Knowledge y Game Knowledge.",
   icons: {
