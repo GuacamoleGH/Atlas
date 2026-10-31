@@ -227,7 +227,7 @@ export default async function GamerHomePage() {
           <div className="space-y-3.5 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/40 text-purple-300 text-xs font-semibold font-mono">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Gamer Hub • Letterboxd para Videojuegos</span>
+              <span>Gamer • Letterboxd para Videojuegos</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">

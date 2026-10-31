@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       });
 
       responseMessage =
-        "Se han eliminado todos tus videojuegos, horas y notas de GamerHub. Tus películas y series se conservan intactas.";
+        "Se han eliminado todos tus videojuegos, horas y notas de Gamer. Tus películas y series se conservan intactas.";
     } else if (universe === "CINE") {
       // Purgar EXCLUSIVAMENTE películas y series
       const [deletedMovies, deletedSeries] = await prisma.$transaction([
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       });
 
       responseMessage =
-        "Se han eliminado todas tus películas, series y críticas de CinephileHub. Tus videojuegos se conservan intactos.";
+        "Se han eliminado todas tus películas, series y críticas de Cinephile. Tus videojuegos se conservan intactos.";
     } else {
       // Purgar ambos universos
       const [deletedMovies, deletedSeries, deletedGames] =

@@ -285,7 +285,7 @@ export default function GameDetailPage() {
                     </div>
                   )}
 
-                {/* Master Hub Score Oficial */}
+                {/* Atlas Score Oficial */}
                 <MasterHubScoreBadge
                   score={game.masterHubScore || null}
                   totalVotes={game.masterHubVotes || 0}

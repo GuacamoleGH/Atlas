@@ -342,7 +342,7 @@ export default function GamerProfilePage() {
                 title="Generar tarjeta de resumen para redes sociales"
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>Gamer Hub Wrapped</span>
+                <span>Gamer Wrapped</span>
               </button>
             </div>
           </div>

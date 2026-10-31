@@ -167,7 +167,7 @@ export default function SocialWrappedModal({
     ctx.font = "bold 34px monospace";
     ctx.textAlign = "left";
     ctx.fillText(
-      isGaming ? "GAMER HUB • WRAPPED" : "CINEPHILE HUB • WRAPPED",
+      isGaming ? "GAMER • WRAPPED" : "CINEPHILE • WRAPPED",
       100,
       135,
     );
@@ -620,8 +620,8 @@ export default function SocialWrappedModal({
     ctx.font = "bold 32px sans-serif";
     ctx.fillText(
       isGaming
-        ? "Gamer Hub • Conectado con RAWG & Metacritic"
-        : "Cinephile Hub • Pasión por el Séptimo Arte",
+        ? "Gamer • Conectado con RAWG & Metacritic"
+        : "Cinephile • Pasión por el Séptimo Arte",
       W / 2,
       footerY,
     );

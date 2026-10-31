@@ -112,7 +112,7 @@ export default function GamerFriendsPage() {
                 <Users className="w-5 h-5" />
               </span>
               <span className="text-xs font-mono uppercase tracking-widest text-purple-400 font-bold">
-                Comunidad Gamer Hub
+                Comunidad Gamer
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -196,7 +196,7 @@ export default function GamerFriendsPage() {
           <p className="text-xs text-cine-400 max-w-sm mx-auto">
             {searchQuery
               ? "Prueba buscando por otro término o limpia el filtro de búsqueda."
-              : "Invita a tus amigos compartiéndoles tu enlace de perfil para que se unan a Gamer Hub."}
+              : "Invita a tus amigos compartiéndoles tu enlace de perfil para que se unan a Gamer."}
           </p>
         </div>
       ) : (
@@ -248,7 +248,7 @@ export default function GamerFriendsPage() {
 
                   {/* Bio */}
                   <p className="text-xs text-cine-400 line-clamp-2 leading-relaxed min-h-[36px]">
-                    {friend.bio || "Miembro de la comunidad de Gamer Hub."}
+                    {friend.bio || "Miembro de la comunidad de Gamer."}
                   </p>
 
                   {/* Insignia de Nivel y Rango Gamer */}

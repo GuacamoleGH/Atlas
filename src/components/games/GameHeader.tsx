@@ -59,7 +59,7 @@ export default function GameHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-purple-500/20 bg-cine-950/90 backdrop-blur-xl shadow-lg">
       <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Izquierda: Botón Volver al Hub + Logo Gamer */}
+        {/* Izquierda: Botón Volver al Inicio + Logo Gamer */}
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/"
@@ -67,7 +67,7 @@ export default function GameHeader() {
             title="Volver al Centro de Mando Principal"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Hub Principal</span>
+            <span className="hidden md:inline">Inicio</span>
           </Link>
 
           <Link
@@ -79,7 +79,7 @@ export default function GameHeader() {
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-white text-base sm:text-lg tracking-tight flex items-center gap-1">
-                Gamer<span className="text-purple-400">Hub</span>
+                Game<span className="text-purple-400">r</span>
               </span>
               <span className="text-[9px] uppercase tracking-widest text-cyan-400 font-mono -mt-1">
                 Game Knowledge
@@ -340,7 +340,7 @@ export default function GameHeader() {
               className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-cine-400 hover:text-white"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Volver al Hub Principal</span>
+              <span>Volver a Inicio</span>
             </Link>
           </div>
         </div>

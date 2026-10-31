@@ -370,7 +370,7 @@ function PublicProfileContent() {
 
   return (
     <div className="space-y-8 pb-20 animate-fade-in">
-      {/* 0. Selector Slider de Universo (Cinephile Hub vs Gamer Hub) */}
+      {/* 0. Selector Slider de Universo (Cinephile vs Gamer) */}
       <div className="flex flex-col items-center justify-center gap-2 pt-1">
         <div className="inline-flex p-1.5 rounded-2xl bg-cine-900/90 border border-cine-800/80 shadow-2xl backdrop-blur-xl">
           <button
@@ -383,7 +383,7 @@ function PublicProfileContent() {
             }`}
           >
             <Film className="w-4 h-4" />
-            <span>Cinephile Hub</span>
+            <span>Cinephile</span>
             {cinema.totalWatched > 0 && (
               <span
                 className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
@@ -407,7 +407,7 @@ function PublicProfileContent() {
             }`}
           >
             <Gamepad2 className="w-4 h-4" />
-            <span>Gamer Hub</span>
+            <span>Gamer</span>
             {gaming.totalCompleted > 0 && (
               <span
                 className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
@@ -521,7 +521,7 @@ function PublicProfileContent() {
                   title="Generar tarjeta de resumen para redes sociales"
                 >
                   <Camera className="w-3.5 h-3.5" />
-                  <span>Cinephile Hub Wrapped</span>
+                  <span>Cinephile Wrapped</span>
                 </button>
               </div>
             </div>
@@ -633,7 +633,7 @@ function PublicProfileContent() {
                   title="Generar tarjeta de resumen para redes sociales"
                 >
                   <Camera className="w-3.5 h-3.5" />
-                  <span>Gamer Hub Wrapped</span>
+                  <span>Gamer Wrapped</span>
                 </button>
               </div>
             </div>

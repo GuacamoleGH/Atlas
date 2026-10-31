@@ -236,7 +236,7 @@ export default function MovieDetailPage() {
                 )}
               </div>
 
-              {/* Metadatos rápidos: Año, Duración, Géneros, IMDb, Master Hub */}
+              {/* Metadatos rápidos: Año, Duración, Géneros, IMDb, Atlas */}
               <div className="flex flex-wrap items-center gap-3 sm:gap-3.5 text-xs sm:text-sm font-medium">
                 {movie.year && (
                   <div className="flex items-center gap-1.5 text-cine-200">
@@ -266,7 +266,7 @@ export default function MovieDetailPage() {
                   </a>
                 )}
 
-                {/* Master Hub Score Oficial */}
+                {/* Atlas Score Oficial */}
                 <MasterHubScoreBadge
                   score={movie.masterHubScore || null}
                   totalVotes={movie.masterHubVotes || 0}

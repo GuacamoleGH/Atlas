@@ -158,7 +158,7 @@ export function WipeoutDangerZone({
                     videojuegos de tu cuenta (horas jugadas, backlog,
                     completados, platinos, notas y críticas gamer).{" "}
                     <span className="text-cine-300 font-semibold">
-                      Tus películas y series de CinephileHub permanecerán
+                      Tus películas y series de Cinephile permanecerán
                       intactas.
                     </span>
                   </>
@@ -168,7 +168,7 @@ export function WipeoutDangerZone({
                     registradas de tu cuenta (visionados, watchlist, notas y
                     críticas de cine).{" "}
                     <span className="text-cine-300 font-semibold">
-                      Tus videojuegos, horas y logros de GamerHub permanecerán
+                      Tus videojuegos, horas y logros de Gamer permanecerán
                       intactos.
                     </span>
                   </>
@@ -270,14 +270,14 @@ export function WipeoutDangerZone({
                         Catálogo de Cine & Series:
                       </strong>{" "}
                       Películas y series vistas, pendientes, notas y críticas en
-                      CinephileHub.
+                      Cinephile.
                     </li>
                     <li>
                       <strong className="text-red-300">
                         Biblioteca de Videojuegos:
                       </strong>{" "}
                       Horas registradas, títulos, backlog, completados, platinos
-                      y críticas en GamerHub.
+                      y críticas en Gamer.
                     </li>
                     <li className="text-rose-400 font-medium">
                       <strong className="text-rose-300">
@@ -298,7 +298,7 @@ export function WipeoutDangerZone({
                     </li>
                     <li className="text-emerald-400/90 font-medium">
                       <strong className="text-emerald-300">
-                        CinephileHub Intacto:
+                        Cinephile Intacto:
                       </strong>{" "}
                       Todas tus películas y series vistas se conservarán
                       exactamente como están.
@@ -322,7 +322,7 @@ export function WipeoutDangerZone({
                     </li>
                     <li className="text-emerald-400/90 font-medium">
                       <strong className="text-emerald-300">
-                        GamerHub Intacto:
+                        Gamer Intacto:
                       </strong>{" "}
                       Toda tu biblioteca de videojuegos, horas y platinos se
                       conservarán exactamente como están.

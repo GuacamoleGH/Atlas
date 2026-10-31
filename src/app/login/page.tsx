@@ -195,7 +195,7 @@ function LoginForm() {
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>Entrar al Hub</span>
+                  <span>Entrar a Atlas</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </>
               )}
