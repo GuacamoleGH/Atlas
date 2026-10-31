@@ -318,7 +318,7 @@ export default function ProfilePage() {
                 title="Generar tarjeta de resumen para redes sociales"
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>Cinephile Wrapped</span>
+                <span>Televisión Wrapped</span>
               </button>
             </div>
           </div>

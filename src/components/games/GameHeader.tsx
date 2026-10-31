@@ -79,9 +79,9 @@ export default function GameHeader() {
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-white text-base sm:text-lg tracking-tight flex items-center gap-1">
-                Game<span className="text-purple-400">r</span>
+                <span className="text-purple-400 font-black">Juegos</span>
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-cyan-400 font-mono -mt-1">
+              <span className="text-[9px] uppercase tracking-widest text-purple-300 font-mono -mt-1">
                 Game Knowledge
               </span>
             </div>

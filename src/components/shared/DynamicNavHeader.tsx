@@ -48,7 +48,7 @@ export default function DynamicNavHeader() {
             <div className="w-7 h-7 rounded-lg overflow-hidden border border-purple-500/30 flex items-center justify-center bg-cine-900/60 shadow-inner group-hover:border-purple-400/60 transition-colors shrink-0">
               <img src="/logo.png" alt="Atlas Logo" className="w-full h-full object-cover" />
             </div>
-            <span>At<span className="text-purple-400">las</span></span>
+            <span>Atlas</span>
           </Link>
         </div>
       </header>
@@ -74,7 +74,7 @@ export default function DynamicNavHeader() {
             </div>
             <div className="flex flex-col">
               <span className="font-black text-white text-base tracking-tight">
-                At<span className="text-purple-400">las</span>
+                Atlas
               </span>
               <span className="text-[9px] uppercase tracking-widest text-cine-400 font-mono -mt-1">
                 Centro de Mando

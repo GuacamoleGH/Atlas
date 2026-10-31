@@ -82,7 +82,7 @@ export default function Header() {
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-white text-base sm:text-lg tracking-tight flex items-center gap-1">
-                Cine<span className="text-amber-400">phile</span>
+                <span className="text-amber-400 font-black">Televisión</span>
               </span>
               <span className="text-[9px] uppercase tracking-widest text-cine-400 font-mono -mt-1">
                 Sofa Knowledge

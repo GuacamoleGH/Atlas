@@ -108,7 +108,7 @@ export default function CinemaFriendsPage() {
                 <Users className="w-5 h-5" />
               </span>
               <span className="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
-                Comunidad Cinephile
+                Comunidad Televisión
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -191,7 +191,7 @@ export default function CinemaFriendsPage() {
           <p className="text-xs text-cine-400 max-w-sm mx-auto">
             {searchQuery
               ? "Prueba buscando por otro término o limpia el filtro de búsqueda."
-              : "Invita a tus amigos compartiéndoles tu enlace de perfil para que se unan a Cinephile."}
+              : "Invita a tus amigos compartiéndoles tu enlace de perfil para que se unan a Televisión."}
           </p>
         </div>
       ) : (
@@ -243,7 +243,7 @@ export default function CinemaFriendsPage() {
 
                   {/* Bio */}
                   <p className="text-xs text-cine-400 line-clamp-2 leading-relaxed min-h-[36px]">
-                    {friend.bio || "Miembro de la comunidad de Cinephile."}
+                    {friend.bio || "Miembro de la comunidad de Televisión."}
                   </p>
 
                   {/* Insignia de Nivel y Rango Cinéfilo */}

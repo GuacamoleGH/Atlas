@@ -167,7 +167,7 @@ export default function SocialWrappedModal({
     ctx.font = "bold 34px monospace";
     ctx.textAlign = "left";
     ctx.fillText(
-      isGaming ? "GAMER • WRAPPED" : "CINEPHILE • WRAPPED",
+      isGaming ? "JUEGOS • WRAPPED" : "TELEVISIÓN • WRAPPED",
       100,
       135,
     );
@@ -620,8 +620,8 @@ export default function SocialWrappedModal({
     ctx.font = "bold 32px sans-serif";
     ctx.fillText(
       isGaming
-        ? "Gamer • Conectado con RAWG & Metacritic"
-        : "Cinephile • Pasión por el Séptimo Arte",
+        ? "Juegos • Conectado con RAWG & Metacritic"
+        : "Televisión • Pasión por el Séptimo Arte",
       W / 2,
       footerY,
     );
@@ -709,8 +709,8 @@ export default function SocialWrappedModal({
     sounds.coin();
     const fileName = isGaming ? "gamer-wrapped.png" : "cinephile-wrapped.png";
     const shareTitle = isGaming
-      ? `Gamer Wrapped de ${user.displayName}`
-      : `Cinephile Wrapped de ${user.displayName}`;
+      ? `Juegos Wrapped de ${user.displayName}`
+      : `Televisión Wrapped de ${user.displayName}`;
     const shareText = isGaming
       ? `¡Mira mis estadísticas gamer en Atlas! #Atlas #Gaming #Videojuegos`
       : `¡Mira mis estadísticas de cine y series en Atlas! #Atlas #Cine #Peliculas`;
@@ -781,7 +781,7 @@ export default function SocialWrappedModal({
           </div>
           <div>
             <h3 className="text-xl font-black text-white tracking-tight">
-              {isGaming ? "Gamer Wrapped" : "Cinephile Wrapped"}
+              {isGaming ? "Juegos Wrapped" : "Televisión Wrapped"}
             </h3>
             <p className="text-xs text-cine-400">
               {isGaming

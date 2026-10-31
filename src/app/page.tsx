@@ -120,7 +120,7 @@ export default async function MasterHubPage() {
 
       {/* Grid de Universos Activos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-        {/* Tarjeta 1: Cinephile */}
+        {/* Tarjeta 1: Televisión */}
         <div className="group relative rounded-3xl overflow-hidden glass-panel border border-amber-500/20 hover:border-amber-500/60 p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-2xl bg-gradient-to-br from-amber-500/10 via-cine-950 to-cine-950">
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/20 transition-all duration-500" />
 
@@ -133,7 +133,7 @@ export default async function MasterHubPage() {
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight group-hover:text-amber-300 transition-colors truncate">
-                    Cine<span className="text-amber-400">phile</span>
+                    Televisión
                   </h2>
                 </div>
               </div>
@@ -165,7 +165,7 @@ export default async function MasterHubPage() {
                 <div className="text-[10px] uppercase font-bold text-cine-400">
                   Series vistas
                 </div>
-                <div className="text-lg font-mono font-black text-purple-400 mt-0.5">
+                <div className="text-lg font-mono font-black text-amber-400 mt-0.5">
                   {seriesWatchedCount}
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default async function MasterHubPage() {
                 <div className="text-[10px] uppercase font-bold text-cine-400">
                   Sofa Knowledge
                 </div>
-                <div className="text-lg font-mono font-black text-emerald-400 mt-0.5">
+                <div className="text-lg font-mono font-black text-amber-400 mt-0.5">
                   {avgBallKnowledge ? `${avgBallKnowledge}%` : "—"}
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default async function MasterHubPage() {
               </Link>
               <Link
                 href="/series"
-                className="h-full px-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs sm:text-sm transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] flex items-center justify-center gap-1.5"
+                className="h-full px-4 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 hover:text-white border border-amber-500/40 font-black text-xs sm:text-sm transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] flex items-center justify-center gap-1.5"
               >
                 <Tv className="w-4 h-4" />
                 <span>Series</span>
@@ -200,7 +200,7 @@ export default async function MasterHubPage() {
           </div>
         </div>
 
-        {/* Tarjeta 2: Gamer */}
+        {/* Tarjeta 2: Juegos */}
         <div className="group relative rounded-3xl overflow-hidden glass-panel border border-purple-500/30 hover:border-purple-500/70 p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-2xl bg-gradient-to-br from-purple-500/10 via-cine-950 to-cine-950">
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-500/20 transition-all duration-500" />
 
@@ -213,7 +213,7 @@ export default async function MasterHubPage() {
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight group-hover:text-purple-300 transition-colors truncate">
-                    Game<span className="text-purple-400">r</span>
+                    Juegos
                   </h2>
                 </div>
               </div>
@@ -237,7 +237,7 @@ export default async function MasterHubPage() {
                 <div className="text-[10px] uppercase font-bold text-cine-400">
                   Horas
                 </div>
-                <div className="text-lg font-mono font-black text-cyan-400 mt-0.5">
+                <div className="text-lg font-mono font-black text-purple-400 mt-0.5">
                   {Math.round(totalHours)}h
                 </div>
               </div>
@@ -255,7 +255,7 @@ export default async function MasterHubPage() {
                 <div className="text-[10px] uppercase font-bold text-cine-400">
                   Game Knowledge
                 </div>
-                <div className="text-lg font-mono font-black text-cyan-300 mt-0.5">
+                <div className="text-lg font-mono font-black text-purple-400 mt-0.5">
                   {avgGameKnowledge ? `${avgGameKnowledge}%` : "—"}
                 </div>
               </div>
@@ -267,7 +267,7 @@ export default async function MasterHubPage() {
                 href="/games"
                 className="w-full h-full px-6 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-sm transition-all shadow-[0_0_20px_rgba(139,92,246,0.4)] flex items-center justify-center gap-2 group-hover:gap-3"
               >
-                <span>Entrar a Gamer</span>
+                <span>Entrar a Juegos</span>
                 <ArrowRight className="w-4 h-4 transition-transform" />
               </Link>
             </div>

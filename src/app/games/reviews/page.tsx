@@ -158,7 +158,7 @@ function GameReviewsFeedContent() {
           <p className="text-xs text-cine-400 max-w-sm mx-auto">
             {searchQuery
               ? `No hay críticas que coincidan con "${searchQuery}".`
-              : "Todavía no se han redactado reseñas en Gamer. ¡Sé el primero!"}
+              : "Todavía no se han redactado reseñas en Juegos. ¡Sé el primero!"}
           </p>
         </div>
       ) : (
@@ -170,7 +170,7 @@ function GameReviewsFeedContent() {
                 ? "crítica encontrada"
                 : "críticas encontradas"}
             </span>
-            <span>Gamer</span>
+            <span>Juegos</span>
           </div>
 
           <div className="grid grid-cols-1 gap-4">

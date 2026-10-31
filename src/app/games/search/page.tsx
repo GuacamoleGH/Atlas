@@ -90,7 +90,7 @@ function GameSearchContent() {
             href="/games"
             className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs transition-all"
           >
-            Volver a Gamer
+            Volver a Juegos
           </Link>
         </div>
       ) : (
