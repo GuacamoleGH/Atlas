@@ -1,14 +1,15 @@
 # 🌍 Atlas: Multi-Universo Personal (Cinephile & Gamer Hub)
 
-> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.0)**. Desplegado en **Vercel** con base de datos en la nube en **Supabase PostgreSQL**.
+> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.0)**. Desplegado en **servidor propio (Self-Hosted)** con base de datos **PostgreSQL** y accesible en **[atlas.guacamolegh.es](https://atlas.guacamolegh.es)**.
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/🌐_Web_Oficial-Visitar_Atlas-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white)](https://master-hub-guacamolegh.vercel.app)
+[![Web Oficial](https://img.shields.io/badge/🌐_Web_Oficial-atlas.guacamolegh.es-0ea5e9?style=for-the-badge)](https://atlas.guacamolegh.es)
 [![Next.js](https://img.shields.io/badge/Next.js_14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Supabase](https://img.shields.io/badge/Supabase_PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Self-Hosted](https://img.shields.io/badge/Self--Hosted-Linux_Server-22c55e?style=for-the-badge&logo=linux&logoColor=white)](https://atlas.guacamolegh.es)
 
-**🔗 Acceso en vivo:** [https://master-hub-guacamolegh.vercel.app](https://master-hub-guacamolegh.vercel.app)
+**🔗 Acceso en vivo:** [https://atlas.guacamolegh.es](https://atlas.guacamolegh.es)
 
 </div>
 
@@ -52,7 +53,7 @@
 - **Autenticación Multi-Proveedor:**
   - Integración completa con **NextAuth.js** con registro seguro y verificación por credenciales (contraseñas encriptadas con `bcryptjs`).
   - Inicio de sesión rápido y seguro con **Google OAuth** y **Discord OAuth**.
-  - Sesiones persistentes JWT y vinculación automática de cuentas en Supabase PostgreSQL.
+  - Sesiones persistentes JWT y vinculación automática de cuentas en base de datos PostgreSQL local/servidor.
 - **Gestión de Invitados & Control de Acceso:**
   - Modo invitado libre para explorar y consultar catálogos, detalles de obras y muros de reseñas.
   - Redirección con retorno inteligente (`/login?callbackUrl=...`) al intentar personalizar perfiles, guardar reseñas o votar.
@@ -82,7 +83,7 @@
 - **Ficha Cinéfila Flexible:**
   - Casilla `[x] Asignar nota` interactiva para registrar visionados sin necesidad de puntuación numérica obligatoria.
 - **Optimizaciones de Rendimiento:**
-  - Índices en base de datos Supabase, lazy loading de carátulas y scripts de mantenimiento de índice Git para Windows (`repair-git.bat`).
+  - Índices en base de datos PostgreSQL, lazy loading de carátulas y scripts de mantenimiento de índice Git para Windows (`repair-git.bat`).
 
 ### 🛸 v2.0.0 — Gamer Hub & Arquitectura Multi-Universo
 
@@ -114,16 +115,22 @@
 ## 🏛️ Arquitectura del Proyecto
 
 ```
-prueba/
+Atlas/
 ├── repair-git.bat             # Script de 1-clic para reparar índice de Git en Windows
+├── BUILD.md                   # Guía exhaustiva de compilación, despliegue y self-hosting
 ├── prisma/
 │   ├── schema.prisma          # Modelos User, Account, Session, Movie, UserMovie, Series, Game, UserGame
 │   ├── seed.js                # Sembrador inicial para Cinephile Hub
 │   └── seedGames.js           # Sembrador de videojuegos verificados para Gamer Hub
+├── public/
+│   ├── logo.png               # Logotipo oficial de Atlas
+│   ├── favicon.ico            # Favicon del proyecto
+│   └── favicon.png            # Favicon en formato PNG de alta resolución
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx           # Launcher Genérico (Centro de Mando v5.0)
 │   │   ├── layout.tsx         # Layout global con AuthProvider, ToastProvider y navegación
+│   │   ├── icon.png           # Icono de aplicación generado para App Router
 │   │   ├── login/             # Página de inicio de sesión (Credenciales, Google, Discord)
 │   │   ├── register/          # Registro de nuevos usuarios
 │   │   ├── friends/           # Amigos y comunidad cinéfila
@@ -202,58 +209,44 @@ prueba/
 
 ---
 
-## 🛠️ Comandos Útiles
+## 🛠️ Comandos Rápidos
 
-### Iniciar en local:
+### Desarrollo en Local:
 
 ```bash
 npm run dev
-# o para producción:
+```
+
+### Compilar y Servir en Producción:
+
+```bash
 npm run build
 npm run start
 ```
 
-### Sembrar datos en Supabase:
+### Base de Datos PostgreSQL (Prisma):
 
 ```bash
-npm run db:seed:all     # Siembra cine y videojuegos
+npm run db:push         # Sincroniza el esquema con tu base de datos PostgreSQL
+npm run db:seed:all     # Siembra catálogo inicial de cine y videojuegos
 npm run db:seed         # Solo cine
 npm run db:seed:games   # Solo videojuegos
 ```
 
 ### 🩹 Reparar el error de índice de Git en Windows (`repair-git.bat`):
 
-Si en tu consola de Windows alguna vez te sale `fatal: .git/index: index file smaller than expected`, simplemente ejecuta en la raíz del proyecto:
-
 ```bash
 repair-git.bat
-# o directamente en tu terminal:
+# o en terminal:
 npm run git:fix
 ```
 
 ---
 
-## 🌐 Despliegue en Vercel & Variables de Entorno
+## 🚀 Despliegue en Servidor Local (Self-Hosted)
 
-### 📍 ¿Dónde están las Variables de Entorno en Vercel?
+Atlas corre en infraestructura propia bajo el dominio **[atlas.guacamolegh.es](https://atlas.guacamolegh.es)** conectado a una instancia dedicada de **PostgreSQL**.
 
-Para configurar las claves en producción, la ruta en el panel de control de Vercel es:
+Para ver la guía completa paso a paso de compilación, variables de entorno, configuración con PM2/Systemd y proxy reverso con Nginx/Caddy, consulta el documento:
 
-> **Tu Proyecto en Vercel** ➔ **Settings** (pestaña superior) ➔ **Environment Variables** (menú lateral izquierdo)
-
-### 📋 Variables requeridas en Vercel:
-
-| Variable                | Descripción / Ejemplo                                                         | Entorno Requerido   |
-| :---------------------- | :---------------------------------------------------------------------------- | :------------------ |
-| `NEXTAUTH_SECRET`       | Clave secreta para firmar sesiones JWT de NextAuth (32+ caracteres)           | Production, Preview |
-| `NEXTAUTH_URL`          | URL pública de tu dominio en Vercel (`https://tu-proyecto.vercel.app`)        | Production, Preview |
-| `DATABASE_URL`          | Conexión pooling de Supabase PostgreSQL (`...:6543/postgres?pgbouncer=true`)  | Production, Preview |
-| `DIRECT_URL`            | Conexión directa de Supabase PostgreSQL (`...:5432/postgres`)                 | Production, Preview |
-| `TMDB_API_KEY`          | Clave API de The Movie Database                                               | Production, Preview |
-| `RAWG_API_KEY`          | Clave API de RAWG Video Games                                                 | Production, Preview |
-| `GOOGLE_CLIENT_ID`      | Client ID de Google Cloud OAuth _(Opcional para login con Google)_            | Production, Preview |
-| `GOOGLE_CLIENT_SECRET`  | Client Secret de Google Cloud OAuth _(Opcional para login con Google)_        | Production, Preview |
-| `DISCORD_CLIENT_ID`     | Client ID de Discord Developer Portal _(Opcional para login con Discord)_     | Production, Preview |
-| `DISCORD_CLIENT_SECRET` | Client Secret de Discord Developer Portal _(Opcional para login con Discord)_ | Production, Preview |
-
-_Nota: Tras añadir o modificar variables en Vercel, recuerda hacer **Redeploy** del último despliegue para que surtan efecto._
+👉 **[Consulta la Guía Completa de Compilación y Despliegue (BUILD.md)](./BUILD.md)**
