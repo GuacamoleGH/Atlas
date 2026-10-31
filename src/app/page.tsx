@@ -14,7 +14,7 @@ import {
   Layers,
   Database,
   ShieldCheck,
-  PlusCircle,
+
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -275,34 +275,6 @@ export default async function MasterHubPage() {
         </div>
       </div>
 
-      {/* Módulo Futuro / Próximamente (Espacio reservado) */}
-      <div className="max-w-5xl mx-auto w-full">
-        <div className="rounded-3xl border-2 border-dashed border-cine-800/90 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-cine-950/40 text-center sm:text-left">
-          <div className="flex items-center gap-4 justify-center sm:justify-start">
-            <div className="w-12 h-12 rounded-2xl bg-cine-900 border border-cine-800 flex items-center justify-center text-cine-500">
-              <PlusCircle className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-bold text-white text-base">
-                Próximos Universos (En desarrollo)
-              </h3>
-              <p className="text-xs text-cine-400">
-                Arquitectura modular preparada para incorporar Anime, Libros o
-                Música cuando lo decidas.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center sm:justify-end gap-3 text-xs font-mono text-cine-500">
-            <span className="px-2.5 py-1 rounded-lg bg-cine-900 border border-cine-800">
-              100% Escalable
-            </span>
-            <span className="px-2.5 py-1 rounded-lg bg-cine-900 border border-cine-800">
-              Supabase DB
-            </span>
-          </div>
-        </div>
       </div>
-    </div>
   );
 }
