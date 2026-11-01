@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   description:
     "Centro de mando personal para cine y videojuegos con Sofa Knowledge y Game Knowledge.",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/Atlas.png",
+    shortcut: "/Atlas.png",
+    apple: "/Atlas.png",
   },
 };
 

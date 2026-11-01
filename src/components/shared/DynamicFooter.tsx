@@ -41,7 +41,7 @@ export default function DynamicFooter() {
       <footer className="border-t border-cine-800/80 bg-cine-950/60 py-6 text-center text-xs text-cine-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Atlas" className="w-4 h-4 object-contain rounded" />
+            <img src="/Atlas.png" alt="Atlas" className="w-4 h-4 object-contain rounded" />
             <span className="font-bold text-white">Atlas</span>
             <span>•</span>
             <span className="text-amber-400">Televisión</span>

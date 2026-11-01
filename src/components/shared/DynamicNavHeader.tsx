@@ -46,7 +46,7 @@ export default function DynamicNavHeader() {
             className="flex items-center gap-2 font-extrabold text-white text-base tracking-tight group"
           >
             <div className="w-7 h-7 rounded-lg overflow-hidden border border-purple-500/30 flex items-center justify-center bg-cine-900/60 shadow-inner group-hover:border-purple-400/60 transition-colors shrink-0">
-              <img src="/logo.png" alt="Atlas Logo" className="w-full h-full object-cover" />
+              <img src="/Atlas.png" alt="Atlas Logo" className="w-full h-full object-cover" />
             </div>
             <span>Atlas</span>
           </Link>
@@ -70,7 +70,7 @@ export default function DynamicNavHeader() {
             className="flex items-center gap-2.5 group shrink-0 z-10"
           >
             <div className="w-8 h-8 rounded-xl overflow-hidden border border-purple-500/30 flex items-center justify-center bg-cine-900/60 shadow-inner group-hover:border-purple-400/60 transition-colors shrink-0">
-              <img src="/logo.png" alt="Atlas Logo" className="w-full h-full object-cover" />
+              <img src="/Atlas.png" alt="Atlas Logo" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col">
               <span className="font-black text-white text-base tracking-tight">
