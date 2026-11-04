@@ -14,14 +14,20 @@ export async function GET(
 
   try {
     const isNum = !isNaN(Number(idOrRawg));
-    let dbGame = await prisma.game.findFirst({
-      where: isNum
-        ? { OR: [{ id: idOrRawg }, { rawgId: Number(idOrRawg) }] }
-        : { id: idOrRawg },
-      include: {
-        userGames: userId ? { where: { userId } } : false,
-      },
-    });
+    let dbGame = null;
+
+    try {
+      dbGame = await prisma.game.findFirst({
+        where: isNum
+          ? { OR: [{ id: idOrRawg }, { rawgId: Number(idOrRawg) }] }
+          : { id: idOrRawg },
+        include: {
+          userGames: userId ? { where: { userId } } : false,
+        },
+      });
+    } catch (dbErr) {
+      console.warn("DB findFirst falló o BD desconectada en /api/games/[id]:", dbErr);
+    }
 
     if (dbGame) {
       let parsedGenres: string[] = [];
@@ -69,14 +75,16 @@ export async function GET(
             ) {
               updatedDescription = rawgDetail.description.slice(0, 1000);
             }
-            await prisma.game.update({
-              where: { id: dbGame.id },
-              data: {
-                developers: JSON.stringify(parsedDevelopers),
-                publishers: JSON.stringify(parsedPublishers),
-                description: updatedDescription,
-              },
-            });
+            try {
+              await prisma.game.update({
+                where: { id: dbGame.id },
+                data: {
+                  developers: JSON.stringify(parsedDevelopers),
+                  publishers: JSON.stringify(parsedPublishers),
+                  description: updatedDescription,
+                },
+              });
+            } catch {}
             dbGame.description = updatedDescription;
           }
         } catch (healError) {
@@ -85,27 +93,30 @@ export async function GET(
       }
 
       // Obtener todas las valoraciones y reseñas de la comunidad para este videojuego
-      const allCommunityUserGames = await prisma.userGame.findMany({
-        where: {
-          gameId: dbGame.id,
-          OR: [
-            { review: { not: null, gt: "" } },
-            { userRating: { not: null } },
-          ],
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              name: true,
-              image: true,
-              totalXp: true,
+      let allCommunityUserGames: any[] = [];
+      try {
+        allCommunityUserGames = await prisma.userGame.findMany({
+          where: {
+            gameId: dbGame.id,
+            OR: [
+              { review: { not: null, gt: "" } },
+              { userRating: { not: null } },
+            ],
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                image: true,
+                totalXp: true,
+              },
             },
           },
-        },
-        orderBy: { updatedAt: "desc" },
-      });
+          orderBy: { updatedAt: "desc" },
+        });
+      } catch {}
 
       const validRatings: number[] = [];
       const distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];

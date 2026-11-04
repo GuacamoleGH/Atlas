@@ -26,9 +26,12 @@ function GameSearchContent() {
         if (res.ok) {
           const data = await res.json();
           setResults(data.results || []);
+        } else {
+          setResults([]);
         }
       } catch (err) {
         console.error("Error al buscar juegos:", err);
+        setResults([]);
       } finally {
         setIsLoading(false);
       }
@@ -57,11 +60,11 @@ function GameSearchContent() {
             <span className="text-purple-400">{query}</span>&quot;
           </h1>
           <span className="px-2.5 py-0.5 rounded-full bg-cine-800 border border-purple-500/30 text-xs font-mono font-bold text-purple-300">
-            {results.length}
+            {isLoading ? "..." : results.length}
           </span>
         </div>
         <p className="text-xs sm:text-sm text-cine-400 mt-1">
-          Búsqueda directa conectada a la base de datos de RAWG Video Games.
+          Búsqueda directa conectada a la base de datos de videojuegos (RAWG / Steam / Catálogo Atlas).
         </p>
       </div>
 
@@ -69,7 +72,7 @@ function GameSearchContent() {
         <div className="min-h-[40vh] flex flex-col items-center justify-center gap-2">
           <Loader2 className="w-7 h-7 text-purple-400 animate-spin" />
           <span className="text-xs text-cine-400 font-mono">
-            Buscando videojuegos en RAWG...
+            Buscando videojuegos...
           </span>
         </div>
       ) : results.length === 0 ? (
