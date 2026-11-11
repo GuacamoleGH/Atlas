@@ -98,123 +98,138 @@ export default function SeriesCard({
     <>
       <div className="group relative glass-card rounded-2xl overflow-hidden flex flex-col bg-cine-900/60 border border-cine-800 hover:border-purple-500/40 transition-all duration-300">
         {/* Póster con enlace */}
-        <Link
-          href={`/series/${series.tmdbId}`}
-          className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950 block"
-        >
-          <MoviePoster
-            src={series.posterPath}
-            alt={series.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-          />
+        <div className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950">
+          <Link
+            href={`/series/${series.tmdbId}`}
+            className="block w-full h-full"
+          >
+            <MoviePoster
+              src={series.posterPath}
+              alt={series.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+            />
 
-          {/* Gradiente superior/inferior para legibilidad */}
-          <div className="absolute inset-0 bg-gradient-to-t from-cine-950 via-transparent to-black/50 opacity-80 group-hover:opacity-60 transition-opacity" />
+            {/* Gradiente superior/inferior para legibilidad */}
+            <div className="absolute inset-0 bg-gradient-to-t from-cine-950 via-transparent to-black/50 opacity-80 group-hover:opacity-60 transition-opacity pointer-events-none" />
+          </Link>
 
-          {/* Badge Serie + Nota IMDb */}
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-            <span className="flex items-center gap-1 bg-purple-950/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold text-purple-300 border border-purple-500/30 shadow">
-              <Tv className="w-3 h-3" /> SERIE
-            </span>
-            {series.imdbRating && (
-              <a
-                href={getImdbUrl(series.imdbId, series.name)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1 bg-black/80 hover:bg-[#f5c518] hover:text-black transition-all backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/20 hover:border-amber-400 shadow group/imdb cursor-pointer"
-                title={`Ver en IMDb (Nota: ${series.imdbRating.toFixed(1)} / 10)`}
-              >
-                <Star className="w-3 h-3 fill-amber-400 group-hover/imdb:fill-black group-hover/imdb:text-black transition-colors" />
-                <span>{series.imdbRating.toFixed(1)}</span>
-                <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover/imdb:opacity-100" />
-              </a>
-            )}
-          </div>
+          {/* Cabecera superior: Badges izquierda + Acciones rápidas derecha */}
+          <div className="absolute top-2.5 left-2.5 right-2.5 flex items-start justify-between gap-1.5 z-10 pointer-events-none">
+            <div className="flex flex-col items-start gap-1.5 pointer-events-auto">
+              <div className="flex items-center gap-1">
+                <span className="flex items-center gap-1 bg-purple-950/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold text-purple-300 border border-purple-500/30 shadow">
+                  <Tv className="w-3 h-3" /> SERIE
+                </span>
+                {series.numberOfSeasons ? (
+                  <span className="bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold text-cine-300 border border-cine-700 shadow">
+                    {series.numberOfSeasons}T
+                  </span>
+                ) : null}
+              </div>
 
-          {/* Badge Temporadas */}
-          {series.numberOfSeasons && (
-            <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold text-cine-300 border border-cine-700 shadow">
-              {series.numberOfSeasons}T
+              {series.imdbRating ? (
+                <a
+                  href={getImdbUrl(series.imdbId, series.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 bg-black/80 hover:bg-[#f5c518] hover:text-black transition-all backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/25 hover:border-amber-400 shadow group/imdb shrink-0"
+                  title={`Ver en IMDb (Nota: ${series.imdbRating.toFixed(1)} / 10)`}
+                >
+                  <span className="font-mono font-black text-[9px] px-1 py-0.2 rounded bg-[#f5c518] text-black leading-tight group-hover/imdb:bg-black group-hover/imdb:text-[#f5c518] transition-colors">
+                    IMDb
+                  </span>
+                  <div className="flex items-center gap-0.5">
+                    <Star className="w-3 h-3 fill-amber-400 group-hover/imdb:fill-black group-hover/imdb:text-black transition-colors" />
+                    <span>{series.imdbRating.toFixed(1)}</span>
+                  </div>
+                  <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover/imdb:opacity-100" />
+                </a>
+              ) : (
+                <a
+                  href={getImdbUrl(series.imdbId, series.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-1.5 py-0.5 rounded-lg backdrop-blur-md border border-amber-500/40 bg-black/80 hover:bg-[#f5c518] text-[#f5c518] hover:text-black font-black text-[10px] tracking-tight transition-all flex items-center gap-0.5 shadow shrink-0"
+                  title="Abrir ficha oficial en IMDb"
+                >
+                  <span>IMDb</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              )}
             </div>
-          )}
+
+            {/* Acciones rápidas compactas */}
+            <div className="flex items-center gap-1 shrink-0 pointer-events-auto">
+              <button
+                type="button"
+                onClick={handleToggleWatchlist}
+                disabled={isUpdating}
+                className={`p-1.5 rounded-lg backdrop-blur-md border transition-all flex items-center justify-center ${
+                  isWatchlist
+                    ? "bg-sky-500 text-cine-950 border-sky-400 font-bold shadow-[0_0_12px_rgba(14,165,233,0.4)]"
+                    : "bg-black/70 text-cine-300 hover:text-white border-white/10 hover:bg-black/90"
+                }`}
+                title={
+                  isWatchlist
+                    ? "Quitar de mi Watchlist"
+                    : "Añadir serie a Watchlist"
+                }
+              >
+                <Bookmark
+                  className={`w-3.5 h-3.5 ${isWatchlist ? "fill-cine-950" : ""}`}
+                />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOpenReview}
+                className={`p-1.5 rounded-lg backdrop-blur-md border transition-all flex items-center justify-center ${
+                  isWatched
+                    ? "bg-emerald-500 text-cine-950 border-emerald-400 font-bold shadow"
+                    : "bg-black/70 text-cine-300 hover:text-white border-white/10 hover:bg-black/90"
+                }`}
+                title={isWatched ? "Modificar reseña" : "Marcar serie como vista"}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
 
           {/* Calificación, Ball Knowledge o Badge Visto si está vista */}
           {isWatched && (
-            <div className="absolute bottom-2.5 left-2.5">
+            <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between z-10 pointer-events-none">
               {userSeries?.userRating !== undefined &&
               userSeries.userRating !== null ? (
                 <div
-                  className="flex items-center gap-1 bg-purple-600/90 text-white px-2 py-0.5 rounded-lg text-xs font-bold shadow cursor-help"
+                  className="flex items-center gap-1 bg-purple-600/90 text-white px-2 py-0.5 rounded-lg text-xs font-bold shadow cursor-help pointer-events-auto"
                   title={`Tu valoración: ${userSeries.userRating.toFixed(1)} / 10`}
                 >
                   <Star className="w-3 h-3 fill-white text-white" />
                   <span>{userSeries.userRating.toFixed(1)}</span>
                 </div>
-              ) : userSeries?.ballKnowledge !== undefined &&
-                userSeries.ballKnowledge !== null ? (
-                <BallKnowledgeBadge
-                  score={userSeries.ballKnowledge}
-                  difference={userSeries.difference}
-                  size="sm"
-                />
               ) : (
                 <div
-                  className="flex items-center gap-1 bg-cine-950/80 border border-purple-500/40 text-purple-300 px-2 py-0.5 rounded-lg text-[10px] font-bold shadow backdrop-blur-md"
+                  className="flex items-center gap-1 bg-cine-950/80 border border-purple-500/40 text-purple-300 px-2 py-0.5 rounded-lg text-[10px] font-bold shadow backdrop-blur-md pointer-events-auto"
                   title="Serie en tu historial (sin nota)"
                 >
                   <span>📼 Vista</span>
                 </div>
               )}
+
+              {userSeries?.ballKnowledge !== undefined &&
+                userSeries.ballKnowledge !== null && (
+                  <div className="pointer-events-auto">
+                    <BallKnowledgeBadge
+                      score={userSeries.ballKnowledge}
+                      difference={userSeries.difference}
+                      size="sm"
+                      showLabel={false}
+                    />
+                  </div>
+                )}
             </div>
           )}
-
-          {/* Acciones rápidas overlay */}
-          <div className="absolute top-12 right-2.5 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <a
-              href={getImdbUrl(series.imdbId, series.name)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="p-2 rounded-xl backdrop-blur-md border border-amber-500/40 bg-black/85 hover:bg-[#f5c518] text-[#f5c518] hover:text-black shadow transition-all flex items-center justify-center font-black text-[10px] tracking-tight gap-0.5"
-              title="Abrir ficha oficial en IMDb"
-            >
-              <span>IMDb</span>
-              <ExternalLink className="w-2.5 h-2.5" />
-            </a>
-
-            <button
-              onClick={handleToggleWatchlist}
-              disabled={isUpdating}
-              className={`p-2 rounded-xl backdrop-blur-md border shadow transition-all ${
-                isWatchlist
-                  ? "bg-sky-500 text-cine-950 border-sky-400 font-bold shadow-[0_0_12px_rgba(14,165,233,0.4)]"
-                  : "bg-cine-900/90 text-cine-300 hover:text-white border-cine-700 hover:bg-cine-800"
-              }`}
-              title={
-                isWatchlist
-                  ? "Quitar de mi Watchlist"
-                  : "Añadir serie a Watchlist"
-              }
-            >
-              <Bookmark
-                className={`w-3.5 h-3.5 ${isWatchlist ? "fill-cine-950" : ""}`}
-              />
-            </button>
-
-            <button
-              onClick={handleOpenReview}
-              className={`p-2 rounded-xl backdrop-blur-md border shadow transition-all ${
-                isWatched
-                  ? "bg-emerald-500 text-cine-950 border-emerald-400"
-                  : "bg-cine-900/90 text-cine-300 hover:text-white border-cine-700 hover:bg-cine-800"
-              }`}
-              title={isWatched ? "Modificar reseña" : "Marcar serie como vista"}
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </Link>
+        </div>
 
         {/* Info inferior */}
         <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
