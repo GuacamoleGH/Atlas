@@ -88,49 +88,8 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
 
-          {/* Gradiente oscuro inferior */}
-          <div className="absolute inset-0 bg-gradient-to-t from-cine-950 via-transparent to-black/30" />
-
-          {/* Badge de Estado */}
-          {userGame?.status && statusBadges[userGame.status] && (
-            <div className="absolute top-2.5 left-2.5">
-              <span
-                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border backdrop-blur-md shadow ${
-                  statusBadges[userGame.status].class
-                }`}
-              >
-                {statusBadges[userGame.status].label}
-              </span>
-            </div>
-          )}
-
-          {/* Metacritic & RAWG Badge */}
-          <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
-            {game.metacritic && (
-              <a
-                href={rawgUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 hover:bg-purple-500 text-white border border-purple-400 shadow-md transition-colors inline-flex items-center gap-1"
-                title={`Puntuación de la crítica especializada en Metacritic: ${game.metacritic} / 100 (Ver en RAWG)`}
-              >
-                MC {game.metacritic}
-              </a>
-            )}
-
-            <a
-              href={rawgUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-black/80 hover:bg-white text-white hover:text-black border border-white/20 shadow-md transition-all flex items-center gap-0.5"
-              title="Abrir ficha oficial en RAWG"
-            >
-              <span>RAWG</span>
-              <ExternalLink className="w-2.5 h-2.5" />
-            </a>
-          </div>
+          {/* Gradiente oscuro inferior sutil */}
+          <div className="absolute inset-0 bg-gradient-to-t from-cine-950/80 via-transparent to-transparent pointer-events-none" />
 
           {/* Horas Jugadas */}
           {userGame?.hoursPlayed !== null &&
@@ -169,28 +128,81 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
 
         {/* Contenido inferior */}
         <div className="p-3.5 flex flex-col flex-1 justify-between gap-2.5">
-          <div>
-            <Link href={`/games/${game.rawgId}`}>
-              <h3
-                className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors line-clamp-1 leading-snug"
-                title={`Ver ficha completa de ${game.title}`}
-              >
-                {game.title}
-              </h3>
-            </Link>
+          <div className="space-y-2">
+            <div>
+              <Link href={`/games/${game.rawgId}`}>
+                <h3
+                  className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors line-clamp-1 leading-snug"
+                  title={`Ver ficha completa de ${game.title}`}
+                >
+                  {game.title}
+                </h3>
+              </Link>
 
-            <div className="flex items-center justify-between text-xs text-cine-400 mt-1">
-              <span
-                title={`Año de lanzamiento: ${releaseYear || "Desconocido"}`}
-              >
-                {releaseYear || "—"}
-              </span>
+              <div className="flex items-center gap-1.5 text-xs text-cine-400 mt-0.5 flex-wrap">
+                <span
+                  title={`Año de lanzamiento: ${releaseYear || "Desconocido"}`}
+                >
+                  {releaseYear || "—"}
+                </span>
+                {game.genres && game.genres.length > 0 && (
+                  <>
+                    <span>•</span>
+                    <span className="truncate" title={`Género: ${game.genres[0]}`}>
+                      {game.genres[0]}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Fila limpia: Metacritic / RAWG a la izquierda y Estado a la derecha */}
+            <div className="flex items-center justify-between gap-2 pt-0.5">
+              <div className="flex items-center gap-1.5 shrink-0">
+                {game.metacritic && (
+                  <a
+                    href={rawgUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 hover:bg-purple-500 text-white border border-purple-400 shadow-sm transition-colors inline-flex items-center gap-1"
+                    title={`Puntuación Metacritic: ${game.metacritic} / 100`}
+                  >
+                    MC {game.metacritic}
+                  </a>
+                )}
+
+                <a
+                  href={rawgUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-black/60 hover:bg-white text-white hover:text-black border border-white/20 shadow-sm transition-all flex items-center gap-0.5"
+                  title="Abrir ficha oficial en RAWG"
+                >
+                  <span>RAWG</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+
+              {/* Badge de Estado a la derecha */}
+              {userGame?.status && statusBadges[userGame.status] && (
+                <div className="shrink-0">
+                  <span
+                    className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border shadow-sm ${
+                      statusBadges[userGame.status].class
+                    }`}
+                  >
+                    {statusBadges[userGame.status].label}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Plataformas donde se jugó */}
             {userGame?.platform && (
               <div
-                className="mt-1.5"
+                className="pt-0.5"
                 title={`Plataforma: ${userGame.platform}`}
               >
                 <PlatformBadge platform={userGame.platform} size="xs" />
