@@ -102,7 +102,7 @@ export default function SeriesCard({
         {/* Póster con enlace */}
         <div className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950">
           <Link
-            href={`/series/${series.tmdbId}`}
+            href={`/tv/series/${series.tmdbId}`}
             className="block w-full h-full"
           >
             <MoviePoster
@@ -156,7 +156,7 @@ export default function SeriesCard({
           <div className="space-y-2">
             <div>
               <Link
-                href={`/series/${series.tmdbId}`}
+                href={`/tv/series/${series.tmdbId}`}
                 className="font-bold text-sm text-white group-hover:text-purple-300 transition-colors line-clamp-1"
                 title={series.name}
               >

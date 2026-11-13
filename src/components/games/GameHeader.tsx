@@ -39,7 +39,7 @@ export default function GameHeader() {
     { href: "/games/completed", label: "Completados", icon: CheckCircle2 },
     { href: "/games/friends", label: "Amigos", icon: Users },
     { href: "/games/reviews", label: "Reseñas", icon: MessageSquare },
-    { href: "/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
+    { href: "/tv/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
   ];
 
   const isActive = (href: string) => {
@@ -52,8 +52,8 @@ export default function GameHeader() {
       );
     if (href === "/games/reviews")
       return pathname === "/games/reviews" || pathname === "/games/resenas";
-    if (href.startsWith("/leaderboard"))
-      return pathname === "/leaderboard" || pathname === "/ranking";
+    if (href.includes("leaderboard"))
+      return pathname === "/tv/leaderboard" || pathname === "/leaderboard" || pathname === "/ranking";
     return pathname.startsWith(href);
   };
 
@@ -180,7 +180,7 @@ export default function GameHeader() {
                     <span>Mi Perfil Público</span>
                   </Link>
                   <Link
-                    href="/profile"
+                    href="/tv/profile"
                     onClick={() => setIsUserMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-xs text-cine-200 hover:bg-cine-800 hover:text-white"
                   >
@@ -278,7 +278,7 @@ export default function GameHeader() {
 
               <div className="grid grid-cols-2 gap-2 mb-2 pb-2 border-b border-cine-800">
                 <Link
-                  href="/profile"
+                  href="/tv/profile"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
                 >

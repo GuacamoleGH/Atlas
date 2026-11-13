@@ -121,9 +121,9 @@ export default function MovieSearchInput() {
       document.activeElement.blur();
     }
     if (item.mediaType === "tv") {
-      router.push(`/series/${item.id}`);
+      router.push(`/tv/series/${item.id}`);
     } else {
-      router.push(`/movie/${item.id}`);
+      router.push(`/tv/movie/${item.id}`);
     }
   };
 
@@ -131,7 +131,7 @@ export default function MovieSearchInput() {
     e.preventDefault();
     if (query.trim()) {
       setIsOpen(false);
-      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+      router.push(`/tv/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 

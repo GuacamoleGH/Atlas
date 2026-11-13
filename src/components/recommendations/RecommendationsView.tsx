@@ -143,7 +143,7 @@ export default function RecommendationsView({
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Link
-              href="/movies"
+              href="/tv/movies"
               className="px-3.5 py-1.5 bg-sky-500 hover:bg-sky-400 text-cine-950 font-bold rounded-xl text-xs transition-colors shadow"
             >
               Explorar Catálogo

@@ -281,13 +281,13 @@ export default function WatchedPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link
-              href="/movies"
+              href="/tv/movies"
               className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-cine-950 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-gold-glow"
             >
               <Plus className="w-3.5 h-3.5" /> Explorar Películas
             </Link>
             <Link
-              href="/series"
+              href="/tv/series"
               className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow"
             >
               <Plus className="w-3.5 h-3.5" /> Explorar Series

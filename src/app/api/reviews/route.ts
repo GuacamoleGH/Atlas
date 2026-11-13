@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
           originalTitle: um.movie.originalTitle,
           year: um.movie.year,
           poster: um.movie.posterPath,
-          detailUrl: `/movie/${um.movie.tmdbId}`,
+          detailUrl: `/tv/movie/${um.movie.tmdbId}`,
           author: {
             id: um.user.id,
             username,
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
           originalTitle: us.series.originalName,
           year: us.series.firstAirYear,
           poster: us.series.posterPath,
-          detailUrl: `/series/${us.series.tmdbId}`,
+          detailUrl: `/tv/series/${us.series.tmdbId}`,
           author: {
             id: us.user.id,
             username,

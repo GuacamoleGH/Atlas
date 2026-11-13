@@ -37,7 +37,7 @@ export default function RecommendationCard({
   const toast = useToast();
 
   const isMovie = item.mediaType === "movie";
-  const detailUrl = isMovie ? `/movie/${item.tmdbId}` : `/series/${item.tmdbId}`;
+  const detailUrl = isMovie ? `/tv/movie/${item.tmdbId}` : `/tv/series/${item.tmdbId}`;
 
   // Manejar Watchlist
   const handleToggleWatchlist = async (e: React.MouseEvent) => {

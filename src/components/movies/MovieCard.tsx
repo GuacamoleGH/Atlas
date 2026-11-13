@@ -119,7 +119,7 @@ export default function MovieCard({
         {/* Póster con enlace */}
         <div className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950">
           <Link
-            href={`/movie/${movie.tmdbId}`}
+            href={`/tv/movie/${movie.tmdbId}`}
             className="block w-full h-full"
           >
             <MoviePoster
@@ -179,7 +179,7 @@ export default function MovieCard({
           <div className="space-y-2">
             <div>
               <Link
-                href={`/movie/${movie.tmdbId}`}
+                href={`/tv/movie/${movie.tmdbId}`}
                 className="font-bold text-sm text-cine-100 hover:text-amber-400 transition-colors line-clamp-1"
                 title={`Ver detalles de ${movie.title}`}
               >

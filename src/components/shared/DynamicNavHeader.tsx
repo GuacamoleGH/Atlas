@@ -85,7 +85,7 @@ export default function DynamicNavHeader() {
 
           <nav className="hidden md:flex items-center justify-center gap-1.5 xl:gap-2 absolute left-1/2 -translate-x-1/2 pointer-events-auto">
             <Link
-              href="/movies"
+              href="/tv/movies"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Film className="w-3.5 h-3.5 text-amber-400" />
@@ -93,7 +93,7 @@ export default function DynamicNavHeader() {
             </Link>
 
             <Link
-              href="/recommendations"
+              href="/tv/recommendations"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -109,7 +109,7 @@ export default function DynamicNavHeader() {
             </Link>
 
             <Link
-              href="/friends"
+              href="/tv/friends"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Users className="w-3.5 h-3.5 text-sky-400" />
@@ -117,7 +117,7 @@ export default function DynamicNavHeader() {
             </Link>
 
             <Link
-              href="/leaderboard"
+              href="/tv/leaderboard"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
@@ -125,7 +125,7 @@ export default function DynamicNavHeader() {
             </Link>
 
             <Link
-              href="/reviews"
+              href="/tv/reviews"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <MessageSquare className="w-3.5 h-3.5 text-pink-400" />
@@ -198,7 +198,7 @@ export default function DynamicNavHeader() {
                       <span>Mi Perfil Público</span>
                     </Link>
                     <Link
-                      href="/profile"
+                      href="/tv/profile"
                       onClick={() => setIsMenuOpen(false)}
                       className="flex items-center gap-2 px-3 py-2 text-xs text-cine-200 hover:bg-cine-800 hover:text-white"
                     >
@@ -262,7 +262,7 @@ export default function DynamicNavHeader() {
             {session?.user && (
               <div className="grid grid-cols-2 gap-2 mb-2 pb-2 border-b border-cine-800">
                 <Link
-                  href="/profile"
+                  href="/tv/profile"
                   onClick={() => setIsMobileNavOpen(false)}
                   className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
                 >
@@ -280,7 +280,7 @@ export default function DynamicNavHeader() {
               </div>
             )}
             <Link
-              href="/movies"
+              href="/tv/movies"
               onClick={() => setIsMobileNavOpen(false)}
               className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
             >
@@ -288,7 +288,7 @@ export default function DynamicNavHeader() {
               <span>Cine & Series</span>
             </Link>
             <Link
-              href="/recommendations"
+              href="/tv/recommendations"
               onClick={() => setIsMobileNavOpen(false)}
               className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-amber-300 hover:text-white hover:bg-cine-900"
             >
@@ -304,7 +304,7 @@ export default function DynamicNavHeader() {
               <span>Videojuegos</span>
             </Link>
             <Link
-              href="/friends"
+              href="/tv/friends"
               onClick={() => setIsMobileNavOpen(false)}
               className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
             >
@@ -312,7 +312,7 @@ export default function DynamicNavHeader() {
               <span>Amigos</span>
             </Link>
             <Link
-              href="/leaderboard"
+              href="/tv/leaderboard"
               onClick={() => setIsMobileNavOpen(false)}
               className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
             >
@@ -320,7 +320,7 @@ export default function DynamicNavHeader() {
               <span>Ranking</span>
             </Link>
             <Link
-              href="/reviews"
+              href="/tv/reviews"
               onClick={() => setIsMobileNavOpen(false)}
               className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
             >

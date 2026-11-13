@@ -140,14 +140,14 @@ export default async function SeriesHomePage() {
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
-                href="/watched"
+                href="/tv/watched"
                 className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.4)] text-sm transition-all flex items-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" /> Series Vistas (
                 {totalWatched})
               </Link>
               <Link
-                href="/watchlist"
+                href="/tv/watchlist"
                 className="px-5 py-2.5 glass-card hover:bg-cine-800 text-white font-semibold rounded-xl border border-cine-700 text-sm transition-all flex items-center gap-2"
               >
                 <Bookmark className="w-4 h-4 text-purple-400" /> Watchlist (
@@ -227,7 +227,7 @@ export default async function SeriesHomePage() {
               </h2>
             </div>
             <Link
-              href="/watched"
+              href="/tv/watched"
               className="text-xs text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1 group"
             >
               Ver todas ({totalWatched}){" "}
@@ -295,7 +295,7 @@ export default async function SeriesHomePage() {
               </h2>
             </div>
             <Link
-              href="/watchlist"
+              href="/tv/watchlist"
               className="text-xs text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1 group"
             >
               Ver todas ({watchlistRecords.length}){" "}

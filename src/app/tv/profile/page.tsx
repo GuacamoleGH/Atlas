@@ -81,7 +81,7 @@ export default function ProfilePage() {
   const handleOpenEdit = () => {
     sounds.click();
     if (!session?.user) {
-      router.push("/login?callbackUrl=/profile");
+      router.push("/login?callbackUrl=/tv/profile");
       return;
     }
     setIsEditProfileOpen(true);

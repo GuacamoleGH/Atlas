@@ -183,14 +183,14 @@ export default async function MasterHubPage() {
             {/* Botones de acción alineados al fondo */}
             <div className="mt-auto grid grid-cols-2 gap-2.5 sm:gap-3 h-11">
               <Link
-                href="/movies"
+                href="/tv/movies"
                 className="h-full px-4 rounded-xl sm:rounded-2xl bg-amber-500 hover:bg-amber-400 text-cine-950 font-black text-xs sm:text-sm transition-all shadow-gold-glow flex items-center justify-center gap-1.5"
               >
                 <Film className="w-4 h-4" />
                 <span>Películas</span>
               </Link>
               <Link
-                href="/series"
+                href="/tv/series"
                 className="h-full px-4 rounded-xl sm:rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 hover:text-white border border-amber-500/40 font-black text-xs sm:text-sm transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] flex items-center justify-center gap-1.5"
               >
                 <Tv className="w-4 h-4" />

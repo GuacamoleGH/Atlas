@@ -36,50 +36,54 @@ export default function GamerLevelBar({
         style={{ backgroundColor: rankColor }}
       />
 
-      <div className="flex items-center justify-between gap-3 relative z-10">
-        {/* Nivel y Rango */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl border shadow-inner shrink-0"
-            style={{
-              backgroundColor: `${rankColor}20`,
-              borderColor: `${rankColor}50`,
-            }}
-          >
-            <span>{rankIcon}</span>
-          </div>
+      <div className="flex items-center gap-3 relative z-10">
+        {/* Icono */}
+        <div
+          className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border shadow-inner shrink-0"
+          style={{
+            backgroundColor: `${rankColor}20`,
+            borderColor: `${rankColor}50`,
+          }}
+        >
+          <span>{rankIcon}</span>
+        </div>
 
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 whitespace-nowrap">
-              <span className="text-[11px] uppercase font-bold tracking-wider text-purple-400 font-mono whitespace-nowrap">
+        {/* Bloque de dos filas con altura sincronizada a la del icono (h-12) */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between h-12 py-0.5">
+          {/* Fila superior: Rango + Nivel (izq) y Exp. Total (der) */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0 whitespace-nowrap">
+              <span className="text-[10px] sm:text-[11px] uppercase font-bold tracking-wider text-purple-400 font-mono whitespace-nowrap">
                 Rango Gamer
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0 whitespace-nowrap">
+              <span className="px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-mono font-bold leading-none bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0 whitespace-nowrap">
                 Nvl. {level}
               </span>
             </div>
+
+            <div className="text-[10px] sm:text-[11px] text-cine-400 flex items-center gap-1 font-mono font-medium whitespace-nowrap shrink-0">
+              <Zap className="w-3 h-3 text-cyan-400 fill-cyan-400" />
+              <span>Exp. Total</span>
+            </div>
+          </div>
+
+          {/* Fila inferior: Título del Rango (izq) y Puntos XP (der) alineados en la misma base */}
+          <div className="flex items-baseline justify-between gap-2">
             <h3
-              className="text-base sm:text-lg font-black tracking-tight truncate leading-tight mt-0.5"
+              className="text-base sm:text-lg font-black tracking-tight truncate leading-none"
               style={{ color: rankColor }}
               title={rankTitle}
             >
               {rankTitle}
             </h3>
-          </div>
-        </div>
 
-        {/* XP acumulada */}
-        <div className="text-right shrink-0">
-          <div className="text-[11px] text-cine-400 flex items-center justify-end gap-1 font-mono font-medium whitespace-nowrap">
-            <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />
-            <span>Exp. Total</span>
-          </div>
-          <div
-            suppressHydrationWarning
-            className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight leading-tight mt-0.5"
-          >
-            {(totalXp || 0).toLocaleString()}{" "}
-            <span className="text-xs font-bold text-purple-400">XP</span>
+            <div
+              suppressHydrationWarning
+              className="text-lg sm:text-xl font-black text-white font-mono tracking-tight leading-none shrink-0"
+            >
+              {(totalXp || 0).toLocaleString()}{" "}
+              <span className="text-xs font-bold text-purple-400">XP</span>
+            </div>
           </div>
         </div>
       </div>

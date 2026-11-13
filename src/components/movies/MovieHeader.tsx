@@ -35,30 +35,30 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: "/movies", label: "Películas", icon: Film },
-    { href: "/series", label: "Series", icon: Tv },
-    { href: "/recommendations", label: "Para ti", icon: Sparkles },
-    { href: "/watchlist", label: "Watchlist", icon: Bookmark },
-    { href: "/watched", label: "Vistas", icon: CheckCircle2 },
-    { href: "/friends", label: "Amigos", icon: Users },
-    { href: "/leaderboard", label: "Ranking", icon: Trophy },
-    { href: "/reviews", label: "Reseñas", icon: MessageSquare },
+    { href: "/tv/movies", label: "Películas", icon: Film },
+    { href: "/tv/series", label: "Series", icon: Tv },
+    { href: "/tv/recommendations", label: "Para ti", icon: Sparkles },
+    { href: "/tv/watchlist", label: "Watchlist", icon: Bookmark },
+    { href: "/tv/watched", label: "Vistas", icon: CheckCircle2 },
+    { href: "/tv/friends", label: "Amigos", icon: Users },
+    { href: "/tv/leaderboard", label: "Ranking", icon: Trophy },
+    { href: "/tv/reviews", label: "Reseñas", icon: MessageSquare },
   ];
 
   const isActive = (href: string) => {
-    if (href === "/movies") return pathname === "/movies";
-    if (href === "/series")
-      return pathname === "/series" || pathname.startsWith("/series/");
-    if (href === "/friends")
+    if (href === "/tv/movies") return pathname === "/tv/movies" || pathname === "/tv";
+    if (href === "/tv/series")
+      return pathname === "/tv/series" || pathname.startsWith("/tv/series/");
+    if (href === "/tv/friends")
       return (
-        pathname === "/friends" ||
-        pathname.startsWith("/friends/") ||
-        pathname === "/amigos"
+        pathname === "/tv/friends" ||
+        pathname.startsWith("/tv/friends/") ||
+        pathname === "/tv/amigos"
       );
-    if (href === "/leaderboard")
-      return pathname === "/leaderboard" || pathname === "/ranking";
-    if (href === "/reviews")
-      return pathname === "/reviews" || pathname === "/resenas";
+    if (href === "/tv/leaderboard")
+      return pathname === "/tv/leaderboard" || pathname === "/tv/ranking";
+    if (href === "/tv/reviews")
+      return pathname === "/tv/reviews" || pathname === "/tv/resenas";
     return pathname === href || pathname.startsWith(href + "/");
   };
 
@@ -77,7 +77,7 @@ export default function Header() {
           </Link>
 
           <Link
-            href="/movies"
+            href="/tv/movies"
             className="flex items-center gap-2.5 group shrink-0"
           >
             <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform shadow-gold-glow">
@@ -185,7 +185,7 @@ export default function Header() {
                     <span>Mi Perfil Público</span>
                   </Link>
                   <Link
-                    href="/profile"
+                    href="/tv/profile"
                     onClick={() => setIsUserMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-xs text-cine-200 hover:bg-cine-800 hover:text-white"
                   >
@@ -283,7 +283,7 @@ export default function Header() {
 
               <div className="grid grid-cols-2 gap-2 mb-2 pb-2 border-b border-cine-800">
                 <Link
-                  href="/profile"
+                  href="/tv/profile"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
                 >

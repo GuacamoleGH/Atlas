@@ -346,7 +346,7 @@ export async function GET() {
       year: um.movie.year,
       rating: um.userRating,
       isFavorite: Boolean(um.isFavorite),
-      link: `/movie/${um.movie.tmdbId}`,
+      link: `/tv/movie/${um.movie.tmdbId}`,
       mediaType: "movie" as const,
     }));
 
@@ -359,7 +359,7 @@ export async function GET() {
         year: us.series.firstAirYear,
         rating: us.userRating,
         isFavorite: false,
-        link: `/series/${us.series.tmdbId}`,
+        link: `/tv/series/${us.series.tmdbId}`,
         mediaType: "series" as const,
       }));
 
@@ -384,7 +384,7 @@ export async function GET() {
         watchedDate: um.watchedDate,
         isFavorite: Boolean(um.isFavorite),
         mediaType: "movie" as const,
-        link: `/movie/${um.movie.tmdbId}`,
+        link: `/tv/movie/${um.movie.tmdbId}`,
       })),
       ...allUserSeries
         .filter((us) => us.status === "WATCHED")
@@ -400,7 +400,7 @@ export async function GET() {
           watchedDate: us.watchedDate,
           isFavorite: false,
           mediaType: "series" as const,
-          link: `/series/${us.series.tmdbId}`,
+          link: `/tv/series/${us.series.tmdbId}`,
         })),
     ].sort((a, b) => {
       if (a.watchedDate && b.watchedDate) {
@@ -426,7 +426,7 @@ export async function GET() {
         genres: um.movie.genres,
         overview: um.movie.overview,
         mediaType: "movie" as const,
-        link: `/movie/${um.movie.tmdbId}`,
+        link: `/tv/movie/${um.movie.tmdbId}`,
         addedDate: um.createdAt,
       })),
       ...watchlistSeries.map((us) => ({
@@ -439,7 +439,7 @@ export async function GET() {
         genres: us.series.genres,
         overview: us.series.overview,
         mediaType: "series" as const,
-        link: `/series/${us.series.tmdbId}`,
+        link: `/tv/series/${us.series.tmdbId}`,
         addedDate: us.createdAt,
       })),
     ].sort(

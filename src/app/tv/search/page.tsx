@@ -92,7 +92,7 @@ function SearchContent() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputVal.trim()) {
-      router.push(`/search?q=${encodeURIComponent(inputVal.trim())}`);
+      router.push(`/tv/search?q=${encodeURIComponent(inputVal.trim())}`);
     }
   };
 
@@ -212,8 +212,8 @@ function SearchContent() {
               key={`${item.mediaType}-${item.id}`}
               href={
                 item.mediaType === "tv"
-                  ? `/series/${item.id}`
-                  : `/movie/${item.id}`
+                  ? `/tv/series/${item.id}`
+                  : `/tv/movie/${item.id}`
               }
               className="group glass-card rounded-2xl overflow-hidden flex flex-col bg-cine-900/60 border border-cine-800 hover:border-amber-500/40 transition-all"
             >
