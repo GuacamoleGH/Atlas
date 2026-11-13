@@ -4,6 +4,7 @@ import { getSeriesDetail } from "@/lib/tmdb";
 import { calculateBallKnowledge, calculateMovieXp } from "@/lib/ballKnowledge";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { invalidateRecommendations } from "@/lib/recommendations";
 
 async function refreshUserXp(userId: string) {
   const allUserMovies = await prisma.userMovie.findMany({ where: { userId } });
@@ -277,6 +278,7 @@ export async function POST(request: NextRequest) {
     });
 
     await refreshUserXp(userId);
+    invalidateRecommendations(userId);
 
     return NextResponse.json({ success: true, userSeries });
   } catch (error) {
@@ -319,6 +321,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await refreshUserXp(userId);
+    invalidateRecommendations(userId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error en DELETE /api/user-series:", error);

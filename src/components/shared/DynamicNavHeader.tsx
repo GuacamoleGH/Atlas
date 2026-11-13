@@ -18,6 +18,7 @@ import {
   Users,
   Menu,
   X,
+  Sparkles,
 } from "lucide-react";
 import MovieHeader from "../movies/MovieHeader";
 import GameHeader from "../games/GameHeader";
@@ -89,6 +90,14 @@ export default function DynamicNavHeader() {
             >
               <Film className="w-3.5 h-3.5 text-amber-400" />
               <span>Cine & Series</span>
+            </Link>
+
+            <Link
+              href="/recommendations"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white hover:bg-cine-900 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Para ti</span>
             </Link>
 
             <Link
@@ -257,6 +266,14 @@ export default function DynamicNavHeader() {
             >
               <Film className="w-4 h-4 text-amber-400" />
               <span>Cine & Series</span>
+            </Link>
+            <Link
+              href="/recommendations"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-amber-300 hover:text-white hover:bg-cine-900"
+            >
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>Para ti (Recomendaciones)</span>
             </Link>
             <Link
               href="/games"

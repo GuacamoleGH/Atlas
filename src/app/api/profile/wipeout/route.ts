@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { calculateMovieXp } from "@/lib/ballKnowledge";
 import { calculateGameXp } from "@/lib/gameKnowledge";
+import { invalidateRecommendations } from "@/lib/recommendations";
 
 async function calculateRemainingTotalXp(userId: string) {
   const [userMovies, userSeries, userGames] = await Promise.all([
@@ -158,6 +159,8 @@ export async function POST(request: NextRequest) {
       responseMessage =
         "Se ha realizado el wipeout de toda tu biblioteca y se ha restablecido tu XP a cero.";
     }
+
+    invalidateRecommendations(userId);
 
     return NextResponse.json({
       success: true,

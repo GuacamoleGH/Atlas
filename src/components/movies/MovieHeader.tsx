@@ -21,6 +21,7 @@ import {
   MessageSquare,
   Award,
   Users,
+  Sparkles,
 } from "lucide-react";
 import MovieSearchInput from "./MovieSearchInput";
 import SoundToggle from "@/components/shared/SoundToggle";
@@ -35,6 +36,7 @@ export default function Header() {
   const navLinks = [
     { href: "/movies", label: "Películas", icon: Film },
     { href: "/series", label: "Series", icon: Tv },
+    { href: "/recommendations", label: "Para ti", icon: Sparkles },
     { href: "/watchlist", label: "Watchlist", icon: Bookmark },
     { href: "/watched", label: "Vistas", icon: CheckCircle2 },
     { href: "/friends", label: "Amigos", icon: Users },

@@ -427,3 +427,272 @@ export async function getSeriesDetail(
 
   return null;
 }
+
+export interface TmdbCandidateItem {
+  id: number;
+  mediaType: "movie" | "tv";
+  title: string;
+  originalTitle?: string | null;
+  overview?: string | null;
+  posterPath: string | null;
+  backdropPath: string | null;
+  releaseDate?: string | null;
+  releaseYear?: number | null;
+  genreIds: number[];
+  voteAverage: number;
+  voteCount: number;
+  popularity: number;
+  originalLanguage: string;
+  adult: boolean;
+}
+
+/**
+ * Consulta recomendaciones de una película en TMDB
+ */
+export async function getMovieRecommendations(
+  tmdbId: number,
+  page: number = 1,
+): Promise<TmdbCandidateItem[]> {
+  try {
+    const apiKeyParam = getApiKeyParam();
+    const url = `${TMDB_BASE_URL}/movie/${tmdbId}/recommendations?language=es-ES&page=${page}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const res = await fetch(url, {
+      headers: getHeaders(),
+      next: { revalidate: 43200 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!data.results || !Array.isArray(data.results)) return [];
+
+    return data.results.map((item: any) => ({
+      id: item.id,
+      mediaType: "movie" as const,
+      title: item.title || item.original_title || "Sin título",
+      originalTitle: item.original_title || null,
+      overview: item.overview || null,
+      posterPath: item.poster_path ? `${TMDB_IMAGE_BASE}/w342${item.poster_path}` : null,
+      backdropPath: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
+      releaseDate: item.release_date || null,
+      releaseYear: item.release_date ? parseInt(item.release_date.substring(0, 4), 10) : null,
+      genreIds: Array.isArray(item.genre_ids) ? item.genre_ids : [],
+      voteAverage: Number((item.vote_average || 0).toFixed(1)),
+      voteCount: Number(item.vote_count || 0),
+      popularity: Number(item.popularity || 0),
+      originalLanguage: item.original_language || "en",
+      adult: Boolean(item.adult),
+    }));
+  } catch (error) {
+    console.error(`Error en getMovieRecommendations para ${tmdbId}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Consulta recomendaciones de una serie en TMDB
+ */
+export async function getSeriesRecommendations(
+  tmdbId: number,
+  page: number = 1,
+): Promise<TmdbCandidateItem[]> {
+  try {
+    const apiKeyParam = getApiKeyParam();
+    const url = `${TMDB_BASE_URL}/tv/${tmdbId}/recommendations?language=es-ES&page=${page}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const res = await fetch(url, {
+      headers: getHeaders(),
+      next: { revalidate: 43200 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!data.results || !Array.isArray(data.results)) return [];
+
+    return data.results.map((item: any) => ({
+      id: item.id,
+      mediaType: "tv" as const,
+      title: item.name || item.original_name || "Sin título",
+      originalTitle: item.original_name || null,
+      overview: item.overview || null,
+      posterPath: item.poster_path ? `${TMDB_IMAGE_BASE}/w342${item.poster_path}` : null,
+      backdropPath: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
+      releaseDate: item.first_air_date || null,
+      releaseYear: item.first_air_date ? parseInt(item.first_air_date.substring(0, 4), 10) : null,
+      genreIds: Array.isArray(item.genre_ids) ? item.genre_ids : [],
+      voteAverage: Number((item.vote_average || 0).toFixed(1)),
+      voteCount: Number(item.vote_count || 0),
+      popularity: Number(item.popularity || 0),
+      originalLanguage: item.original_language || "en",
+      adult: Boolean(item.adult),
+    }));
+  } catch (error) {
+    console.error(`Error en getSeriesRecommendations para ${tmdbId}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Descubre películas filtradas por géneros con soporte OR (|) y calidad mínima
+ */
+export async function discoverMovies(
+  withGenres: string,
+  minVotes: number = 500,
+  sortBy: string = "vote_average.desc",
+  page: number = 1,
+): Promise<TmdbCandidateItem[]> {
+  try {
+    const apiKeyParam = getApiKeyParam();
+    const url = `${TMDB_BASE_URL}/discover/movie?language=es-ES&with_genres=${encodeURIComponent(withGenres)}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const res = await fetch(url, {
+      headers: getHeaders(),
+      next: { revalidate: 43200 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!data.results || !Array.isArray(data.results)) return [];
+
+    return data.results.map((item: any) => ({
+      id: item.id,
+      mediaType: "movie" as const,
+      title: item.title || item.original_title || "Sin título",
+      originalTitle: item.original_title || null,
+      overview: item.overview || null,
+      posterPath: item.poster_path ? `${TMDB_IMAGE_BASE}/w342${item.poster_path}` : null,
+      backdropPath: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
+      releaseDate: item.release_date || null,
+      releaseYear: item.release_date ? parseInt(item.release_date.substring(0, 4), 10) : null,
+      genreIds: Array.isArray(item.genre_ids) ? item.genre_ids : [],
+      voteAverage: Number((item.vote_average || 0).toFixed(1)),
+      voteCount: Number(item.vote_count || 0),
+      popularity: Number(item.popularity || 0),
+      originalLanguage: item.original_language || "en",
+      adult: Boolean(item.adult),
+    }));
+  } catch (error) {
+    console.error("Error en discoverMovies:", error);
+    return [];
+  }
+}
+
+/**
+ * Descubre series filtradas por géneros con soporte OR (|) y calidad mínima
+ */
+export async function discoverSeries(
+  withGenres: string,
+  minVotes: number = 500,
+  sortBy: string = "vote_average.desc",
+  page: number = 1,
+): Promise<TmdbCandidateItem[]> {
+  try {
+    const apiKeyParam = getApiKeyParam();
+    const url = `${TMDB_BASE_URL}/discover/tv?language=es-ES&with_genres=${encodeURIComponent(withGenres)}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const res = await fetch(url, {
+      headers: getHeaders(),
+      next: { revalidate: 43200 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!data.results || !Array.isArray(data.results)) return [];
+
+    return data.results.map((item: any) => ({
+      id: item.id,
+      mediaType: "tv" as const,
+      title: item.name || item.original_name || "Sin título",
+      originalTitle: item.original_name || null,
+      overview: item.overview || null,
+      posterPath: item.poster_path ? `${TMDB_IMAGE_BASE}/w342${item.poster_path}` : null,
+      backdropPath: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
+      releaseDate: item.first_air_date || null,
+      releaseYear: item.first_air_date ? parseInt(item.first_air_date.substring(0, 4), 10) : null,
+      genreIds: Array.isArray(item.genre_ids) ? item.genre_ids : [],
+      voteAverage: Number((item.vote_average || 0).toFixed(1)),
+      voteCount: Number(item.vote_count || 0),
+      popularity: Number(item.popularity || 0),
+      originalLanguage: item.original_language || "en",
+      adult: Boolean(item.adult),
+    }));
+  } catch (error) {
+    console.error("Error en discoverSeries:", error);
+    return [];
+  }
+}
+
+/**
+ * Obtiene contenido en tendencia semanal para Cold Start
+ */
+export async function getTrendingAllWeek(page: number = 1): Promise<TmdbCandidateItem[]> {
+  try {
+    const apiKeyParam = getApiKeyParam();
+    const url = `${TMDB_BASE_URL}/trending/all/week?language=es-ES&page=${page}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const res = await fetch(url, {
+      headers: getHeaders(),
+      next: { revalidate: 43200 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!data.results || !Array.isArray(data.results)) return [];
+
+    return data.results
+      .filter((item: any) => item.media_type === "movie" || item.media_type === "tv")
+      .map((item: any) => ({
+        id: item.id,
+        mediaType: item.media_type as "movie" | "tv",
+        title: item.title || item.name || item.original_title || item.original_name || "Sin título",
+        originalTitle: item.original_title || item.original_name || null,
+        overview: item.overview || null,
+        posterPath: item.poster_path ? `${TMDB_IMAGE_BASE}/w342${item.poster_path}` : null,
+        backdropPath: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
+        releaseDate: item.release_date || item.first_air_date || null,
+        releaseYear: item.release_date
+          ? parseInt(item.release_date.substring(0, 4), 10)
+          : item.first_air_date
+            ? parseInt(item.first_air_date.substring(0, 4), 10)
+            : null,
+        genreIds: Array.isArray(item.genre_ids) ? item.genre_ids : [],
+        voteAverage: Number((item.vote_average || 0).toFixed(1)),
+        voteCount: Number(item.vote_count || 0),
+        popularity: Number(item.popularity || 0),
+        originalLanguage: item.original_language || "en",
+        adult: Boolean(item.adult),
+      }));
+  } catch (error) {
+    console.error("Error en getTrendingAllWeek:", error);
+    return [];
+  }
+}
+
+/**
+ * Obtiene keywords de una película
+ */
+export async function getMovieKeywords(tmdbId: number): Promise<string[]> {
+  try {
+    const apiKeyParam = getApiKeyParam();
+    const url = `${TMDB_BASE_URL}/movie/${tmdbId}/keywords?${apiKeyParam ? `${apiKeyParam}` : ""}`;
+    const res = await fetch(url, {
+      headers: getHeaders(),
+      next: { revalidate: 43200 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.keywords || []).map((k: any) => String(k.name || "").toLowerCase()).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Obtiene keywords de una serie
+ */
+export async function getSeriesKeywords(tmdbId: number): Promise<string[]> {
+  try {
+    const apiKeyParam = getApiKeyParam();
+    const url = `${TMDB_BASE_URL}/tv/${tmdbId}/keywords?${apiKeyParam ? `${apiKeyParam}` : ""}`;
+    const res = await fetch(url, {
+      headers: getHeaders(),
+      next: { revalidate: 43200 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || []).map((k: any) => String(k.name || "").toLowerCase()).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+

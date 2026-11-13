@@ -32,6 +32,7 @@ model User {
   userMovies    UserMovie[]
   userSeries    UserSeries[]
   userGames     UserGame[]
+  recommendationExclusions RecommendationExclusion[]
 }
 
 model Account {
@@ -229,3 +230,21 @@ model GamerProfile {
   totalXp     Int      @default(0)
   updatedAt   DateTime @updatedAt
 }
+
+// =======================
+// EXCLUSIONES DE RECOMENDACIONES
+// =======================
+
+model RecommendationExclusion {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mediaType String   // "movie" | "tv"
+  tmdbId    Int
+  title     String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, mediaType, tmdbId])
+  @@index([userId])
+}
+
