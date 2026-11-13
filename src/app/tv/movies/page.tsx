@@ -88,7 +88,7 @@ export default async function MoviesHomePage() {
     : [];
 
   // 4. Recomendaciones inteligentes según tus gustos (películas vistas, series vistas y watchlist)
-  const formattedExploreMovies = await getPersonalizedMovieRecommendations(userId, 12);
+  const formattedExploreMovies = await getPersonalizedMovieRecommendations(userId, 24);
 
   // 5. Estadísticas resumidas para la Home
   const allWatched = userId

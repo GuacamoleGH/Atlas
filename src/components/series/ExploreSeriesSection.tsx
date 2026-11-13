@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import {
-  ChevronDown,
-  ChevronUp,
-  Sparkles,
-  Filter,
-} from "lucide-react";
+import { Sparkles, Filter } from "lucide-react";
 import SeriesCard from "./SeriesCard";
 
 export interface ExploreSeriesItem {
@@ -35,7 +30,6 @@ interface ExploreSeriesSectionProps {
 export default function ExploreSeriesSection({
   series,
 }: ExploreSeriesSectionProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState("all");
 
   // Extraer géneros únicos
@@ -52,16 +46,6 @@ export default function ExploreSeriesSection({
     if (selectedGenre === "all") return series;
     return series.filter((s) => s.genres?.includes(selectedGenre));
   }, [series, selectedGenre]);
-
-  // Si no está expandido y está en "all", mostrar solo los primeros 6
-  const displayedSeries = useMemo(() => {
-    if (isExpanded || selectedGenre !== "all") {
-      return filteredSeries;
-    }
-    return filteredSeries.slice(0, 6);
-  }, [filteredSeries, isExpanded, selectedGenre]);
-
-  const hasMore = selectedGenre === "all" && filteredSeries.length > 6;
 
   if (series.length === 0) return null;
 
@@ -114,7 +98,7 @@ export default function ExploreSeriesSection({
 
       {/* Grid de Series */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {displayedSeries.map((s) => (
+        {filteredSeries.map((s) => (
           <SeriesCard
             key={s.id}
             series={{
@@ -138,30 +122,6 @@ export default function ExploreSeriesSection({
           />
         ))}
       </div>
-
-      {/* Botón Ver Más / Colapsar */}
-      {hasMore && (
-        <div className="text-center pt-2">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cine-900 hover:bg-cine-800 text-purple-400 hover:text-purple-300 font-semibold text-xs border border-cine-700 transition-all shadow-md group"
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUp className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
-                <span>Colapsar recomendaciones</span>
-              </>
-            ) : (
-              <>
-                <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                <span>
-                  Ver todas las recomendaciones ({filteredSeries.length - 6} más)
-                </span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
     </section>
   );
 }

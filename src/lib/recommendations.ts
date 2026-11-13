@@ -645,7 +645,11 @@ export async function getRecommendations(
   // COLD START (menos de 3 obras vistas)
   // ==========================================
   if (profile.totalWatched < 3) {
-    const trending = await getTrendingAllWeek(1);
+    const [trending1, trending2] = await Promise.all([
+      getTrendingAllWeek(1),
+      getTrendingAllWeek(2),
+    ]);
+    const trending = [...trending1, ...trending2];
 
     const validTrending: RecommendationItem[] = [];
     for (const item of trending) {
@@ -693,7 +697,7 @@ export async function getRecommendations(
           subtitle:
             "Todavía estamos conociendo tus gustos. Valora algunas películas y series para que Atlas pueda ofrecerte recomendaciones personalizadas.",
           type: "trending",
-          items: validTrending.slice(0, 20),
+          items: validTrending.slice(0, 40),
         },
       ],
       cachedAt: new Date().toISOString(),
@@ -765,12 +769,14 @@ export async function getRecommendations(
   // 2. Exploración mediante Discover con los géneros favoritos
   if (profile.favoriteGenreIds.length > 0) {
     const top2Genres = profile.favoriteGenreIds.slice(0, 2).join("|");
-    const [discoverMov, discoverTv] = await Promise.all([
+    const [discoverMov1, discoverMov2, discoverTv1, discoverTv2] = await Promise.all([
       discoverMovies(top2Genres, 500, "vote_average.desc", 1),
+      discoverMovies(top2Genres, 250, "vote_average.desc", 2),
       discoverSeries(top2Genres, 500, "vote_average.desc", 1),
+      discoverSeries(top2Genres, 250, "vote_average.desc", 2),
     ]);
 
-    for (const cand of [...discoverMov, ...discoverTv]) {
+    for (const cand of [...discoverMov1, ...discoverMov2, ...discoverTv1, ...discoverTv2]) {
       const key = `${cand.mediaType}:${cand.id}`;
       if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
       if (cand.adult || !cand.posterPath || cand.voteCount < 150) continue;
@@ -857,22 +863,22 @@ export async function getRecommendations(
   scoredCandidates.sort((a, b) => b.affinityScore - a.affinityScore);
 
   // ==========================================
-  // FILA 1: «Creemos que te va a gustar» (Top 20 con diversidad)
+  // FILA 1: «Creemos que te va a gustar» (Top 30 con diversidad)
   // ==========================================
   const featuredCandidates: RecommendationItem[] = [];
   const primaryGenreCount: Record<number, number> = {};
   const seedContributionCount: Record<string, number> = {};
-  const maxPerGenre = Math.ceil(20 / 3); // 7
+  const maxPerGenre = Math.ceil(30 / 3); // 10
 
   for (const cand of scoredCandidates) {
-    if (featuredCandidates.length >= 20) break;
+    if (featuredCandidates.length >= 30) break;
 
     const primaryG = normalizeGenreIds(cand.genreIds)[0] || 0;
     const gCount = primaryGenreCount[primaryG] || 0;
     const sTitle = cand.scoreBreakdown.seedTitle || "discover";
     const sCount = seedContributionCount[sTitle] || 0;
 
-    if (gCount < maxPerGenre && sCount < 3) {
+    if (gCount < maxPerGenre && sCount < 4) {
       featuredCandidates.push(cand);
       primaryGenreCount[primaryG] = gCount + 1;
       seedContributionCount[sTitle] = sCount + 1;
@@ -880,9 +886,9 @@ export async function getRecommendations(
   }
 
   // Si quedaron huecos por las restricciones de diversidad, rellenar con los siguientes
-  if (featuredCandidates.length < 20) {
+  if (featuredCandidates.length < 30) {
     for (const cand of scoredCandidates) {
-      if (featuredCandidates.length >= 20) break;
+      if (featuredCandidates.length >= 30) break;
       if (!featuredCandidates.some((f) => f.id === cand.id)) {
         featuredCandidates.push(cand);
       }
@@ -1077,7 +1083,7 @@ export async function getRecommendations(
 
 export async function getPersonalizedMovieRecommendations(
   userId?: string | null,
-  limit: number = 12
+  limit: number = 24
 ) {
   if (!userId) return [];
   try {
@@ -1111,7 +1117,7 @@ export async function getPersonalizedMovieRecommendations(
 
 export async function getPersonalizedSeriesRecommendations(
   userId?: string | null,
-  limit: number = 12
+  limit: number = 24
 ) {
   if (!userId) return [];
   try {

@@ -258,13 +258,13 @@ export default function SeriesCard({
             </div>
 
             {series.matchPercentage ? (
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <span className="text-[11px] font-extrabold text-emerald-400 font-mono tracking-tight bg-emerald-500/10 border border-emerald-500/25 px-1.5 py-0.5 rounded-md">
+              <div className="flex items-center gap-1.5 mt-2 pt-1 border-t border-cine-800/60 min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-black text-emerald-400 font-mono tracking-tight bg-emerald-950/70 border border-emerald-500/30 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0 shadow-sm">
                   {series.matchPercentage}% para ti
                 </span>
                 {series.matchReason && (
                   <span
-                    className="text-[10px] text-cine-400 truncate max-w-[130px]"
+                    className="text-[10px] text-cine-400 truncate min-w-0 leading-tight"
                     title={series.matchReason}
                   >
                     {series.matchReason}
