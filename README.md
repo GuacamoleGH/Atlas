@@ -1,6 +1,6 @@
 # 🌍 Atlas: Multi-Universo Personal (Cinephile & Gamer Hub)
 
-> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.0)**. Desplegado en **servidor propio (Self-Hosted)** con base de datos **PostgreSQL** y accesible en **[atlas.guacamolegh.es](https://atlas.guacamolegh.es)**.
+> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming, Recomendaciones Personalizadas estilo Netflix y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Motor de Recomendaciones Basado en Contenido («Para ti»), Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.1)**. Desplegado en **servidor propio (Self-Hosted)** con base de datos **PostgreSQL** y accesible en **[atlas.guacamolegh.es](https://atlas.guacamolegh.es)**.
 
 <div align="center">
 
@@ -17,7 +17,29 @@
 
 ## 📜 Historial de Versiones (Changelog)
 
-### 🛸 v5.0.0 — Perfil Público Unificado con Slider, Amigos Separados & Core Refactor _(Versión Actual)_
+### 🍿 v5.1.0 — Motor de Recomendaciones Personalizadas «Para ti» (Estilo Netflix) _(Versión Actual)_
+
+- **Sección Dedicada de Recomendaciones (`/recommendations` o «Para ti»):**
+  - Nuevo apartado protegido por autenticación (`/login?callbackUrl=/recommendations`), integrado de forma destacada en la barra de navegación de Cine & Series y en el Centro de Mando.
+- **Motor Algorítmico Propio Basado en Contenido (`src/lib/recommendations.ts`):**
+  - **Ponderación granular:** Contenido visto con valoración ($\text{peso} = (\text{nota} - 5)/5$), visto sin valorar ($+0.5$) y en watchlist ($+0.3$).
+  - **Decaimiento temporal exponencial:** Las preferencias recientes tienen mayor influencia ($\text{factorTemporal} = 0.5 + 0.5 \cdot e^{-\text{días}/365}$) mientras que las notas negativas conservan su penalización para no recomendar contenido rechazado.
+  - **Equivalencias de géneros TV $\rightarrow$ Cine:** Normalización canónica de géneros TMDB (TV 10759 $\rightarrow$ 28 y 12; TV 10765 $\rightarrow$ 878 y 14; TV 10768 $\rightarrow$ 10752).
+  - **Scoring Bayesiano y Multicriterio:** Fórmula compuesta ponderada (40% soporte de semillas favoritas, 30% afinidad de géneros, 20% calidad bayesiana TMDB con $n/(n+500)$, 10% afinidad lingüística e idioma original).
+- **Filas Horizontales Interactivas:**
+  - **Creemos que te va a gustar:** Fila principal con los 20 mejores candidatos aplicando reglas de diversidad (máximo $\lceil n/3 \rceil$ por género principal y máximo 3 de la misma semilla).
+  - **Porque viste {título}:** Hasta 3 filas independientes para obras de referencia con al menos 4 resultados directos.
+  - **Joyas menos conocidas:** Títulos con popularidad $< 30$ y valoración TMDB $\ge 7.3$ con alta afinidad.
+  - **De tu watchlist, lo que más encaja:** Obras de tu propia lista de pendientes priorizadas según tu afinidad del momento.
+- **Transparencia y Explicación Algorítmica:**
+  - Píldora de porcentaje de afinidad estilo Netflix en pósteres y modal interactivo de **Desglose de Afinidad** con barras de ponderación de cada criterio.
+  - Razón contextual real: *«Porque viste Interstellar»*, *«Por tu interés en Suspense»*, *«Del director Christopher Nolan»*.
+- **Gestión de Cold Start & Exclusiones («No me interesa»):**
+  - Manejo de usuarios con menos de 3 obras vistas mediante tendencias globales semanales y mensaje pedagógico.
+  - Botón de exclusión rápida que oculta el título al instante y lo descarta de futuras recomendaciones.
+  - Caché de 6 horas por usuario con invalidación inmediata al registrar visionados, notas, cambios en watchlist o exclusiones.
+
+### 🛸 v5.0.0 — Perfil Público Unificado con Slider, Amigos Separados & Core Refactor
 
 - **Perfil Público Unificado en Atlas (`/u/[username]`):**
   - Mantiene el contexto global del Launcher **Atlas (Centro de Mando)** sin forzar al usuario a entrar al header de un solo universo.
@@ -144,6 +166,7 @@ Atlas/
 │   │   ├── watchlist/         # Películas y series pendientes
 │   │   ├── watched/           # Obras vistas con filtros y Sofa Knowledge
 │   │   ├── profile/           # Perfil cinéfilo y analítica de Ball Knowledge
+│   │   ├── recommendations/   # Motor de recomendaciones personalizadas «Para ti» (v5.1)
 │   │   ├── search/            # Búsqueda en catálogo de cine y series (TMDB)
 │   │   ├── games/             # Gamer Hub (Home de Videojuegos)
 │   │   ├── games/[id]/        # Ficha de videojuego (trailers, screenshots, veredicto)
@@ -154,18 +177,20 @@ Atlas/
 │   │   ├── games/profile/     # Perfil Gamer, Critic vs You y Hot Takes
 │   │   ├── games/search/      # Buscador de videojuegos con RAWG API
 │   │   ├── games/u/[username]/# Redirección canónica a /u/[username]?tab=gaming
-│   │   └── api/               # Endpoints REST (auth, leaderboard, reviews, games, movies, series, u)
+│   │   └── api/               # Endpoints REST (auth, recommendations, leaderboard, reviews, games, movies, series, u)
 │   ├── components/
 │   │   ├── DynamicNavHeader.tsx # Barra de navegación inteligente multi-universo (Atlas, Cine, Juegos)
 │   │   ├── DynamicFooter.tsx    # Pie de página dinámico por universo
 │   │   ├── leaderboard/         # Componentes del ranking (PodiumCard, LeaderboardRow, UserRankCard)
 │   │   ├── reviews/             # Componentes de muro de opiniones (ReviewFeedCard)
+│   │   ├── recommendations/     # Filas, tarjetas interactivas y modal de desglose de afinidad
 │   │   ├── profile/             # TopFiveCard, WatchedCatalogSection, AffinityCard, SocialWrappedModal
 │   │   ├── movies/              # Componentes cinéfilos (MovieCard, EditCinephileProfileModal, ReviewModal)
 │   │   ├── games/               # Componentes gamer (GameCard, EditGamerProfileModal, GamerLevelBar, CriticVsYouChart)
 │   │   └── shared/              # Sonido, Toasts, Avatares, Badges de Knowledge
 │   ├── lib/
 │   │   ├── prisma.ts          # Cliente Prisma ORM compartido
+│   │   ├── recommendations.ts # Algoritmo de afinidad bayesiana, perfil de gustos, diversidad y caché
 │   │   ├── auth.ts            # Configuración de NextAuth (Credenciales, Google, Discord)
 │   │   ├── avatars.ts         # Catálogo de 16 avatares temáticos predefinidos
 │   │   ├── sounds.ts          # Motor de audio Web sintetizado
@@ -206,6 +231,19 @@ Atlas/
 - **Motor Sofa Knowledge 🛋️:** Mide tu porcentaje de sintonía cultural frente a las valoraciones medias de IMDb.
 - **Muro de Reseñas Cinéfilo (`/reviews`):** Feed comunitario con filtros de búsqueda instantánea y ordenación múltiple.
 - **Comunidad Cinéfila (`/friends`):** Espacio para descubrir qué están viendo tus amigos en tiempo real.
+
+### 4. 🍿 Motor de Recomendaciones Personalizadas (`/recommendations`)
+
+- **Algoritmo propio basado en contenido:** Sin modelos de IA externos ni dependencias de terceros; calcula la afinidad real a partir del historial del usuario.
+- **Ponderación multicriterio:** Combina el peso de obras vistas (notas 0 a 10 con fórmula $(\text{nota}-5)/5$), obras vistas sin nota ($+0.5$) y watchlist ($+0.3$), aplicando un factor de decaimiento temporal exponencial para priorizar gustos recientes sin olvidar títulos desfavorables.
+- **Normalización de géneros cruzada:** Mapeo de identificadores de series a cine (Action & Adventure $\rightarrow$ Acción y Aventura; Sci-Fi & Fantasy $\rightarrow$ Ciencia ficción y Fantasía; War & Politics $\rightarrow$ Bélica).
+- **Filas temáticas al estilo Netflix:**
+  - *«Creemos que te va a gustar»* (top 20 con control de diversidad: máximo $\lceil n/3 \rceil$ por género principal).
+  - *«Porque viste {título}»* (candidatos directos de obras de referencia).
+  - *«Joyas menos conocidas»* (obras con popularidad $< 30$ y nota $\ge 7.3$).
+  - *«De tu watchlist, lo que más encaja»* (tus pendientes priorizados por afinidad).
+- **Transparencia algorítmica:** Píldora de afinidad estilo Netflix y modal interactivo con desglose de la fórmula (40% soporte de semillas, 30% géneros, 20% calidad bayesiana TMDB y 10% idioma).
+- **Acciones y exclusión inmediata:** Botón «No me interesa» para descartar títulos de recomendaciones futuras, y caché invalidable de 6 horas.
 
 ---
 
