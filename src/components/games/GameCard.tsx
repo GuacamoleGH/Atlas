@@ -139,60 +139,51 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
                 </h3>
               </Link>
 
-              <div className="flex items-center justify-between gap-2 text-xs text-cine-400 mt-1">
-                <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center justify-between gap-1.5 text-xs text-cine-400 mt-1.5">
+                <div className="flex items-center gap-1.5 min-w-0">
                   <span
+                    className="shrink-0"
                     title={`Año de lanzamiento: ${releaseYear || "Desconocido"}`}
                   >
                     {releaseYear || "—"}
                   </span>
-                  {userGame?.status && statusBadges[userGame.status] && (
-                    <span
-                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border shadow-sm shrink-0 ${
-                        statusBadges[userGame.status].class
-                      }`}
+
+                  {game.metacritic && (
+                    <a
+                      href={rawgUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 hover:bg-purple-500 text-white border border-purple-400 shadow-sm transition-colors inline-flex items-center gap-1 shrink-0"
+                      title={`Puntuación Metacritic: ${game.metacritic} / 100`}
                     >
-                      {statusBadges[userGame.status].label}
-                    </span>
+                      MC {game.metacritic}
+                    </a>
                   )}
-                </div>
-                {game.genres && game.genres.length > 0 && (
-                  <span
-                    className="truncate text-cine-500 text-[11px]"
-                    title={`Género: ${game.genres[0]}`}
+
+                  <a
+                    href={rawgUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-black/60 hover:bg-white text-white hover:text-black border border-white/20 shadow-sm transition-all flex items-center gap-0.5 shrink-0"
+                    title="Abrir ficha oficial en RAWG"
                   >
-                    {game.genres[0]}
+                    <span>RAWG</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </div>
+
+                {userGame?.status && statusBadges[userGame.status] && (
+                  <span
+                    className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border shadow-sm shrink-0 ${
+                      statusBadges[userGame.status].class
+                    }`}
+                  >
+                    {statusBadges[userGame.status].label}
                   </span>
                 )}
               </div>
-            </div>
-
-            {/* Fila Metacritic / RAWG */}
-            <div className="flex items-center gap-1.5 pt-0.5">
-              {game.metacritic && (
-                <a
-                  href={rawgUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 hover:bg-purple-500 text-white border border-purple-400 shadow-sm transition-colors inline-flex items-center gap-1 shrink-0"
-                  title={`Puntuación Metacritic: ${game.metacritic} / 100`}
-                >
-                  MC {game.metacritic}
-                </a>
-              )}
-
-              <a
-                href={rawgUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-black/60 hover:bg-white text-white hover:text-black border border-white/20 shadow-sm transition-all flex items-center gap-0.5 shrink-0"
-                title="Abrir ficha oficial en RAWG"
-              >
-                <span>RAWG</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
             </div>
 
             {/* Plataformas donde se jugó */}
