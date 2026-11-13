@@ -348,7 +348,7 @@ export default function GamerProfilePage() {
           </div>
 
           {/* Barra de Nivel Gamer */}
-          <div className="w-full lg:w-[350px] xl:w-[380px] shrink-0">
+          <div className="w-full lg:w-[360px] xl:w-[400px] shrink-0">
             <GamerLevelBar
               totalXp={stats.totalXp}
               className="h-full lg:h-[166px]"

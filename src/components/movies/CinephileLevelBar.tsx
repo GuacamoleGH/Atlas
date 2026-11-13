@@ -50,7 +50,7 @@ export default function CinephileLevelBar({
 
   return (
     <div
-      className={`glass-panel p-5 rounded-2xl border shadow-lg relative overflow-hidden flex flex-col justify-between ${
+      className={`glass-panel p-4 sm:p-5 rounded-2xl border shadow-lg relative overflow-hidden flex flex-col justify-between ${
         isSeries
           ? "border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-cine-900 to-cine-950 shadow-[0_0_20px_rgba(168,85,247,0.15)]"
           : "border-amber-500/20 bg-gradient-to-r from-amber-950/30 via-cine-900 to-cine-950 shadow-gold-glow"
@@ -62,11 +62,11 @@ export default function CinephileLevelBar({
         style={{ backgroundColor: rankColor }}
       />
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+      <div className="flex items-center justify-between gap-3 relative z-10">
         {/* Nivel y Rango */}
-        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+        <div className="flex items-center gap-3 min-w-0">
           <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border shadow-inner shrink-0"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl border shadow-inner shrink-0"
             style={{
               backgroundColor: `${rankColor}20`,
               borderColor: `${rankColor}50`,
@@ -75,17 +75,17 @@ export default function CinephileLevelBar({
             <span>{rankIcon}</span>
           </div>
 
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 whitespace-nowrap">
               <span
-                className={`text-xs uppercase font-extrabold tracking-widest font-mono ${
+                className={`text-[11px] uppercase font-bold tracking-wider font-mono whitespace-nowrap ${
                   isSeries ? "text-purple-400" : "text-amber-400"
                 }`}
               >
                 {label}
               </span>
               <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border shrink-0 ${
+                className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border shrink-0 whitespace-nowrap ${
                   isSeries
                     ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
                     : "bg-amber-500/20 text-amber-300 border-amber-500/30"
@@ -95,7 +95,7 @@ export default function CinephileLevelBar({
               </span>
             </div>
             <h3
-              className="text-base sm:text-lg font-black tracking-tight truncate"
+              className="text-base sm:text-lg font-black tracking-tight truncate leading-tight mt-0.5"
               style={{ color: rankColor }}
               title={rankTitle}
             >
@@ -105,20 +105,20 @@ export default function CinephileLevelBar({
         </div>
 
         {/* XP acumulada */}
-        <div className="sm:text-right shrink-0">
-          <div className="text-xs text-cine-400 flex items-center sm:justify-end gap-1 font-medium">
+        <div className="text-right shrink-0">
+          <div className="text-[11px] text-cine-400 flex items-center justify-end gap-1 font-mono font-medium whitespace-nowrap">
             <Zap
               className={`w-3.5 h-3.5 ${
                 isSeries
                   ? "text-cyan-400 fill-cyan-400"
                   : "text-amber-400 fill-amber-400"
               }`}
-            />{" "}
-            Experiencia Total
+            />
+            <span>Exp. Total</span>
           </div>
           <div
             suppressHydrationWarning
-            className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight"
+            className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight leading-tight mt-0.5"
           >
             {(totalXp || 0).toLocaleString()}{" "}
             <span
@@ -133,12 +133,12 @@ export default function CinephileLevelBar({
       </div>
 
       {/* Barra de progreso interactiva */}
-      <div className="mt-4 space-y-1.5 relative z-10">
+      <div className="mt-3.5 space-y-1.5 relative z-10">
         <div className="flex items-center justify-between text-xs text-cine-400 font-mono">
           <span>
             Progreso nivel {level}:{" "}
             <strong className={isSeries ? "text-purple-300" : "text-amber-300"}>
-              {currentXpInLevel} / {xpNeededForNext} XP
+              {currentXpInLevel.toLocaleString()} / {xpNeededForNext.toLocaleString()} XP
             </strong>
           </span>
           <span
@@ -161,19 +161,19 @@ export default function CinephileLevelBar({
                 ? "bg-gradient-to-r from-purple-500 to-cyan-400 shadow-[0_0_12px_rgba(168,85,247,0.5)]"
                 : "bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-400 shadow-[0_0_12px_rgba(245,158,11,0.5)]"
             }`}
-            style={{ width: `${Math.max(3, xpProgressPercent)}%` }}
+            style={{ width: `${xpProgressPercent > 0 ? Math.max(3, Math.min(100, xpProgressPercent)) : 0}%` }}
           />
         </div>
 
         <div className="flex items-center justify-between text-[11px] text-cine-500 pt-0.5 font-mono">
-          <span>{currentLevelBaseXp} XP</span>
+          <span>{currentLevelBaseXp.toLocaleString()} XP</span>
           <span className="flex items-center gap-1 text-cine-400">
             <Trophy
               className={`w-3 h-3 ${
                 isSeries ? "text-purple-400" : "text-amber-400"
               }`}
             />{" "}
-            Siguiente nivel: {nextLevelXp} XP
+            Siguiente nivel: {nextLevelXp.toLocaleString()} XP
           </span>
         </div>
       </div>

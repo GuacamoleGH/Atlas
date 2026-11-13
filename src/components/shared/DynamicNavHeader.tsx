@@ -259,6 +259,26 @@ export default function DynamicNavHeader() {
         {/* Menú desplegable móvil */}
         {isMobileNavOpen && (
           <div className="md:hidden border-t border-cine-800 bg-cine-950/95 px-4 py-3 space-y-1.5 backdrop-blur-xl animate-fade-in">
+            {session?.user && (
+              <div className="grid grid-cols-2 gap-2 mb-2 pb-2 border-b border-cine-800">
+                <Link
+                  href="/profile"
+                  onClick={() => setIsMobileNavOpen(false)}
+                  className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
+                >
+                  <Film className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Perfil Cinéfilo</span>
+                </Link>
+                <Link
+                  href="/games/profile"
+                  onClick={() => setIsMobileNavOpen(false)}
+                  className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20"
+                >
+                  <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Perfil Gamer</span>
+                </Link>
+              </div>
+            )}
             <Link
               href="/movies"
               onClick={() => setIsMobileNavOpen(false)}

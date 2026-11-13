@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
   Gamepad2,
+  Film,
   Bookmark,
   CheckCircle2,
   User,
@@ -179,11 +180,19 @@ export default function GameHeader() {
                     <span>Mi Perfil Público</span>
                   </Link>
                   <Link
+                    href="/profile"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs text-cine-200 hover:bg-cine-800 hover:text-white"
+                  >
+                    <Film className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Perfil Cinéfilo</span>
+                  </Link>
+                  <Link
                     href="/games/profile"
                     onClick={() => setIsUserMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-xs text-cine-200 hover:bg-cine-800 hover:text-white"
                   >
-                    <User className="w-3.5 h-3.5 text-purple-400" />
+                    <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
                     <span>Perfil Gamer</span>
                   </Link>
                   <button
@@ -242,29 +251,50 @@ export default function GameHeader() {
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-purple-500/20 bg-cine-950/95 px-4 py-3 space-y-1">
           {session?.user ? (
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-cine-900 border border-cine-800 mb-2">
-              {session.user.image ? (
-                <img
-                  src={session.user.image}
-                  alt={session.user.name || "Usuario"}
-                  className="w-8 h-8 rounded-lg object-cover border border-purple-500/40 shrink-0"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 text-xs font-bold flex items-center justify-center shrink-0">
-                  {(session.user.name ||
-                    session.user.username ||
-                    "U")[0].toUpperCase()}
+            <>
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-cine-900 border border-cine-800 mb-2">
+                {session.user.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name || "Usuario"}
+                    className="w-8 h-8 rounded-lg object-cover border border-purple-500/40 shrink-0"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 text-xs font-bold flex items-center justify-center shrink-0">
+                    {(session.user.name ||
+                      session.user.username ||
+                      "U")[0].toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-white truncate">
+                    {session.user.name || session.user.username}
+                  </p>
+                  <p className="text-[10px] text-cine-400 truncate">
+                    {session.user.email}
+                  </p>
                 </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-white truncate">
-                  {session.user.name || session.user.username}
-                </p>
-                <p className="text-[10px] text-cine-400 truncate">
-                  {session.user.email}
-                </p>
               </div>
-            </div>
+
+              <div className="grid grid-cols-2 gap-2 mb-2 pb-2 border-b border-cine-800">
+                <Link
+                  href="/profile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
+                >
+                  <Film className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Perfil Cinéfilo</span>
+                </Link>
+                <Link
+                  href="/games/profile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20"
+                >
+                  <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Perfil Gamer</span>
+                </Link>
+              </div>
+            </>
           ) : (
             <div className="p-2.5 rounded-xl bg-purple-950/30 border border-purple-500/30 mb-2 flex items-center justify-between">
               <div>

@@ -28,13 +28,19 @@ export default function GamerLevelBar({
 
   return (
     <div
-      className={`glass-panel p-5 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-cine-900 to-cine-950 shadow-lg flex flex-col justify-between ${className}`}
+      className={`glass-panel p-4 sm:p-5 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-cine-900 to-cine-950 shadow-lg relative overflow-hidden flex flex-col justify-between ${className}`}
     >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Luz ambiental decorativa */}
+      <div
+        className="absolute -right-12 -top-12 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
+        style={{ backgroundColor: rankColor }}
+      />
+
+      <div className="flex items-center justify-between gap-3 relative z-10">
         {/* Nivel y Rango */}
-        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+        <div className="flex items-center gap-3 min-w-0">
           <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border shadow-inner shrink-0"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl border shadow-inner shrink-0"
             style={{
               backgroundColor: `${rankColor}20`,
               borderColor: `${rankColor}50`,
@@ -43,17 +49,17 @@ export default function GamerLevelBar({
             <span>{rankIcon}</span>
           </div>
 
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs uppercase font-extrabold tracking-widest text-purple-400 font-mono">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 whitespace-nowrap">
+              <span className="text-[11px] uppercase font-bold tracking-wider text-purple-400 font-mono whitespace-nowrap">
                 Rango Gamer
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0 whitespace-nowrap">
                 Nvl. {level}
               </span>
             </div>
             <h3
-              className="text-base sm:text-lg font-black tracking-tight truncate"
+              className="text-base sm:text-lg font-black tracking-tight truncate leading-tight mt-0.5"
               style={{ color: rankColor }}
               title={rankTitle}
             >
@@ -63,14 +69,14 @@ export default function GamerLevelBar({
         </div>
 
         {/* XP acumulada */}
-        <div className="sm:text-right shrink-0">
-          <div className="text-xs text-cine-400 flex items-center sm:justify-end gap-1 font-medium">
-            <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />{" "}
-            Experiencia Total
+        <div className="text-right shrink-0">
+          <div className="text-[11px] text-cine-400 flex items-center justify-end gap-1 font-mono font-medium whitespace-nowrap">
+            <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />
+            <span>Exp. Total</span>
           </div>
           <div
             suppressHydrationWarning
-            className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight"
+            className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight leading-tight mt-0.5"
           >
             {(totalXp || 0).toLocaleString()}{" "}
             <span className="text-xs font-bold text-purple-400">XP</span>
@@ -79,12 +85,12 @@ export default function GamerLevelBar({
       </div>
 
       {/* Barra de progreso interactiva */}
-      <div className="mt-4 space-y-1.5">
+      <div className="mt-3.5 space-y-1.5 relative z-10">
         <div className="flex items-center justify-between text-xs text-cine-400 font-mono">
           <span>
             Progreso nivel {level}:{" "}
             <strong className="text-purple-300">
-              {xpInCurrentLevel} / {xpNeededForNext} XP
+              {xpInCurrentLevel.toLocaleString()} / {xpNeededForNext.toLocaleString()} XP
             </strong>
           </span>
           <span className="text-cyan-400 font-bold">{xpProgressPercent}%</span>
@@ -93,15 +99,15 @@ export default function GamerLevelBar({
         <div className="w-full h-2.5 bg-cine-900 rounded-full overflow-hidden p-0.5 border border-purple-900/50">
           <div
             className="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-purple-500 to-cyan-400 shadow-[0_0_12px_rgba(139,92,246,0.5)]"
-            style={{ width: `${xpProgressPercent}%` }}
+            style={{ width: `${xpProgressPercent > 0 ? Math.max(3, Math.min(100, xpProgressPercent)) : 0}%` }}
           />
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-cine-500 pt-0.5">
-          <span>{currentLevelBaseXp} XP</span>
+        <div className="flex items-center justify-between text-[11px] text-cine-500 pt-0.5 font-mono">
+          <span>{currentLevelBaseXp.toLocaleString()} XP</span>
           <span className="flex items-center gap-1 text-cine-400">
             <Trophy className="w-3 h-3 text-purple-400" /> Siguiente nivel:{" "}
-            {nextLevelXp} XP
+            {nextLevelXp.toLocaleString()} XP
           </span>
         </div>
       </div>
