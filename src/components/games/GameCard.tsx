@@ -139,41 +139,44 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
                 </h3>
               </Link>
 
-              <div className="flex items-center justify-between gap-1.5 text-xs text-cine-400 mt-1.5">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span
-                    className="shrink-0"
-                    title={`Año de lanzamiento: ${releaseYear || "Desconocido"}`}
-                  >
-                    {releaseYear || "—"}
-                  </span>
+              <div className="flex items-center gap-1.5 text-xs text-cine-400 mt-1.5">
+                <span
+                  className="shrink-0"
+                  title={`Año de lanzamiento: ${releaseYear || "Desconocido"}`}
+                >
+                  {releaseYear || "—"}
+                </span>
 
-                  {game.metacritic && (
-                    <a
-                      href={rawgUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 hover:bg-purple-500 text-white border border-purple-400 shadow-sm transition-colors inline-flex items-center gap-1 shrink-0"
-                      title={`Puntuación Metacritic: ${game.metacritic} / 100`}
-                    >
-                      MC {game.metacritic}
-                    </a>
-                  )}
-
+                {game.metacritic && (
                   <a
                     href={rawgUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-black/60 hover:bg-white text-white hover:text-black border border-white/20 shadow-sm transition-all flex items-center gap-0.5 shrink-0"
-                    title="Abrir ficha oficial en RAWG"
+                    className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 hover:bg-purple-500 text-white border border-purple-400 shadow-sm transition-colors inline-flex items-center gap-1 shrink-0"
+                    title={`Puntuación Metacritic: ${game.metacritic} / 100`}
                   >
-                    <span>RAWG</span>
-                    <ExternalLink className="w-2.5 h-2.5" />
+                    MC {game.metacritic}
                   </a>
-                </div>
+                )}
 
+                <a
+                  href={rawgUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-black/60 hover:bg-white text-white hover:text-black border border-white/20 shadow-sm transition-all flex items-center gap-0.5 shrink-0"
+                  title="Abrir ficha oficial en RAWG"
+                >
+                  <span>RAWG</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Estado de juego y Plataformas donde se jugó agrupados */}
+            {(userGame?.status || userGame?.platform) && (
+              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
                 {userGame?.status && statusBadges[userGame.status] && (
                   <span
                     className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border shadow-sm shrink-0 ${
@@ -183,22 +186,18 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
                     {statusBadges[userGame.status].label}
                   </span>
                 )}
-              </div>
-            </div>
 
-            {/* Plataformas donde se jugó */}
-            {userGame?.platform && (
-              <div
-                className="pt-0.5"
-                title={`Plataforma: ${userGame.platform}`}
-              >
-                <PlatformBadge platform={userGame.platform} size="xs" />
+                {userGame?.platform && (
+                  <div title={`Plataforma: ${userGame.platform}`}>
+                    <PlatformBadge platform={userGame.platform} size="xs" />
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Reseña snippet si existe */}
-          {userGame?.review && (
+          {/* Reseña snippet si existe, o placeholder cuando no hay reseña */}
+          {userGame?.review ? (
             <div
               onClick={() => setIsReviewOpen(true)}
               className="cursor-pointer group/review bg-cine-950/80 hover:bg-cine-950 p-2.5 rounded-xl border border-purple-500/15 hover:border-purple-400/30 transition-all shadow-inner"
@@ -211,7 +210,19 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
                 </p>
               </div>
             </div>
-          )}
+          ) : userGame?.status ? (
+            <button
+              type="button"
+              onClick={() => setIsReviewOpen(true)}
+              className="w-full text-left cursor-pointer group/add-rev bg-cine-950/40 hover:bg-cine-950/90 p-2 rounded-xl border border-dashed border-purple-500/20 hover:border-purple-400/40 transition-all shadow-inner flex items-center gap-2"
+              title="Añadir una pequeña reseña o veredicto sobre este juego"
+            >
+              <Quote className="w-3 h-3 text-purple-400/50 group-hover/add-rev:text-purple-400 flex-shrink-0" />
+              <span className="text-[11px] text-cine-500 group-hover/add-rev:text-purple-300 italic font-normal truncate">
+                + Añadir reseña personal...
+              </span>
+            </button>
+          ) : null}
 
           {/* Mi Puntuación y Game Knowledge */}
           {userGame?.userRating !== null &&

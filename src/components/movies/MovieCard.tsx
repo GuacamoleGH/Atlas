@@ -296,8 +296,8 @@ export default function MovieCard({
             ) : null}
           </div>
 
-          {/* Reseña snippet si existe */}
-          {userMovie?.review && (
+          {/* Reseña snippet si existe, o placeholder cuando no hay reseña */}
+          {userMovie?.review ? (
             <div
               onClick={handleOpenReview}
               className="cursor-pointer group/review bg-cine-950/80 hover:bg-cine-950 p-2.5 rounded-xl border border-white/5 hover:border-amber-500/30 transition-all shadow-inner"
@@ -310,7 +310,19 @@ export default function MovieCard({
                 </p>
               </div>
             </div>
-          )}
+          ) : isWatched ? (
+            <button
+              type="button"
+              onClick={handleOpenReview}
+              className="w-full text-left cursor-pointer group/add-rev bg-cine-950/40 hover:bg-cine-950/90 p-2 rounded-xl border border-dashed border-amber-500/20 hover:border-amber-400/40 transition-all shadow-inner flex items-center gap-2"
+              title="Añadir una pequeña reseña o notas sobre esta película"
+            >
+              <Quote className="w-3 h-3 text-amber-400/50 group-hover/add-rev:text-amber-400 flex-shrink-0" />
+              <span className="text-[11px] text-cine-500 group-hover/add-rev:text-amber-300 italic font-normal truncate">
+                + Añadir reseña personal...
+              </span>
+            </button>
+          ) : null}
         </div>
       </div>
 

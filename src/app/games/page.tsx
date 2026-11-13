@@ -263,8 +263,8 @@ export default async function GamerHomePage() {
           </div>
 
           {/* Tarjeta de Nivel Gamer */}
-          <div className="w-full md:w-auto md:min-w-[320px]">
-            <GamerLevelBar totalXp={profile.totalXp} />
+          <div className="w-full md:w-[420px] lg:w-[480px] shrink-0">
+            <GamerLevelBar totalXp={profile.totalXp} size="lg" />
           </div>
         </div>
       </section>

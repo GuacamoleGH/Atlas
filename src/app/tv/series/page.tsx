@@ -157,8 +157,8 @@ export default async function SeriesHomePage() {
           </div>
 
           {/* Tarjeta de Nivel y Progreso Seriéfilo */}
-          <div className="w-full md:w-auto md:min-w-[320px]">
-            <CinephileLevelBar totalXp={profile.totalXp} variant="series" />
+          <div className="w-full md:w-[420px] lg:w-[480px] shrink-0">
+            <CinephileLevelBar totalXp={profile.totalXp} variant="series" size="lg" />
           </div>
         </div>
       </section>

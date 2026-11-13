@@ -156,8 +156,8 @@ export default async function MoviesHomePage() {
           </div>
 
           {/* Tarjeta de Nivel y Progreso Cinéfilo */}
-          <div className="w-full md:w-auto md:min-w-[320px]">
-            <CinephileLevelBar totalXp={profile.totalXp} variant="cinema" />
+          <div className="w-full md:w-[420px] lg:w-[480px] shrink-0">
+            <CinephileLevelBar totalXp={profile.totalXp} variant="cinema" size="lg" />
           </div>
         </div>
       </section>

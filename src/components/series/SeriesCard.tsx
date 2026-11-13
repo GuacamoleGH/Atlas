@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Star, Bookmark, CheckCircle2, Tv, ExternalLink } from "lucide-react";
+import { Star, Bookmark, CheckCircle2, Tv, ExternalLink, Quote } from "lucide-react";
 import BallKnowledgeBadge from "../BallKnowledgeBadge";
 import ReviewModal from "../ReviewModal";
 import MoviePoster from "../MoviePoster";
@@ -273,6 +273,34 @@ export default function SeriesCard({
               </div>
             ) : null}
           </div>
+
+          {/* Reseña snippet si existe, o placeholder cuando no hay reseña */}
+          {userSeries?.review ? (
+            <div
+              onClick={handleOpenReview}
+              className="cursor-pointer group/review bg-cine-950/80 hover:bg-cine-950 p-2.5 rounded-xl border border-white/5 hover:border-purple-500/30 transition-all shadow-inner"
+              title={`Tu reseña: "${userSeries.review}". Haz clic para ampliar o editar.`}
+            >
+              <div className="flex items-start gap-1.5">
+                <Quote className="w-3 h-3 text-purple-400/80 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-cine-300 leading-snug line-clamp-2 italic font-normal">
+                  {userSeries.review}
+                </p>
+              </div>
+            </div>
+          ) : isWatched ? (
+            <button
+              type="button"
+              onClick={handleOpenReview}
+              className="w-full text-left cursor-pointer group/add-rev bg-cine-950/40 hover:bg-cine-950/90 p-2 rounded-xl border border-dashed border-purple-500/20 hover:border-purple-400/40 transition-all shadow-inner flex items-center gap-2"
+              title="Añadir una pequeña reseña o notas sobre esta serie"
+            >
+              <Quote className="w-3 h-3 text-purple-400/50 group-hover/add-rev:text-purple-400 flex-shrink-0" />
+              <span className="text-[11px] text-cine-500 group-hover/add-rev:text-purple-300 italic font-normal truncate">
+                + Añadir reseña personal...
+              </span>
+            </button>
+          ) : null}
 
           {currentPlatform && (
             <div className="pt-2 border-t border-cine-800/80 flex items-center justify-between">
