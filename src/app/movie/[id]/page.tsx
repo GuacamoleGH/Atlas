@@ -53,14 +53,30 @@ export default function MovieDetailPage() {
       console.error(err);
     } finally {
       setIsLoading(false);
+      if (typeof window !== "undefined") {
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        });
+      }
     }
   };
 
   useEffect(() => {
     if (movieId) {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
       fetchMovie();
     }
   }, [movieId]);
+
+  useEffect(() => {
+    if (!isLoading && movie) {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
+    }
+  }, [isLoading, movie?.id]);
 
   if (isLoading) {
     return (

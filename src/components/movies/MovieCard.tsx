@@ -29,6 +29,8 @@ interface MovieCardProps {
     imdbRating?: number | null;
     genres?: string[];
     streamingPlatforms?: string[];
+    matchPercentage?: number;
+    matchReason?: string;
   };
   userMovie?: {
     status: "WATCHLIST" | "WATCHED";
@@ -267,6 +269,21 @@ export default function MovieCard({
                 </>
               )}
             </div>
+            {movie.matchPercentage ? (
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <span className="text-[11px] font-extrabold text-emerald-400 font-mono tracking-tight bg-emerald-500/10 border border-emerald-500/25 px-1.5 py-0.5 rounded-md">
+                  {movie.matchPercentage}% para ti
+                </span>
+                {movie.matchReason && (
+                  <span
+                    className="text-[10px] text-cine-400 truncate max-w-[130px]"
+                    title={movie.matchReason}
+                  >
+                    {movie.matchReason}
+                  </span>
+                )}
+              </div>
+            ) : null}
           </div>
 
           {/* Reseña snippet si existe */}

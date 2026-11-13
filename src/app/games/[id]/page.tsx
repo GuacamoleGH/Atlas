@@ -55,14 +55,30 @@ export default function GameDetailPage() {
       console.error(err);
     } finally {
       setIsLoading(false);
+      if (typeof window !== "undefined") {
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        });
+      }
     }
   };
 
   useEffect(() => {
     if (gameId) {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
       fetchGame();
     }
   }, [gameId]);
+
+  useEffect(() => {
+    if (!isLoading && game) {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
+    }
+  }, [isLoading, game?.id]);
 
   if (isLoading) {
     return (

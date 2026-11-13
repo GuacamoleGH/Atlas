@@ -24,6 +24,8 @@ export interface SeriesCardProps {
     imdbRating?: number | null;
     genres?: string[];
     streamingPlatforms?: string[];
+    matchPercentage?: number;
+    matchReason?: string;
   };
   userSeries?: {
     status: "WATCHLIST" | "WATCHED";
@@ -194,7 +196,6 @@ export default function SeriesCard({
               </button>
             </div>
           </div>
-
           {/* Calificación, Ball Knowledge o Badge Visto si está vista */}
           {isWatched && (
             <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between z-10 pointer-events-none">
@@ -246,6 +247,21 @@ export default function SeriesCard({
                 {series.originalName}
               </p>
             )}
+            {series.matchPercentage ? (
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <span className="text-[11px] font-extrabold text-emerald-400 font-mono tracking-tight bg-emerald-500/10 border border-emerald-500/25 px-1.5 py-0.5 rounded-md">
+                  {series.matchPercentage}% para ti
+                </span>
+                {series.matchReason && (
+                  <span
+                    className="text-[10px] text-cine-400 truncate max-w-[130px]"
+                    title={series.matchReason}
+                  >
+                    {series.matchReason}
+                  </span>
+                )}
+              </div>
+            ) : null}
           </div>
 
           <div className="flex items-center justify-between pt-1 border-t border-cine-800/80 text-[11px] text-cine-400">

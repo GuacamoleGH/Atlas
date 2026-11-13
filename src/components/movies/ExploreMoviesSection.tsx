@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from "react";
 import {
-  Compass,
   ChevronDown,
   ChevronUp,
   Sparkles,
@@ -13,6 +12,7 @@ import MovieCard from "./MovieCard";
 interface ExploreMovieItem {
   id: string | number;
   tmdbId: number;
+  imdbId?: string | null;
   title: string;
   originalTitle?: string | null;
   year?: number | null;
@@ -21,6 +21,8 @@ interface ExploreMovieItem {
   genres: string[];
   streamingPlatforms?: string[];
   userMovie?: any;
+  matchPercentage?: number;
+  matchReason?: string;
 }
 
 interface ExploreMoviesSectionProps {
@@ -63,28 +65,27 @@ export default function ExploreMoviesSection({
       {/* Cabecera con controles desplegables */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
-            <Compass className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm">
+            <Sparkles className="w-4 h-4" />
           </div>
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-white tracking-wide flex items-center gap-2">
-              Continuar Explorando
+              Creemos que te va a gustar
               <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-cine-800 text-amber-400 border border-amber-500/20">
                 {filteredMovies.length} títulos
               </span>
             </h2>
             <p className="text-xs text-cine-400">
-              Grandes obras del cine recomendadas listas para valorar o añadir a
-              tu Watchlist.
+              Recomendaciones personalizadas basadas en tus películas y series vistas y tu Watchlist.
             </p>
           </div>
         </div>
 
-        {/* Desplegable de Géneros */}
+        {/* Desplegable de Géneros y botón Plegar/Desplegar */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <div
             className="relative inline-flex items-center bg-cine-900 border border-amber-500/30 rounded-xl px-3 py-1.5 text-xs text-cine-200"
-            title="Filtra las películas recomendadas por género cinematográfico"
+            title="Filtra las recomendaciones por género cinematográfico"
           >
             <Filter className="w-3.5 h-3.5 text-amber-400 mr-2" />
             <select
@@ -112,8 +113,8 @@ export default function ExploreMoviesSection({
               onClick={() => setIsExpanded(!isExpanded)}
               title={
                 isExpanded
-                  ? "Plegar sección para mostrar solo 6 películas destacadas"
-                  : `Desplegar catálogo completo (${filteredMovies.length} películas disponibles)`
+                  ? "Plegar sección para mostrar solo 6 títulos destacados"
+                  : `Desplegar recomendaciones completas (${filteredMovies.length} películas)`
               }
               className="px-3.5 py-1.5 bg-cine-800 hover:bg-cine-700 border border-cine-700 text-amber-400 font-semibold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm"
             >
@@ -140,6 +141,7 @@ export default function ExploreMoviesSection({
             movie={{
               id: movie.id,
               tmdbId: movie.tmdbId,
+              imdbId: movie.imdbId,
               title: movie.title,
               originalTitle: movie.originalTitle,
               year: movie.year,
@@ -147,6 +149,8 @@ export default function ExploreMoviesSection({
               imdbRating: movie.imdbRating,
               genres: movie.genres,
               streamingPlatforms: movie.streamingPlatforms,
+              matchPercentage: movie.matchPercentage,
+              matchReason: movie.matchReason,
             }}
             userMovie={
               movie.userMovie
@@ -174,12 +178,12 @@ export default function ExploreMoviesSection({
             {isExpanded ? (
               <>
                 <ChevronUp className="w-4 h-4 text-amber-400" />
-                Mostrar menos películas
+                Mostrar menos recomendaciones
               </>
             ) : (
               <>
                 <ChevronDown className="w-4 h-4 text-amber-400" />
-                Desplegar catálogo completo de exploración (+
+                Desplegar catálogo completo de recomendaciones (+
                 {filteredMovies.length - 6} películas)
               </>
             )}

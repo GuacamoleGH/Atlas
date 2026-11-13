@@ -51,14 +51,30 @@ export default function SeriesDetailPage() {
       console.error(err);
     } finally {
       setIsLoading(false);
+      if (typeof window !== "undefined") {
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        });
+      }
     }
   };
 
   useEffect(() => {
     if (seriesId) {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
       fetchSeries();
     }
   }, [seriesId]);
+
+  useEffect(() => {
+    if (!isLoading && series) {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
+    }
+  }, [isLoading, series?.id]);
 
   if (isLoading) {
     return (

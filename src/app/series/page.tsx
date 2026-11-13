@@ -8,6 +8,7 @@ import SeriesCard from "@/components/series/SeriesCard";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
 import CinephileLevelBar from "@/components/movies/CinephileLevelBar";
 import ExploreSeriesSection from "@/components/series/ExploreSeriesSection";
+import { getPersonalizedSeriesRecommendations } from "@/lib/recommendations";
 import { CURATED_SERIES } from "@/lib/mockData";
 import {
   Tv,
@@ -87,70 +88,8 @@ export default async function SeriesHomePage() {
       })
     : [];
 
-  // 4. Catálogo general para continuar explorando
-  let exploreSeries = await prisma.series.findMany({
-    where: userId
-      ? {
-          userSeries: {
-            none: { userId },
-          },
-        }
-      : {},
-    orderBy: { imdbRating: "desc" },
-    take: 12,
-    include: {
-      userSeries: userId ? { where: { userId } } : false,
-    },
-  });
-
-  if (exploreSeries.length === 0) {
-    exploreSeries = await prisma.series.findMany({
-      take: 12,
-      orderBy: { imdbRating: "desc" },
-      include: {
-        userSeries: userId ? { where: { userId } } : false,
-      },
-    });
-  }
-
-  const formattedExploreSeries = exploreSeries.map((s) => {
-    let genres: string[] = [];
-    let streamingPlatforms: string[] = [];
-    try {
-      genres = JSON.parse(s.genres);
-    } catch {}
-    try {
-      if (s.streamingPlatforms)
-        streamingPlatforms = JSON.parse(s.streamingPlatforms);
-    } catch {}
-
-    const uSeries = (s as any).userSeries?.[0] || null;
-
-    return {
-      id: s.id,
-      tmdbId: s.tmdbId,
-      name: s.name,
-      originalName: s.originalName,
-      firstAirYear: s.firstAirYear,
-      lastAirYear: s.lastAirYear,
-      numberOfSeasons: s.numberOfSeasons,
-      numberOfEpisodes: s.numberOfEpisodes,
-      posterPath: s.posterPath,
-      imdbRating: s.imdbRating,
-      genres,
-      streamingPlatforms,
-      userSeries: uSeries
-        ? {
-            status: uSeries.status as any,
-            userRating: uSeries.userRating,
-            review: uSeries.review,
-            ballKnowledge: uSeries.ballKnowledge,
-            difference: uSeries.difference,
-            platform: uSeries.platform,
-          }
-        : null,
-    };
-  });
+  // 4. Recomendaciones inteligentes según tus gustos (películas vistas, series vistas y watchlist)
+  const formattedExploreSeries = await getPersonalizedSeriesRecommendations(userId, 12);
 
   // 5. Estadísticas resumidas de Series
   const allWatched = userId
@@ -406,7 +345,7 @@ export default async function SeriesHomePage() {
         </section>
       )}
 
-      {/* Continuar Explorando Series con Desplegable y Modo Colapsable */}
+      {/* Creemos que te va a gustar: Recomendaciones personalizadas según tus gustos */}
       <ExploreSeriesSection series={formattedExploreSeries} />
     </div>
   );

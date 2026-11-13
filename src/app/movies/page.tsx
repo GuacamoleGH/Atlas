@@ -8,6 +8,7 @@ import MovieCard from "@/components/MovieCard";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
 import CinephileLevelBar from "@/components/movies/CinephileLevelBar";
 import ExploreMoviesSection from "@/components/movies/ExploreMoviesSection";
+import { getPersonalizedMovieRecommendations } from "@/lib/recommendations";
 import {
   Film,
   Bookmark,
@@ -86,67 +87,8 @@ export default async function MoviesHomePage() {
       })
     : [];
 
-  // 4. Catálogo general para continuar explorando
-  let exploreMovies = await prisma.movie.findMany({
-    where: userId
-      ? {
-          userMovies: {
-            none: { userId },
-          },
-        }
-      : {},
-    orderBy: { imdbRating: "desc" },
-    take: 12,
-    include: {
-      userMovies: userId ? { where: { userId } } : false,
-    },
-  });
-
-  if (exploreMovies.length === 0) {
-    exploreMovies = await prisma.movie.findMany({
-      take: 12,
-      orderBy: { imdbRating: "desc" },
-      include: {
-        userMovies: userId ? { where: { userId } } : false,
-      },
-    });
-  }
-
-  const formattedExploreMovies = exploreMovies.map((movie) => {
-    let genres: string[] = [];
-    let streamingPlatforms: string[] = [];
-    try {
-      genres = JSON.parse(movie.genres);
-    } catch {}
-    try {
-      if (movie.streamingPlatforms)
-        streamingPlatforms = JSON.parse(movie.streamingPlatforms);
-    } catch {}
-
-    const uMovie = (movie as any).userMovies?.[0] || null;
-
-    return {
-      id: movie.id,
-      tmdbId: movie.tmdbId,
-      title: movie.title,
-      originalTitle: movie.originalTitle,
-      year: movie.year,
-      posterPath: movie.posterPath,
-      imdbRating: movie.imdbRating,
-      genres,
-      streamingPlatforms,
-      userMovie: uMovie
-        ? {
-            status: uMovie.status as any,
-            userRating: uMovie.userRating,
-            review: uMovie.review,
-            ballKnowledge: uMovie.ballKnowledge,
-            difference: uMovie.difference,
-            platform: uMovie.platform,
-          }
-        : null,
-    };
-  });
+  // 4. Recomendaciones inteligentes según tus gustos (películas vistas, series vistas y watchlist)
+  const formattedExploreMovies = await getPersonalizedMovieRecommendations(userId, 12);
 
   // 5. Estadísticas resumidas para la Home
   const allWatched = userId
@@ -396,7 +338,7 @@ export default async function MoviesHomePage() {
         </section>
       )}
 
-      {/* Continuar Explorando Películas con Desplegable y Modo Colapsable */}
+      {/* Creemos que te va a gustar: Recomendaciones personalizadas según tus gustos */}
       <ExploreMoviesSection movies={formattedExploreMovies} />
     </div>
   );

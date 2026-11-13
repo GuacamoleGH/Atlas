@@ -117,6 +117,9 @@ export default function MovieSearchInput() {
   const handleSelectItem = (item: SearchItem) => {
     setIsOpen(false);
     setQuery("");
+    if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     if (item.mediaType === "tv") {
       router.push(`/series/${item.id}`);
     } else {

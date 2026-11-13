@@ -66,6 +66,9 @@ export default function GameSearchInput({
   const handleSelect = (gameId: number) => {
     setIsOpen(false);
     setQuery("");
+    if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     router.push(`/games/${gameId}`);
   };
 
