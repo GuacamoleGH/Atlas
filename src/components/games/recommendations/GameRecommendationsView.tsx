@@ -65,14 +65,111 @@ export default function GameRecommendationsView({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [breakdownGame, setBreakdownGame] = useState<ScoredGameCandidate | null>(null);
 
-  // Estados de filtros interactivos idénticos a Cine & Series
-  const [platformCategoryFilter, setPlatformCategoryFilter] = useState<string>("all");
-  const [selectedGenre, setSelectedGenre] = useState<string>("all");
-  const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
-  const [selectedEra, setSelectedEra] = useState<"all" | "recent" | "2010s" | "classic">("all");
-  const [sortBy, setSortBy] = useState<"affinity" | "metacritic" | "year">("affinity");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
+  // Estados de filtros interactivos con persistencia en sesión (por defecto Catálogo/Grid)
+  const [platformCategoryFilter, setPlatformCategoryFilter] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("game_recs_platform_category") || "all";
+    }
+    return "all";
+  });
+  const [selectedGenre, setSelectedGenre] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("game_recs_genre") || "all";
+    }
+    return "all";
+  });
+  const [selectedPlatform, setSelectedPlatform] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("game_recs_platform") || "all";
+    }
+    return "all";
+  });
+  const [selectedEra, setSelectedEra] = useState<"all" | "recent" | "2010s" | "classic">(() => {
+    if (typeof window !== "undefined") {
+      return (sessionStorage.getItem("game_recs_era") as any) || "all";
+    }
+    return "all";
+  });
+  const [sortBy, setSortBy] = useState<"affinity" | "metacritic" | "year">(() => {
+    if (typeof window !== "undefined") {
+      return (sessionStorage.getItem("game_recs_sort_by") as any) || "affinity";
+    }
+    return "affinity";
+  });
+  const [searchQuery, setSearchQuery] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("game_recs_search") || "";
+    }
+    return "";
+  });
+  const [viewMode, setViewMode] = useState<"carousel" | "grid">(() => {
+    if (typeof window !== "undefined") {
+      return (sessionStorage.getItem("game_recs_view_mode") as any) || "grid";
+    }
+    return "grid";
+  });
+
+  // Guardar filtros en sessionStorage para no perder estado al navegar
+  React.useEffect(() => {
+    sessionStorage.setItem("game_recs_platform_category", platformCategoryFilter);
+  }, [platformCategoryFilter]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("game_recs_genre", selectedGenre);
+  }, [selectedGenre]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("game_recs_platform", selectedPlatform);
+  }, [selectedPlatform]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("game_recs_era", selectedEra);
+  }, [selectedEra]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("game_recs_sort_by", sortBy);
+  }, [sortBy]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("game_recs_search", searchQuery);
+  }, [searchQuery]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("game_recs_view_mode", viewMode);
+  }, [viewMode]);
+
+  // Restaurar posición de scroll exacta al volver atrás a la lista de juegos
+  React.useEffect(() => {
+    const savedY = sessionStorage.getItem("game_recs_scroll_pos");
+    const lastId = sessionStorage.getItem("game_recs_last_clicked_id");
+
+    if (savedY || lastId) {
+      const restore = () => {
+        if (lastId) {
+          const el = document.getElementById(`rec-item-${lastId}`);
+          if (el) {
+            el.scrollIntoView({ block: "center", behavior: "instant" });
+            sessionStorage.removeItem("game_recs_last_clicked_id");
+            sessionStorage.removeItem("game_recs_scroll_pos");
+            return;
+          }
+        }
+        if (savedY) {
+          window.scrollTo({ top: parseInt(savedY, 10), behavior: "instant" });
+          sessionStorage.removeItem("game_recs_scroll_pos");
+          sessionStorage.removeItem("game_recs_last_clicked_id");
+        }
+      };
+
+      restore();
+      const t1 = setTimeout(restore, 60);
+      const t2 = setTimeout(restore, 180);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
+  }, []);
 
   const toast = useToast();
 
@@ -253,6 +350,14 @@ export default function GameRecommendationsView({
     setSelectedEra("all");
     setSortBy("affinity");
     setSearchQuery("");
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("game_recs_platform_category");
+      sessionStorage.removeItem("game_recs_genre");
+      sessionStorage.removeItem("game_recs_platform");
+      sessionStorage.removeItem("game_recs_era");
+      sessionStorage.removeItem("game_recs_sort_by");
+      sessionStorage.removeItem("game_recs_search");
+    }
   };
 
   const totalFilteredCount =

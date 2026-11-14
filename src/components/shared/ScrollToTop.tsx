@@ -8,6 +8,17 @@ export default function ScrollToTop() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // Si se está restaurando una posición guardada al volver a recomendaciones, no resetear a (0, 0)
+      const hasSavedScroll =
+        sessionStorage.getItem("recs_scroll_pos") ||
+        sessionStorage.getItem("recs_last_clicked_id") ||
+        sessionStorage.getItem("game_recs_scroll_pos") ||
+        sessionStorage.getItem("game_recs_last_clicked_id");
+
+      if (hasSavedScroll && pathname.includes("/recommendations")) {
+        return;
+      }
+
       if ("scrollRestoration" in window.history) {
         window.history.scrollRestoration = "manual";
       }

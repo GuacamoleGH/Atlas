@@ -79,13 +79,23 @@ export default function GameRecommendationCard({
 
   return (
     <div
+      id={`rec-item-${game.rawgId}`}
       className={`group relative flex flex-col ${
         className || "w-[160px] sm:w-[190px] md:w-[210px] shrink-0"
       } glass-card rounded-2xl overflow-hidden bg-cine-900/60 border border-cine-800 hover:border-purple-500/40 transition-all duration-300 shadow-md`}
     >
       {/* Contenedor del Póster estilo Atlas */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950">
-        <Link href={`/games/${game.rawgId}`} className="block w-full h-full">
+        <Link
+          href={`/games/${game.rawgId}`}
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              sessionStorage.setItem("game_recs_scroll_pos", window.scrollY.toString());
+              sessionStorage.setItem("game_recs_last_clicked_id", game.rawgId.toString());
+            }
+          }}
+          className="block w-full h-full"
+        >
           <GamePoster
             src={game.backgroundImage}
             alt={game.title}

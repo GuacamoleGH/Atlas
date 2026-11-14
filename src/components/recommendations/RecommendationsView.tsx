@@ -58,13 +58,101 @@ export default function RecommendationsView({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [breakdownItem, setBreakdownItem] = useState<RecommendationItem | null>(null);
 
-  // Estados de filtros interactivos
-  const [mediaTypeFilter, setMediaTypeFilter] = useState<"all" | "movie" | "tv" | "miniseries">("all");
-  const [selectedGenre, setSelectedGenre] = useState("all");
-  const [selectedEra, setSelectedEra] = useState<"all" | "recent" | "2010s" | "classic">("all");
-  const [sortBy, setSortBy] = useState<"affinity" | "rating" | "year">("affinity");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
+  // Estados de filtros interactivos con persistencia en sesión (por defecto Catálogo/Grid)
+  const [mediaTypeFilter, setMediaTypeFilter] = useState<"all" | "movie" | "tv" | "miniseries">(() => {
+    if (typeof window !== "undefined") {
+      return (sessionStorage.getItem("recs_media_type") as any) || "all";
+    }
+    return "all";
+  });
+  const [selectedGenre, setSelectedGenre] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("recs_genre") || "all";
+    }
+    return "all";
+  });
+  const [selectedEra, setSelectedEra] = useState<"all" | "recent" | "2010s" | "classic">(() => {
+    if (typeof window !== "undefined") {
+      return (sessionStorage.getItem("recs_era") as any) || "all";
+    }
+    return "all";
+  });
+  const [sortBy, setSortBy] = useState<"affinity" | "rating" | "year">(() => {
+    if (typeof window !== "undefined") {
+      return (sessionStorage.getItem("recs_sort_by") as any) || "affinity";
+    }
+    return "affinity";
+  });
+  const [searchQuery, setSearchQuery] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("recs_search") || "";
+    }
+    return "";
+  });
+  const [viewMode, setViewMode] = useState<"carousel" | "grid">(() => {
+    if (typeof window !== "undefined") {
+      return (sessionStorage.getItem("recs_view_mode") as any) || "grid";
+    }
+    return "grid";
+  });
+
+  // Guardar filtros en sessionStorage para no perder estado al navegar
+  React.useEffect(() => {
+    sessionStorage.setItem("recs_media_type", mediaTypeFilter);
+  }, [mediaTypeFilter]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("recs_genre", selectedGenre);
+  }, [selectedGenre]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("recs_era", selectedEra);
+  }, [selectedEra]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("recs_sort_by", sortBy);
+  }, [sortBy]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("recs_search", searchQuery);
+  }, [searchQuery]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("recs_view_mode", viewMode);
+  }, [viewMode]);
+
+  // Restaurar posición de scroll exacta al volver atrás a la lista
+  React.useEffect(() => {
+    const savedY = sessionStorage.getItem("recs_scroll_pos");
+    const lastId = sessionStorage.getItem("recs_last_clicked_id");
+
+    if (savedY || lastId) {
+      const restore = () => {
+        if (lastId) {
+          const el = document.getElementById(`rec-item-${lastId}`);
+          if (el) {
+            el.scrollIntoView({ block: "center", behavior: "instant" });
+            sessionStorage.removeItem("recs_last_clicked_id");
+            sessionStorage.removeItem("recs_scroll_pos");
+            return;
+          }
+        }
+        if (savedY) {
+          window.scrollTo({ top: parseInt(savedY, 10), behavior: "instant" });
+          sessionStorage.removeItem("recs_scroll_pos");
+          sessionStorage.removeItem("recs_last_clicked_id");
+        }
+      };
+
+      restore();
+      const t1 = setTimeout(restore, 60);
+      const t2 = setTimeout(restore, 180);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
+  }, []);
 
   const toast = useToast();
 
@@ -247,6 +335,13 @@ export default function RecommendationsView({
     setSelectedEra("all");
     setSortBy("affinity");
     setSearchQuery("");
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("recs_media_type");
+      sessionStorage.removeItem("recs_genre");
+      sessionStorage.removeItem("recs_era");
+      sessionStorage.removeItem("recs_sort_by");
+      sessionStorage.removeItem("recs_search");
+    }
   };
 
   return (
