@@ -182,25 +182,26 @@ export async function getPersonalizedGameRecommendations(
     },
   ];
 
-  // 8. Fila 2: "Más como tus favoritos" (Saga o similar a tu juego #1)
-  const topSeed = profile.seedGames[0];
-  if (topSeed) {
+  // 8. Filas: "Porque jugaste [Semilla]" para los favoritos principales
+  const usedGameIdsInSeeds = new Set<number>();
+  for (const seed of profile.seedGames.slice(0, 4)) {
     const seedSimilar = scoredCandidates
-      .filter((c) => c.seedMatch === topSeed.title || c.breakdown.M >= 12)
+      .filter((c) => (c.seedMatch === seed.title || c.breakdown.M >= 12) && !usedGameIdsInSeeds.has(c.rawgId))
       .slice(0, 10);
 
     if (seedSimilar.length >= 3) {
+      seedSimilar.forEach((c) => usedGameIdsInSeeds.add(c.rawgId));
       rows.push({
-        id: `seed_${topSeed.rawgId}`,
-        title: `Porque jugaste ${topSeed.title}`,
-        subtitle: `Títulos con temática, estilo o universo afines a ${topSeed.title}.`,
+        id: `seed_${seed.rawgId}`,
+        title: `Porque jugaste ${seed.title}`,
+        subtitle: `Títulos con temática y estilo muy afines a ${seed.title}.`,
         type: "seed",
         items: seedSimilar,
       });
     }
   }
 
-  // 9. Fila 3: "Porque te gusta [Género]"
+  // 9. Fila: "Por tu pasión por [Género]"
   const topGenreEntry = Object.entries(profile.genreAffinities)
     .sort((a, b) => b[1] - a[1])[0];
 
@@ -210,7 +211,7 @@ export async function getPersonalizedGameRecommendations(
       .filter((c) =>
         c.genres.some((g) => g.toLowerCase() === topGenreEntry[0].toLowerCase())
       )
-      .slice(0, 10);
+      .slice(0, 12);
 
     if (genreItems.length >= 3) {
       rows.push({
@@ -223,10 +224,10 @@ export async function getPersonalizedGameRecommendations(
     }
   }
 
-  // 10. Fila 4: "Joyas que quizás no conozcas"
+  // 10. Fila: "Joyas que quizás no conozcas"
   const hiddenGems = scoredCandidates
     .filter((c) => c.ratingsCount < 800 || (c.metacritic && c.metacritic >= 80 && c.ratingsCount < 1500))
-    .slice(0, 10);
+    .slice(0, 12);
 
   if (hiddenGems.length >= 3) {
     rows.push({
@@ -238,14 +239,14 @@ export async function getPersonalizedGameRecommendations(
     });
   }
 
-  // 11. Fila 5: "Para tu [Plataforma Principal]"
+  // 11. Fila: "Para tu [Plataforma Principal]"
   if (profile.activePlatformNames.length > 0) {
     const mainPlatName = profile.activePlatformNames[0];
     const platformItems = scoredCandidates
       .filter((c) =>
         c.platforms.some((p) => p.name.toLowerCase().includes(mainPlatName.toLowerCase()))
       )
-      .slice(0, 10);
+      .slice(0, 12);
 
     if (platformItems.length >= 3) {
       rows.push({
@@ -258,51 +259,9 @@ export async function getPersonalizedGameRecommendations(
     }
   }
 
-  // 12. Fila 6: "De tu backlog, lo que más encaja" (con tiempo estimado playtime)
-  const backlogUserGames = userGames.filter((ug) => ug.status === "BACKLOG");
-  if (backlogUserGames.length > 0) {
-    const scoredBacklog: ScoredGameCandidate[] = [];
-
-    for (const bg of backlogUserGames) {
-      let rawgDetail = await fetchRawgGameDetail(bg.game.rawgId);
-      if (!rawgDetail) {
-        let parsedGenres: string[] = [];
-        try {
-          parsedGenres = JSON.parse(bg.game.genres);
-        } catch {}
-        rawgDetail = {
-          id: bg.game.rawgId,
-          name: bg.game.title,
-          slug: bg.game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-          released: bg.game.released,
-          background_image: null,
-          rating: bg.game.rating,
-          metacritic: bg.game.metacritic,
-          playtime: 15,
-          ratings_count: 50,
-          genres: parsedGenres.map((g, idx) => ({ id: idx, name: g, slug: g.toLowerCase() })),
-        };
-      }
-
-      const scored = scoreDetailedGame(rawgDetail, profile);
-      scored.statusInAtlas = "BACKLOG";
-      scored.userAtlasId = bg.id;
-      scoredBacklog.push(scored);
-    }
-
-    scoredBacklog.sort((a, b) => b.score - a.score);
-
-    rows.push({
-      id: "backlog_priority",
-      title: "De tu backlog, lo que más encaja",
-      subtitle: "Juegos que ya tienes en espera ordenados por afinidad a tus gustos recientes.",
-      type: "backlog",
-      items: scoredBacklog.slice(0, 10),
-    });
-  }
-
   const response: GameRecommendationsResponse = {
     rows,
+    allCandidates: scoredCandidates,
     profile: {
       totalGames: profile.totalGamesCount,
       confidence: profile.confidence,

@@ -70,6 +70,7 @@ export interface GameRecommendationRow {
 
 export interface GameRecommendationsResponse {
   rows: GameRecommendationRow[];
+  allCandidates?: ScoredGameCandidate[];
   profile: {
     totalGames: number;
     confidence: "baja" | "media" | "alta";
