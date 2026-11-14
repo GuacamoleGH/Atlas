@@ -179,6 +179,14 @@ export async function getMovieDetail(
       // Plataformas de streaming
       const streamingPlatforms = extractStreamingPlatforms(watchProviders);
 
+      // Países de producción y origen (para detección de cine español)
+      const productionCountries: string[] = (data.production_countries || [])
+        .map((c: any) => String(c.iso_3166_1 || "").toUpperCase())
+        .filter(Boolean);
+      const originCountry: string[] = Array.isArray(data.origin_country)
+        ? data.origin_country.map((c: any) => String(c || "").toUpperCase())
+        : productionCountries;
+
       // Obtener rating de IMDb vía OMDb con fallback a TMDB
       const imdbRating = await getImdbRating(imdbId, tmdbRating);
 
@@ -189,6 +197,8 @@ export async function getMovieDetail(
         title: data.title,
         originalTitle: data.original_title || null,
         originalLanguage: data.original_language || "en",
+        productionCountries,
+        originCountry,
         year: data.release_date
           ? parseInt(data.release_date.substring(0, 4), 10)
           : null,
@@ -361,6 +371,14 @@ export async function getSeriesDetail(
       else if (seriesStatus === "Returning Series") seriesStatus = "En emisión";
       else if (seriesStatus === "Canceled") seriesStatus = "Cancelada";
 
+      // Países de producción y origen (para detección de series españolas)
+      const productionCountries: string[] = (data.production_countries || [])
+        .map((c: any) => String(c.iso_3166_1 || "").toUpperCase())
+        .filter(Boolean);
+      const originCountry: string[] = Array.isArray(data.origin_country)
+        ? data.origin_country.map((c: any) => String(c || "").toUpperCase())
+        : productionCountries;
+
       return {
         id: String(data.id),
         tmdbId: data.id,
@@ -368,6 +386,8 @@ export async function getSeriesDetail(
         name: data.name,
         originalName: data.original_name || null,
         originalLanguage: data.original_language || "en",
+        productionCountries,
+        originCountry,
         firstAirYear: data.first_air_date
           ? parseInt(data.first_air_date.substring(0, 4), 10)
           : null,
@@ -448,6 +468,8 @@ export interface TmdbCandidateItem {
   adult: boolean;
   numberOfSeasons?: number | null;
   isMiniseries?: boolean;
+  originCountry?: string[];
+  isSpanish?: boolean;
 }
 
 /**
@@ -541,12 +563,14 @@ export async function discoverMovies(
   sortBy: string = "vote_average.desc",
   page: number = 1,
   withOriginalLanguage?: string,
+  withOriginCountry?: string,
 ): Promise<TmdbCandidateItem[]> {
   try {
     const apiKeyParam = getApiKeyParam();
     const langParam = withOriginalLanguage ? `&with_original_language=${withOriginalLanguage}` : "";
+    const countryParam = withOriginCountry ? `&with_origin_country=${encodeURIComponent(withOriginCountry)}` : "";
     const genresParam = withGenres ? `&with_genres=${encodeURIComponent(withGenres)}` : "";
-    const url = `${TMDB_BASE_URL}/discover/movie?language=es-ES${genresParam}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${langParam}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const url = `${TMDB_BASE_URL}/discover/movie?language=es-ES${genresParam}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${langParam}${countryParam}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
     const res = await fetch(url, {
       headers: getHeaders(),
       next: { revalidate: 43200 },
@@ -555,23 +579,37 @@ export async function discoverMovies(
     const data = await res.json();
     if (!data.results || !Array.isArray(data.results)) return [];
 
-    return data.results.map((item: any) => ({
-      id: item.id,
-      mediaType: "movie" as const,
-      title: item.title || item.original_title || "Sin título",
-      originalTitle: item.original_title || null,
-      overview: item.overview || null,
-      posterPath: item.poster_path ? `${TMDB_IMAGE_BASE}/w342${item.poster_path}` : null,
-      backdropPath: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
-      releaseDate: item.release_date || null,
-      releaseYear: item.release_date ? parseInt(item.release_date.substring(0, 4), 10) : null,
-      genreIds: Array.isArray(item.genre_ids) ? item.genre_ids : [],
-      voteAverage: Number((item.vote_average || 0).toFixed(1)),
-      voteCount: Number(item.vote_count || 0),
-      popularity: Number(item.popularity || 0),
-      originalLanguage: item.original_language || "en",
-      adult: Boolean(item.adult),
-    }));
+    return data.results.map((item: any) => {
+      const origCountries = Array.isArray(item.origin_country)
+        ? item.origin_country
+        : withOriginCountry
+          ? [withOriginCountry]
+          : [];
+      const isSpanish =
+        withOriginCountry === "ES" ||
+        origCountries.includes("ES") ||
+        (item.original_language === "es" && origCountries.includes("ES"));
+
+      return {
+        id: item.id,
+        mediaType: "movie" as const,
+        title: item.title || item.original_title || "Sin título",
+        originalTitle: item.original_title || null,
+        overview: item.overview || null,
+        posterPath: item.poster_path ? `${TMDB_IMAGE_BASE}/w342${item.poster_path}` : null,
+        backdropPath: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
+        releaseDate: item.release_date || null,
+        releaseYear: item.release_date ? parseInt(item.release_date.substring(0, 4), 10) : null,
+        genreIds: Array.isArray(item.genre_ids) ? item.genre_ids : [],
+        voteAverage: Number((item.vote_average || 0).toFixed(1)),
+        voteCount: Number(item.vote_count || 0),
+        popularity: Number(item.popularity || 0),
+        originalLanguage: item.original_language || "en",
+        adult: Boolean(item.adult),
+        originCountry: origCountries,
+        isSpanish,
+      };
+    });
   } catch (error) {
     console.error("Error en discoverMovies:", error);
     return [];
@@ -588,13 +626,15 @@ export async function discoverSeries(
   page: number = 1,
   withOriginalLanguage?: string,
   withType?: number | string,
+  withOriginCountry?: string,
 ): Promise<TmdbCandidateItem[]> {
   try {
     const apiKeyParam = getApiKeyParam();
     const langParam = withOriginalLanguage ? `&with_original_language=${withOriginalLanguage}` : "";
+    const countryParam = withOriginCountry ? `&with_origin_country=${encodeURIComponent(withOriginCountry)}` : "";
     const typeParam = withType !== undefined ? `&with_type=${withType}` : "";
     const genresParam = withGenres ? `&with_genres=${encodeURIComponent(withGenres)}` : "";
-    const url = `${TMDB_BASE_URL}/discover/tv?language=es-ES${genresParam}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${langParam}${typeParam}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const url = `${TMDB_BASE_URL}/discover/tv?language=es-ES${genresParam}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${langParam}${typeParam}${countryParam}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
     const res = await fetch(url, {
       headers: getHeaders(),
       next: { revalidate: 43200 },
@@ -610,6 +650,16 @@ export async function discoverSeries(
         isExplicitMiniseries ||
         item.name?.toLowerCase().includes("miniserie") ||
         item.overview?.toLowerCase().includes("miniserie");
+
+      const origCountries = Array.isArray(item.origin_country)
+        ? item.origin_country
+        : withOriginCountry
+          ? [withOriginCountry]
+          : [];
+      const isSpanish =
+        withOriginCountry === "ES" ||
+        origCountries.includes("ES") ||
+        (item.original_language === "es" && origCountries.includes("ES"));
 
       return {
         id: item.id,
@@ -629,6 +679,8 @@ export async function discoverSeries(
         adult: Boolean(item.adult),
         numberOfSeasons: isMini ? 1 : null,
         isMiniseries: isMini,
+        originCountry: origCountries,
+        isSpanish,
       };
     });
   } catch (error) {

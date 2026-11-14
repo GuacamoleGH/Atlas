@@ -25,6 +25,8 @@ export interface MovieDetail {
   title: string;
   originalTitle: string | null;
   originalLanguage?: string | null;
+  productionCountries?: string[];
+  originCountry?: string[];
   year: number | null;
   posterPath: string | null;
   backdropPath: string | null;

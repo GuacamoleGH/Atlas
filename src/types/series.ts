@@ -20,6 +20,8 @@ export interface SeriesDetail {
   name: string;
   originalName: string | null;
   originalLanguage?: string | null;
+  productionCountries?: string[];
+  originCountry?: string[];
   firstAirYear: number | null;
   lastAirYear: number | null;
   numberOfSeasons: number | null;
