@@ -5,18 +5,10 @@ import Link from "next/link";
 import {
   Users,
   Search,
-  Film,
-  Gamepad2,
-  Sparkles,
-  Star,
-  Brain,
-  Clock,
-  Trophy,
   ArrowRight,
   Loader2,
   X,
   Calendar,
-  Layers,
 } from "lucide-react";
 import { sounds } from "@/lib/sounds";
 
@@ -50,12 +42,10 @@ interface FriendUser {
   };
 }
 
-type TabType = "all" | "cinema" | "gaming";
-
 export default function GlobalFriendsPage() {
   const [friends, setFriends] = useState<FriendUser[]>([]);
+  const [totalMembers, setTotalMembers] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentTab, setCurrentTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<string>("recent");
 
@@ -66,7 +56,13 @@ export default function GlobalFriendsPage() {
         const res = await fetch("/api/friends");
         if (res.ok) {
           const data = await res.json();
-          setFriends(data.friends || []);
+          const friendsList = data.friends || [];
+          setFriends(friendsList);
+          // Si el backend envía totalMembers, lo usamos; si no, calculamos incluyendo al usuario actual (+1)
+          const membersCount =
+            data.totalMembers ||
+            (friendsList.length > 0 ? friendsList.length + 1 : 3);
+          setTotalMembers(membersCount);
         }
       } catch (err) {
         console.error("Error al cargar amigos de Atlas:", err);
@@ -77,12 +73,6 @@ export default function GlobalFriendsPage() {
 
     fetchFriends();
   }, []);
-
-  const handleTabChange = (tab: TabType) => {
-    sounds.nav();
-    setCurrentTab(tab);
-    setSortBy("recent");
-  };
 
   const filteredAndSortedFriends = useMemo(() => {
     let result = [...friends];
@@ -103,29 +93,14 @@ export default function GlobalFriendsPage() {
       if (sortBy === "cinema_watched") {
         return b.cinema.totalWatched - a.cinema.totalWatched;
       }
-      if (sortBy === "cinema_level") {
-        return b.cinema.level - a.cinema.level;
-      }
       if (sortBy === "sofa_knowledge") {
         return (b.cinema.ballKnowledge || 0) - (a.cinema.ballKnowledge || 0);
       }
       if (sortBy === "gaming_hours") {
         return b.gaming.totalHours - a.gaming.totalHours;
       }
-      if (sortBy === "gaming_completed") {
-        return b.gaming.completedGames - a.gaming.completedGames;
-      }
-      if (sortBy === "gaming_level") {
-        return b.gaming.level - a.gaming.level;
-      }
       if (sortBy === "game_knowledge") {
         return (b.gaming.gameKnowledge || 0) - (a.gaming.gameKnowledge || 0);
-      }
-      if (sortBy === "cinema_rating") {
-        return (b.cinema.avgRating || 0) - (a.cinema.avgRating || 0);
-      }
-      if (sortBy === "gaming_rating") {
-        return (b.gaming.avgRating || 0) - (a.gaming.avgRating || 0);
       }
       // "recent" por defecto
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -144,14 +119,14 @@ export default function GlobalFriendsPage() {
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-500/10 border border-sky-500/30 text-sky-400">
               <Users className="w-3.5 h-3.5" />
-              <span>Comunidad Atlas Global</span>
+              <span>Comunidad Atlas</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
               Amigos & Comunidad
             </h1>
             <p className="text-xs sm:text-sm text-cine-300 max-w-2xl leading-relaxed">
-              Explora la red de usuarios de todo el ecosistema Atlas. Descubre sus
-              gustos cinéfilos, bibliotecas gamer, horas de juego y nivel cultural en un único lugar.
+              Explora la red de amigos de Atlas. Descubre sus perfiles, gustos
+              cinéfilos, bibliotecas gamer y horas de juego.
             </p>
           </div>
 
@@ -165,7 +140,10 @@ export default function GlobalFriendsPage() {
                   Miembros Registrados
                 </div>
                 <div className="text-2xl font-black text-white font-mono">
-                  {isLoading ? "..." : friends.length}
+                  {isLoading
+                    ? "..."
+                    : totalMembers ||
+                      (friends.length > 0 ? friends.length + 1 : 3)}
                 </div>
               </div>
             </div>
@@ -173,47 +151,19 @@ export default function GlobalFriendsPage() {
         </div>
       </section>
 
-      {/* 2. Selector de Pestañas (Universos) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-cine-800 pb-4">
-        <div className="flex items-center gap-2 p-1 bg-cine-900/90 border border-cine-800 rounded-2xl">
-          <button
-            onClick={() => handleTabChange("all")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              currentTab === "all"
-                ? "bg-gradient-to-r from-sky-500 to-purple-600 text-white shadow-lg shadow-sky-500/20"
-                : "text-cine-400 hover:text-white hover:bg-cine-800/50"
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>Todos los Universos</span>
-          </button>
-
-          <button
-            onClick={() => handleTabChange("cinema")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              currentTab === "cinema"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
-                : "text-cine-400 hover:text-white hover:bg-cine-800/50"
-            }`}
-          >
-            <Film className="w-4 h-4" />
-            <span>Cine & Series</span>
-          </button>
-
-          <button
-            onClick={() => handleTabChange("gaming")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              currentTab === "gaming"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
-                : "text-cine-400 hover:text-white hover:bg-cine-800/50"
-            }`}
-          >
-            <Gamepad2 className="w-4 h-4" />
-            <span>Videojuegos</span>
-          </button>
+      {/* 2. Barra de Filtros y Búsqueda */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-cine-800 pb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cine-900 border border-cine-800 text-xs font-bold text-white">
+            <Users className="w-4 h-4 text-sky-400" />
+            <span>Amigos</span>
+            <span className="ml-1 px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 font-mono text-[11px]">
+              {filteredAndSortedFriends.length}
+            </span>
+          </div>
         </div>
 
-        {/* 3. Buscador y Filtro de Orden */}
+        {/* Buscador y Filtro de Orden */}
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {/* Buscador de Amigos */}
           <div className="relative flex-1 sm:w-72">
@@ -235,7 +185,7 @@ export default function GlobalFriendsPage() {
             )}
           </div>
 
-          {/* Menú de Ordenación Dinámico */}
+          {/* Menú de Ordenación */}
           <div className="flex items-center gap-2">
             <select
               value={sortBy}
@@ -246,42 +196,21 @@ export default function GlobalFriendsPage() {
               className="px-3 py-2 rounded-xl bg-cine-900 border border-cine-800 text-cine-200 text-xs focus:outline-none focus:border-sky-500/60 font-semibold cursor-pointer"
             >
               <option value="recent">Más recientes</option>
-              {currentTab === "all" && (
-                <>
-                  <option value="cinema_watched">Más títulos vistos (Cine)</option>
-                  <option value="sofa_knowledge">Mayor Sofa Knowledge</option>
-                  <option value="gaming_hours">Más horas jugadas (Gamer)</option>
-                  <option value="game_knowledge">Mayor Game Knowledge</option>
-                </>
-              )}
-              {currentTab === "cinema" && (
-                <>
-                  <option value="cinema_watched">Más títulos vistos</option>
-                  <option value="cinema_level">Mayor nivel cinéfilo</option>
-                  <option value="sofa_knowledge">Mayor Sofa Knowledge</option>
-                  <option value="cinema_rating">Mejor nota media</option>
-                </>
-              )}
-              {currentTab === "gaming" && (
-                <>
-                  <option value="gaming_hours">Más horas jugadas</option>
-                  <option value="gaming_completed">Más juegos completados</option>
-                  <option value="gaming_level">Mayor nivel gamer</option>
-                  <option value="game_knowledge">Mayor Game Knowledge</option>
-                  <option value="gaming_rating">Mejor nota media</option>
-                </>
-              )}
+              <option value="cinema_watched">Más títulos vistos (Cine)</option>
+              <option value="sofa_knowledge">Mayor Sofa Knowledge</option>
+              <option value="gaming_hours">Más horas jugadas (Gamer)</option>
+              <option value="game_knowledge">Mayor Game Knowledge</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* 4. Lista o Grid de Tarjetas de Amigos */}
+      {/* 3. Lista o Grid de Tarjetas de Amigos */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3 text-cine-400">
           <Loader2 className="w-8 h-8 animate-spin text-sky-400" />
           <span className="text-xs uppercase tracking-widest font-mono">
-            Sincronizando la comunidad de Atlas...
+            Sincronizando amigos de Atlas...
           </span>
         </div>
       ) : filteredAndSortedFriends.length === 0 ? (
@@ -291,7 +220,7 @@ export default function GlobalFriendsPage() {
           </div>
           <div className="space-y-1">
             <h3 className="text-base font-bold text-white">
-              No se encontraron usuarios
+              No se encontraron amigos
             </h3>
             <p className="text-xs text-cine-400 max-w-sm mx-auto">
               {searchQuery
@@ -316,21 +245,19 @@ export default function GlobalFriendsPage() {
               : 2026;
 
             return (
-              <div
+              <Link
                 key={friend.id}
-                className="group glass-panel rounded-3xl border border-cine-800/80 bg-cine-900/50 hover:bg-cine-900 hover:border-sky-500/40 transition-all duration-300 p-6 flex flex-col justify-between gap-5 relative overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-sky-500/5"
+                href={friend.profileUrl}
+                onClick={() => sounds.nav()}
+                className="group glass-panel rounded-3xl border border-cine-800/80 bg-cine-900/50 hover:bg-cine-900/90 hover:border-sky-500/50 transition-all duration-300 p-6 flex flex-col justify-between gap-5 relative overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-sky-500/10 cursor-pointer hover:-translate-y-0.5"
               >
                 {/* Fondo sutil de glow al hacer hover */}
-                <div className="absolute -top-16 -right-16 w-32 h-32 bg-sky-500/5 group-hover:bg-sky-500/10 rounded-full blur-2xl transition-all pointer-events-none" />
+                <div className="absolute -top-16 -right-16 w-32 h-32 bg-sky-500/5 group-hover:bg-sky-500/15 rounded-full blur-2xl transition-all pointer-events-none" />
 
                 <div className="space-y-4 relative z-10">
                   {/* Fila del Perfil: Avatar + Nombre + Username */}
                   <div className="flex items-start gap-4">
-                    <Link
-                      href={friend.profileUrl}
-                      onClick={() => sounds.nav()}
-                      className="relative shrink-0 group-hover:scale-105 transition-transform"
-                    >
+                    <div className="relative shrink-0 group-hover:scale-105 transition-transform">
                       {friend.image ? (
                         <img
                           src={friend.image}
@@ -339,19 +266,17 @@ export default function GlobalFriendsPage() {
                         />
                       ) : (
                         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cine-800 to-cine-900 border-2 border-cine-700 group-hover:border-sky-400 flex items-center justify-center font-bold text-white text-lg shadow-md">
-                          {friend.name ? friend.name.charAt(0).toUpperCase() : "U"}
+                          {friend.name
+                            ? friend.name.charAt(0).toUpperCase()
+                            : "U"}
                         </div>
                       )}
-                    </Link>
+                    </div>
 
                     <div className="min-w-0 flex-1">
-                      <Link
-                        href={friend.profileUrl}
-                        onClick={() => sounds.nav()}
-                        className="block font-black text-white text-base hover:text-sky-300 transition-colors truncate"
-                      >
+                      <div className="font-black text-white text-base group-hover:text-sky-300 transition-colors truncate">
                         {friend.name || "Usuario de Atlas"}
-                      </Link>
+                      </div>
                       <div className="text-xs text-cine-400 font-mono truncate">
                         @{friend.username || friend.id.slice(0, 8)}
                       </div>
@@ -369,202 +294,88 @@ export default function GlobalFriendsPage() {
                     </p>
                   )}
 
-                  {/* Insignias de Rango según Pestaña */}
-                  {currentTab === "all" && (
-                    <div className="space-y-2 pt-1">
-                      {/* Rango Cinéfilo */}
-                      <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25">
-                        <div className="flex items-center gap-2">
-                          <span className="text-base">{friend.cinema.rankIcon}</span>
-                          <span className="text-xs font-bold text-amber-300">
-                            Nvl. {friend.cinema.level}
-                          </span>
-                        </div>
-                        <span className="text-[11px] text-cine-300 font-semibold truncate max-w-[140px]">
-                          {friend.cinema.rankTitle}
-                        </span>
-                      </div>
-
-                      {/* Rango Gamer */}
-                      <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/25">
-                        <div className="flex items-center gap-2">
-                          <span className="text-base">{friend.gaming.rankIcon}</span>
-                          <span className="text-xs font-bold text-purple-300">
-                            Nvl. {friend.gaming.level}
-                          </span>
-                        </div>
-                        <span className="text-[11px] text-cine-300 font-semibold truncate max-w-[140px]">
-                          {friend.gaming.rankTitle}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {currentTab === "cinema" && (
-                    <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/25">
+                  {/* Insignias de Rango: Cine & Gaming */}
+                  <div className="space-y-2 pt-1">
+                    {/* Rango Cinéfilo */}
+                    <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{friend.cinema.rankIcon}</span>
+                        <span className="text-base">
+                          {friend.cinema.rankIcon}
+                        </span>
                         <span className="text-xs font-bold text-amber-300">
                           Nvl. {friend.cinema.level}
                         </span>
                       </div>
-                      <span className="text-xs text-cine-300 font-semibold truncate">
+                      <span className="text-[11px] text-cine-300 font-semibold truncate max-w-[140px]">
                         {friend.cinema.rankTitle}
                       </span>
                     </div>
-                  )}
 
-                  {currentTab === "gaming" && (
-                    <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-purple-500/10 border border-purple-500/25">
+                    {/* Rango Gamer */}
+                    <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/25">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{friend.gaming.rankIcon}</span>
+                        <span className="text-base">
+                          {friend.gaming.rankIcon}
+                        </span>
                         <span className="text-xs font-bold text-purple-300">
                           Nvl. {friend.gaming.level}
                         </span>
                       </div>
-                      <span className="text-xs text-cine-300 font-semibold truncate">
+                      <span className="text-[11px] text-cine-300 font-semibold truncate max-w-[140px]">
                         {friend.gaming.rankTitle}
                       </span>
                     </div>
-                  )}
+                  </div>
 
-                  {/* Métricas Numéricas según Pestaña */}
-                  {currentTab === "all" && (
-                    <div className="grid grid-cols-4 gap-2 pt-1 text-center">
-                      <div className="bg-cine-950/60 p-2 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono">
-                          Vistos
-                        </div>
-                        <div className="text-xs font-bold text-amber-400 font-mono mt-0.5">
-                          {friend.cinema.totalWatched}
-                        </div>
+                  {/* Métricas Numéricas del Perfil */}
+                  <div className="grid grid-cols-4 gap-2 pt-1 text-center">
+                    <div className="bg-cine-950/60 p-2 rounded-xl border border-cine-800/80">
+                      <div className="text-[10px] text-cine-400 font-medium uppercase font-mono">
+                        Vistos
                       </div>
-                      <div className="bg-cine-950/60 p-2 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono">
-                          Sofa K.
-                        </div>
-                        <div className="text-xs font-bold text-amber-400 font-mono mt-0.5">
-                          {friend.cinema.ballKnowledge !== null
-                            ? `${friend.cinema.ballKnowledge}%`
-                            : "—"}
-                        </div>
-                      </div>
-                      <div className="bg-cine-950/60 p-2 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono">
-                          Horas
-                        </div>
-                        <div className="text-xs font-bold text-purple-400 font-mono mt-0.5">
-                          {friend.gaming.totalHours.toLocaleString()}h
-                        </div>
-                      </div>
-                      <div className="bg-cine-950/60 p-2 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono">
-                          Game K.
-                        </div>
-                        <div className="text-xs font-bold text-purple-400 font-mono mt-0.5">
-                          {friend.gaming.gameKnowledge !== null
-                            ? `${friend.gaming.gameKnowledge}%`
-                            : "—"}
-                        </div>
+                      <div className="text-xs font-bold text-amber-400 font-mono mt-0.5">
+                        {friend.cinema.totalWatched}
                       </div>
                     </div>
-                  )}
-
-                  {currentTab === "cinema" && (
-                    <div className="grid grid-cols-3 gap-2 pt-1 text-center">
-                      <div className="bg-cine-950/60 p-2.5 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono flex items-center justify-center gap-1">
-                          <Film className="w-3 h-3 text-amber-400" />
-                          <span>Vistos</span>
-                        </div>
-                        <div className="text-sm font-bold text-white font-mono mt-0.5">
-                          {friend.cinema.totalWatched}
-                        </div>
+                    <div className="bg-cine-950/60 p-2 rounded-xl border border-cine-800/80">
+                      <div className="text-[10px] text-cine-400 font-medium uppercase font-mono">
+                        Sofa K.
                       </div>
-                      <div className="bg-cine-950/60 p-2.5 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono flex items-center justify-center gap-1">
-                          <Star className="w-3 h-3 text-amber-400" />
-                          <span>Media</span>
-                        </div>
-                        <div className="text-sm font-bold text-white font-mono mt-0.5">
-                          {friend.cinema.avgRating !== null
-                            ? `${friend.cinema.avgRating} ★`
-                            : "—"}
-                        </div>
-                      </div>
-                      <div className="bg-cine-950/60 p-2.5 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono flex items-center justify-center gap-1">
-                          <Brain className="w-3 h-3 text-amber-400" />
-                          <span>Sofa K.</span>
-                        </div>
-                        <div className="text-sm font-bold text-white font-mono mt-0.5">
-                          {friend.cinema.ballKnowledge !== null
-                            ? `${friend.cinema.ballKnowledge}%`
-                            : "—"}
-                        </div>
+                      <div className="text-xs font-bold text-amber-400 font-mono mt-0.5">
+                        {friend.cinema.ballKnowledge !== null
+                          ? `${friend.cinema.ballKnowledge}%`
+                          : "—"}
                       </div>
                     </div>
-                  )}
-
-                  {currentTab === "gaming" && (
-                    <div className="grid grid-cols-3 gap-2 pt-1 text-center">
-                      <div className="bg-cine-950/60 p-2.5 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono flex items-center justify-center gap-1">
-                          <Clock className="w-3 h-3 text-purple-400" />
-                          <span>Horas</span>
-                        </div>
-                        <div className="text-sm font-bold text-white font-mono mt-0.5">
-                          {friend.gaming.totalHours.toLocaleString()}h
-                        </div>
+                    <div className="bg-cine-950/60 p-2 rounded-xl border border-cine-800/80">
+                      <div className="text-[10px] text-cine-400 font-medium uppercase font-mono">
+                        Horas
                       </div>
-                      <div className="bg-cine-950/60 p-2.5 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono flex items-center justify-center gap-1">
-                          <Trophy className="w-3 h-3 text-purple-400" />
-                          <span>Completos</span>
-                        </div>
-                        <div className="text-sm font-bold text-white font-mono mt-0.5">
-                          {friend.gaming.completedGames}
-                        </div>
-                      </div>
-                      <div className="bg-cine-950/60 p-2.5 rounded-xl border border-cine-800/80">
-                        <div className="text-[10px] text-cine-400 font-medium uppercase font-mono flex items-center justify-center gap-1">
-                          <Brain className="w-3 h-3 text-purple-400" />
-                          <span>Game K.</span>
-                        </div>
-                        <div className="text-sm font-bold text-white font-mono mt-0.5">
-                          {friend.gaming.gameKnowledge !== null
-                            ? `${friend.gaming.gameKnowledge}%`
-                            : "—"}
-                        </div>
+                      <div className="text-xs font-bold text-purple-400 font-mono mt-0.5">
+                        {friend.gaming.totalHours.toLocaleString()}h
                       </div>
                     </div>
-                  )}
+                    <div className="bg-cine-950/60 p-2 rounded-xl border border-cine-800/80">
+                      <div className="text-[10px] text-cine-400 font-medium uppercase font-mono">
+                        Game K.
+                      </div>
+                      <div className="text-xs font-bold text-purple-400 font-mono mt-0.5">
+                        {friend.gaming.gameKnowledge !== null
+                          ? `${friend.gaming.gameKnowledge}%`
+                          : "—"}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Botón de Enlace al Perfil */}
+                {/* Botón / Indicador de Enlace al Perfil */}
                 <div className="pt-2 relative z-10 border-t border-cine-800/60">
-                  <Link
-                    href={friend.profileUrl}
-                    onClick={() => sounds.click()}
-                    className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                      currentTab === "cinema"
-                        ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500 hover:text-black"
-                        : currentTab === "gaming"
-                          ? "bg-purple-500/15 text-purple-300 border border-purple-500/30 hover:bg-purple-600 hover:text-white"
-                          : "bg-cine-800/80 text-cine-200 border border-cine-700/60 hover:bg-sky-500/20 hover:text-sky-300 hover:border-sky-500/40"
-                    }`}
-                  >
-                    <span>
-                      {currentTab === "cinema"
-                        ? "Ver Perfil Cinéfilo"
-                        : currentTab === "gaming"
-                          ? "Ver Perfil Gamer"
-                          : "Ver Perfil Público"}
-                    </span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                  </Link>
+                  <div className="w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-cine-800/80 text-cine-200 border border-cine-700/60 group-hover:bg-sky-500/20 group-hover:text-sky-300 group-hover:border-sky-500/40 transition-all">
+                    <span>Ver Perfil Público</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
