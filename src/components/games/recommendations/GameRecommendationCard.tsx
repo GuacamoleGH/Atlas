@@ -75,7 +75,16 @@ export default function GameRecommendationCard({
     }
   };
 
-  const mainPlatform = game.platforms[0]?.name || "JUEGO";
+  // Plataforma preferida para el badge: priorizar PC si está disponible, luego consolas modernas
+  const allPlatformNames = game.platforms.map((p) => p.name);
+  const mainPlatform =
+    game.platforms.find((p) => p.name === "PC")?.name ||
+    game.platforms.find((p) => p.name.includes("PlayStation"))?.name ||
+    game.platforms.find((p) => p.name.includes("Xbox"))?.name ||
+    game.platforms[0]?.name ||
+    "JUEGO";
+
+  const allPlatformsTooltip = `Disponible en: ${allPlatformNames.join(", ") || mainPlatform}`;
 
   const saveScrollState = () => {
     if (typeof window !== "undefined") {
@@ -110,9 +119,12 @@ export default function GameRecommendationCard({
 
         {/* Badges superiores: Tipo/Plataforma + Porcentaje de Afinidad */}
         <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1 z-10 pointer-events-none">
-          <span className="flex items-center gap-1 backdrop-blur-md px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-bold border shadow bg-purple-950/80 text-purple-300 border-purple-500/30">
-            <Gamepad2 className="w-2.5 h-2.5 text-purple-400" />
-            <span className="truncate max-w-[65px]">{mainPlatform}</span>
+          <span
+            title={allPlatformsTooltip}
+            className="pointer-events-auto flex items-center gap-1 backdrop-blur-md px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-bold border shadow bg-purple-950/80 text-purple-300 border-purple-500/30 cursor-help"
+          >
+            <Gamepad2 className="w-2.5 h-2.5 text-purple-400 shrink-0" />
+            <span className="truncate max-w-[85px]">{mainPlatform}</span>
           </span>
 
           {/* Píldora de Afinidad estilo Netflix / Atlas */}
@@ -198,11 +210,24 @@ export default function GameRecommendationCard({
             {game.title}
           </Link>
 
-          {/* Razón explicativa */}
-          <p className="text-[11px] text-zinc-400 line-clamp-1 mt-1 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
-            <span className="truncate">{game.primaryReason}</span>
-          </p>
+          {/* Razón explicativa con tooltip interactivo al pasar el ratón */}
+          <div className="relative group/reason mt-1">
+            <p
+              title={game.primaryReason}
+              className="text-[11px] text-zinc-400 line-clamp-1 flex items-center gap-1.5 cursor-help transition-colors hover:text-cyan-300"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+              <span className="truncate">{game.primaryReason}</span>
+            </p>
+
+            {/* Tooltip flotante emergente al dejar el ratón encima */}
+            <div className="pointer-events-none absolute bottom-full left-0 mb-1.5 hidden group-hover/reason:block w-max max-w-[220px] sm:max-w-[260px] rounded-xl bg-zinc-950/95 border border-purple-500/60 p-2.5 text-[11px] leading-snug text-zinc-100 shadow-[0_4px_24px_rgba(0,0,0,0.9)] backdrop-blur-md z-40">
+              <div className="flex items-start gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 mt-1 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+                <span className="font-medium text-white">{game.primaryReason}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Pie de tarjeta: Género principal a la izquierda, Confianza a la derecha */}

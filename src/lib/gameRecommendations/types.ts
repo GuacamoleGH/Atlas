@@ -19,6 +19,9 @@ export interface GameTasteProfile {
   seedGames: GameSeed[];
   activePlatformIds: number[];
   activePlatformNames: string[];
+  primaryPlatformId?: number;
+  primaryPlatformName?: string;
+  isPrimaryPlatformDominant?: boolean;
   eraPreferences: Record<string, number>; // "1990s", "2000s", "2010s", "2020s"
   avgPreferredPlaytime: number; // en horas
   gameKnowledgeAvg: number; // 0 a 100

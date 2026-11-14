@@ -50,10 +50,11 @@ export function setCachedRawg<T>(key: string, data: T, ttlMs = 1000 * 60 * 60 * 
  * Obtiene recomendaciones de usuario cacheadas
  */
 export function getCachedUserRecommendations<T>(userId: string): T | null {
-  const entry = userRecsCache.get(userId);
+  const cacheKey = `user_recs_v3_${userId}`;
+  const entry = userRecsCache.get(cacheKey);
   if (!entry) return null;
   if (entry.expiresAt <= Date.now()) {
-    userRecsCache.delete(userId);
+    userRecsCache.delete(cacheKey);
     return null;
   }
   return entry.data as T;
@@ -63,7 +64,8 @@ export function getCachedUserRecommendations<T>(userId: string): T | null {
  * Guarda recomendaciones de usuario con TTL en ms (por defecto 6 horas)
  */
 export function setCachedUserRecommendations<T>(userId: string, data: T, ttlMs = 1000 * 60 * 60 * 6): void {
-  userRecsCache.set(userId, {
+  const cacheKey = `user_recs_v3_${userId}`;
+  userRecsCache.set(cacheKey, {
     data,
     expiresAt: Date.now() + ttlMs,
   });
@@ -73,5 +75,7 @@ export function setCachedUserRecommendations<T>(userId: string, data: T, ttlMs =
  * Invalida la caché de recomendaciones de un usuario específico
  */
 export function invalidateUserRecommendations(userId: string): void {
+  const cacheKey = `user_recs_v3_${userId}`;
+  userRecsCache.delete(cacheKey);
   userRecsCache.delete(userId);
 }

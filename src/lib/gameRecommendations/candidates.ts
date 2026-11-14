@@ -33,14 +33,19 @@ export async function getCandidatePool(
     if (userGameTitles.has(norm)) return true;
     if (!game.name || !game.background_image) return true;
 
-    // Hard filter de plataforma: si el usuario tiene plataformas activas registradas,
-    // el candidato DEBE estar disponible en al menos una de ellas
+    // Hard filter de plataforma:
+    // Si el usuario tiene una plataforma dominante (ej. la mayoría de horas o últimos juegos son en PC),
+    // el videojuego recomendado DEBE estar disponible en esa plataforma prioritaria.
     if (profile.activePlatformIds.length > 0 && game.platforms && game.platforms.length > 0) {
       const gamePlatIds = game.platforms.map((p) => p.platform?.id).filter(Boolean);
-      const sharesPlatform = gamePlatIds.some((pId) =>
-        profile.activePlatformIds.includes(pId)
-      );
-      if (!sharesPlatform) return true;
+      if (profile.isPrimaryPlatformDominant && profile.primaryPlatformId) {
+        if (!gamePlatIds.includes(profile.primaryPlatformId)) return true;
+      } else {
+        const sharesPlatform = gamePlatIds.some((pId) =>
+          profile.activePlatformIds.includes(pId)
+        );
+        if (!sharesPlatform) return true;
+      }
     }
 
     return false;
@@ -72,15 +77,18 @@ export async function getCandidatePool(
     .map(([g]) => g)
     .slice(0, 2);
 
+  // Plataforma preferente para filtrar consultas si es dominante
+  const dominantPlatformFilter = profile.isPrimaryPlatformDominant ? profile.primaryPlatformId : undefined;
+
   for (const genre of topGenres) {
-    queryPromises.push(
-      queryRawgGames({
-        genres: genre,
-        metacritic: "72,100",
-        ordering: "-metacritic",
-        page_size: 25,
-      }).catch(() => [])
-    );
+    const params: Record<string, string | number> = {
+      genres: genre,
+      metacritic: "72,100",
+      ordering: "-metacritic",
+      page_size: 25,
+    };
+    if (dominantPlatformFilter) params.platforms = dominantPlatformFilter;
+    queryPromises.push(queryRawgGames(params).catch(() => []));
   }
 
   // Top tags característicos del usuario (Souls-like, Roguelike, Open World, Story Rich, etc.)
@@ -91,13 +99,13 @@ export async function getCandidatePool(
     .slice(0, 2);
 
   for (const tag of topTags) {
-    queryPromises.push(
-      queryRawgGames({
-        tags: tag,
-        ordering: "-rating",
-        page_size: 20,
-      }).catch(() => [])
-    );
+    const params: Record<string, string | number> = {
+      tags: tag,
+      ordering: "-rating",
+      page_size: 20,
+    };
+    if (dominantPlatformFilter) params.platforms = dominantPlatformFilter;
+    queryPromises.push(queryRawgGames(params).catch(() => []));
   }
 
   // Candidatos para la plataforma principal del usuario

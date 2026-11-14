@@ -241,19 +241,100 @@ export async function buildGameTasteProfile(
     }
   }
 
-  // 5. Plataformas activas del usuario (según sus registros de juego)
-  const userPlatformAtlasIds = new Set<string>();
-  for (const ug of userGames) {
-    if (ug.platform) userPlatformAtlasIds.add(ug.platform);
+  // 5. Plataformas activas y análisis ponderado de horas y recencia por plataforma
+  const platformHoursMap = new Map<number, number>();
+  const platformRecentGamesMap = new Map<number, number>();
+  const allUserRawgPlatformIds = new Set<number>();
+
+  // Ordenar userGames por recencia (los últimos jugados primero)
+  const sortedByRecent = [...userGames].sort((a, b) => {
+    const dateA = new Date(a.completedDate || a.createdAt).getTime();
+    const dateB = new Date(b.completedDate || b.createdAt).getTime();
+    return dateB - dateA;
+  });
+
+  // Analizar los últimos 5 juegos para dar peso a la plataforma actual
+  const recentSlice = sortedByRecent.slice(0, 5);
+  for (const ug of recentSlice) {
+    const rawgPlatIds: number[] = [];
+    if (ug.platform) {
+      rawgPlatIds.push(...mapAtlasPlatformsToRawg([ug.platform]));
+    }
     if (ug.platformDetails && Array.isArray(ug.platformDetails)) {
       ug.platformDetails.forEach((p: any) => {
-        if (p.platform) userPlatformAtlasIds.add(p.platform);
+        if (p.platform) {
+          rawgPlatIds.push(...mapAtlasPlatformsToRawg([p.platform]));
+        }
       });
+    }
+    for (const rId of rawgPlatIds) {
+      allUserRawgPlatformIds.add(rId);
+      platformRecentGamesMap.set(rId, (platformRecentGamesMap.get(rId) || 0) + 1);
     }
   }
 
-  const activePlatformIds = mapAtlasPlatformsToRawg(Array.from(userPlatformAtlasIds));
+  // Contabilizar horas dedicadas por plataforma
+  let totalTrackedHours = 0;
+  for (const ug of userGames) {
+    if (ug.platformDetails && Array.isArray(ug.platformDetails) && ug.platformDetails.length > 0) {
+      for (const p of ug.platformDetails) {
+        if (p.platform) {
+          const rIds = mapAtlasPlatformsToRawg([p.platform]);
+          const h = p.hours || 0;
+          totalTrackedHours += h;
+          for (const rId of rIds) {
+            allUserRawgPlatformIds.add(rId);
+            platformHoursMap.set(rId, (platformHoursMap.get(rId) || 0) + h);
+          }
+        }
+      }
+    } else if (ug.platform) {
+      const rIds = mapAtlasPlatformsToRawg([ug.platform]);
+      const h = ug.hoursPlayed || 0;
+      totalTrackedHours += h;
+      for (const rId of rIds) {
+        allUserRawgPlatformIds.add(rId);
+        platformHoursMap.set(rId, (platformHoursMap.get(rId) || 0) + h);
+      }
+    }
+  }
+
+  // Si no se registraron horas numéricas, recopilar todas las plataformas del usuario
+  if (allUserRawgPlatformIds.size === 0) {
+    for (const ug of userGames) {
+      if (ug.platform) {
+        mapAtlasPlatformsToRawg([ug.platform]).forEach((id) => allUserRawgPlatformIds.add(id));
+      }
+    }
+  }
+
+  // Puntuación ponderada por plataforma: horas dedicadas + (juegos recientes * 25)
+  const platformScores: { rawgId: number; score: number; hours: number }[] = [];
+  const uniquePlatformIds = Array.from(allUserRawgPlatformIds);
+
+  for (const rId of uniquePlatformIds) {
+    const hours = platformHoursMap.get(rId) || 0;
+    const recentCount = platformRecentGamesMap.get(rId) || 0;
+    const score = hours + recentCount * 25;
+    platformScores.push({ rawgId: rId, score, hours });
+  }
+
+  // Ordenar plataformas de mayor a menor preferencia
+  platformScores.sort((a, b) => b.score - a.score);
+
+  const activePlatformIds = platformScores.map((ps) => ps.rawgId);
   const finalPlatformIds = activePlatformIds.length > 0 ? activePlatformIds : [4, 187, 186, 7];
+
+  const primaryPlatformId = finalPlatformIds[0];
+  const primaryPlatformName = RAWG_PLATFORM_NAMES[primaryPlatformId] || "PC";
+
+  // Determinar si la plataforma primaria es claramente dominante (>45% de horas totales o mayoría de recientes)
+  const primaryHours = platformHoursMap.get(primaryPlatformId) || 0;
+  const isPrimaryPlatformDominant =
+    finalPlatformIds.length === 1 ||
+    (totalTrackedHours > 0 && primaryHours / totalTrackedHours >= 0.45) ||
+    (platformRecentGamesMap.get(primaryPlatformId) || 0) >= 2;
+
   const activePlatformNames = finalPlatformIds
     .map((id) => RAWG_PLATFORM_NAMES[id])
     .filter(Boolean);
@@ -296,6 +377,9 @@ export async function buildGameTasteProfile(
     seedGames,
     activePlatformIds: finalPlatformIds,
     activePlatformNames,
+    primaryPlatformId,
+    primaryPlatformName,
+    isPrimaryPlatformDominant,
     eraPreferences: normalizeMap(eraScores),
     avgPreferredPlaytime:
       playtimeSampleCount > 0 ? Math.round(totalPlaytimeSample / playtimeSampleCount) : 25,

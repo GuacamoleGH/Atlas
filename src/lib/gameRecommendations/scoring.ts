@@ -44,10 +44,12 @@ export function preScoreCandidate(
 
   // Plataformas (P)
   if (game.platforms && profile.activePlatformIds.length > 0) {
-    const hasPlat = game.platforms.some((p) =>
-      profile.activePlatformIds.includes(p.platform?.id)
-    );
-    if (hasPlat) score += 10;
+    const gamePlatIds = game.platforms.map((p) => p.platform?.id);
+    if (profile.primaryPlatformId && gamePlatIds.includes(profile.primaryPlatformId)) {
+      score += 15;
+    } else if (gamePlatIds.some((id) => profile.activePlatformIds.includes(id))) {
+      score += 5;
+    }
   }
 
   return score;
@@ -177,10 +179,14 @@ export function scoreDetailedGame(
   // 6. Plataformas (P)
   let P = 0;
   if (game.platforms && profile.activePlatformIds.length > 0) {
-    const matchingPlats = game.platforms.filter((p) =>
-      profile.activePlatformIds.includes(p.platform?.id)
-    );
-    P = matchingPlats.length > 0 ? 1 : 0.3;
+    const gamePlatIds = game.platforms.map((p) => p.platform?.id).filter(Boolean);
+    const hasPrimary = profile.primaryPlatformId && gamePlatIds.includes(profile.primaryPlatformId);
+    if (hasPrimary) {
+      P = 1;
+    } else {
+      const hasSecondary = gamePlatIds.some((id) => profile.activePlatformIds.includes(id as number));
+      P = hasSecondary ? 0.6 : 0;
+    }
   } else {
     P = 1;
   }
