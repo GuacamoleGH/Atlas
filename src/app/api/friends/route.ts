@@ -12,46 +12,49 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
     const currentUserId = session?.user?.id || null;
 
-    // Obtener todos los usuarios registrados menos el usuario actual
-    const rawUsers = await prisma.user.findMany({
-      where: currentUserId
-        ? {
-            id: { not: currentUserId },
-          }
-        : {},
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        image: true,
-        bio: true,
-        totalXp: true,
-        createdAt: true,
-        userMovies: {
-          where: { status: "WATCHED" },
-          select: {
-            userRating: true,
-            ballKnowledge: true,
+    // Obtener el total de miembros registrados en Atlas y la lista de amigos (excluyendo el usuario actual)
+    const [totalMembersCount, rawUsers] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.findMany({
+        where: currentUserId
+          ? {
+              id: { not: currentUserId },
+            }
+          : {},
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          image: true,
+          bio: true,
+          totalXp: true,
+          createdAt: true,
+          userMovies: {
+            where: { status: "WATCHED" },
+            select: {
+              userRating: true,
+              ballKnowledge: true,
+            },
+          },
+          userSeries: {
+            where: { status: "WATCHED" },
+            select: {
+              userRating: true,
+              ballKnowledge: true,
+            },
+          },
+          userGames: {
+            select: {
+              status: true,
+              hoursPlayed: true,
+              userRating: true,
+              gameKnowledge: true,
+            },
           },
         },
-        userSeries: {
-          where: { status: "WATCHED" },
-          select: {
-            userRating: true,
-            ballKnowledge: true,
-          },
-        },
-        userGames: {
-          select: {
-            status: true,
-            hoursPlayed: true,
-            userRating: true,
-            gameKnowledge: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
 
     const friends = rawUsers.map((u) => {
       // 1. Cine & Series
@@ -156,6 +159,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       friends,
       totalCount: friends.length,
+      totalMembers: totalMembersCount || (friends.length + (currentUserId ? 1 : 0)),
     });
   } catch (error) {
     console.error("Error en GET /api/friends:", error);

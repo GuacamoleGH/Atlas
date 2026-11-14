@@ -213,25 +213,9 @@ export default function EditGamerProfileModal({
 
             {/* Avatar & Presets */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-                  <Image className="w-3.5 h-3.5 text-cyan-400" /> Avatar de Perfil
-                </label>
-                {avatarUrl && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sounds.playClick();
-                      setAvatarUrl("");
-                    }}
-                    className="text-[10px] text-cine-400 hover:text-rose-400 flex items-center gap-1 transition-colors cursor-pointer"
-                    title="Quitar avatar"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    <span>Quitar foto</span>
-                  </button>
-                )}
-              </div>
+              <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
+                <Image className="w-3.5 h-3.5 text-cyan-400" /> Avatar de Perfil
+              </label>
 
               {/* Input oculto para subida segura de archivo */}
               <input
@@ -242,7 +226,7 @@ export default function EditGamerProfileModal({
                 onChange={handleFileUpload}
               />
 
-              {/* Vista previa y controles de subida / URL */}
+              {/* Vista previa y controles de subida */}
               <div className="flex items-center gap-3">
                 <div
                   onClick={() => !isUploading && fileInputRef.current?.click()}
@@ -264,13 +248,13 @@ export default function EditGamerProfileModal({
                   </div>
                 </div>
 
-                <div className="flex-1 space-y-1.5 min-w-0">
+                <div className="flex-1 space-y-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isUploading}
-                      className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                      className="px-3.5 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
                     >
                       {isUploading ? (
                         <>
@@ -284,21 +268,24 @@ export default function EditGamerProfileModal({
                         </>
                       )}
                     </button>
-                    <span className="text-[10px] text-cine-400 truncate">
-                      JPG, PNG, WebP (máx. 5 MB)
-                    </span>
+                    {avatarUrl && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sounds.playClick();
+                          setAvatarUrl("");
+                        }}
+                        className="px-2.5 py-1.5 bg-cine-900 hover:bg-rose-500/20 text-cine-400 hover:text-rose-400 border border-cine-700 hover:border-rose-500/40 rounded-xl text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
+                        title="Quitar foto actual"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Quitar</span>
+                      </button>
+                    )}
                   </div>
-
-                  <input
-                    type="url"
-                    value={avatarUrl}
-                    onChange={(e) => {
-                      setAvatarUrl(e.target.value);
-                      setUploadError(null);
-                    }}
-                    placeholder="O pega una URL externa..."
-                    className="w-full px-3 py-1.5 bg-cine-900 border border-cine-700 rounded-xl text-xs text-white placeholder-cine-500 focus:outline-none focus:border-cyan-400"
-                  />
+                  <span className="text-[10px] text-cine-400 block truncate">
+                    Formatos JPG, PNG, WebP o GIF (máx. 5 MB)
+                  </span>
                 </div>
               </div>
 
