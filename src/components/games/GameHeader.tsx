@@ -39,7 +39,7 @@ export default function GameHeader() {
     { href: "/games/completed", label: "Completados", icon: CheckCircle2 },
     { href: "/games/friends", label: "Amigos", icon: Users },
     { href: "/games/reviews", label: "Reseñas", icon: MessageSquare },
-    { href: "/tv/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
+    { href: "/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
   ];
 
   const isActive = (href: string) => {

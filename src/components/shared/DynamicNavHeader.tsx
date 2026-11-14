@@ -61,8 +61,13 @@ export default function DynamicNavHeader() {
     return <GameHeader />;
   }
 
-  // Launcher Principal (Centro de Mando) y Perfil Público Unificado
-  if (pathname === "/" || pathname.startsWith("/u/")) {
+  // Launcher Principal (Centro de Mando), Ranking Global y Perfil Público Unificado
+  if (
+    pathname === "/" ||
+    pathname === "/leaderboard" ||
+    pathname === "/ranking" ||
+    pathname.startsWith("/u/")
+  ) {
     return (
       <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/90 backdrop-blur-xl shadow-lg">
         <div className="relative w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -117,7 +122,7 @@ export default function DynamicNavHeader() {
             </Link>
 
             <Link
-              href="/tv/leaderboard"
+              href="/leaderboard"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
@@ -312,7 +317,7 @@ export default function DynamicNavHeader() {
               <span>Amigos</span>
             </Link>
             <Link
-              href="/tv/leaderboard"
+              href="/leaderboard"
               onClick={() => setIsMobileNavOpen(false)}
               className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
             >

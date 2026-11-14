@@ -8,8 +8,6 @@ import {
   Sparkles,
   Trophy,
   Flame,
-  Film,
-  Gamepad2,
 } from "lucide-react";
 import { LeaderboardUserEntry } from "@/app/api/leaderboard/route";
 import { sounds } from "@/lib/sounds";
@@ -44,7 +42,7 @@ export default function PodiumCard({ user, position }: PodiumCardProps) {
           "bg-gradient-to-b from-amber-500/20 via-amber-950/30 to-cine-950",
         icon: Crown,
         medalLabel: "1º LUGAR",
-        heightClass: "h-72 sm:h-80 md:h-96",
+        heightClass: "h-auto md:h-[435px]",
         avatarSize: "w-20 h-20 sm:w-24 sm:h-24",
         glowAccent: "text-amber-400",
       }
@@ -60,7 +58,7 @@ export default function PodiumCard({ user, position }: PodiumCardProps) {
             "bg-gradient-to-b from-slate-400/15 via-slate-900/40 to-cine-950",
           icon: Medal,
           medalLabel: "2º LUGAR",
-          heightClass: "h-64 sm:h-72 md:h-84",
+          heightClass: "h-auto md:h-[385px]",
           avatarSize: "w-16 h-16 sm:w-20 sm:h-20",
           glowAccent: "text-slate-200",
         }
@@ -74,7 +72,7 @@ export default function PodiumCard({ user, position }: PodiumCardProps) {
             "bg-gradient-to-b from-amber-900/20 via-zinc-900/40 to-cine-950",
           icon: Trophy,
           medalLabel: "3º LUGAR",
-          heightClass: "h-56 sm:h-64 md:h-76",
+          heightClass: "h-auto md:h-[340px]",
           avatarSize: "w-16 h-16 sm:w-20 sm:h-20",
           glowAccent: "text-amber-500",
         };
@@ -85,7 +83,7 @@ export default function PodiumCard({ user, position }: PodiumCardProps) {
     <Link
       href={`/u/${user.username}`}
       onClick={handleCardClick}
-      className={`group relative flex flex-col items-center justify-between rounded-3xl p-4 sm:p-6 border ${theme.border} ${theme.shadow} ${theme.pedestalBg} transition-all duration-300 hover:-translate-y-2 cursor-pointer w-full overflow-hidden`}
+      className={`group relative flex flex-col items-center justify-between rounded-3xl p-4 sm:p-6 border ${theme.border} ${theme.shadow} ${theme.pedestalBg} ${theme.heightClass} transition-all duration-300 hover:-translate-y-2 cursor-pointer w-full overflow-hidden`}
     >
       {/* Resplandor decorativo de fondo */}
       {isFirst && (
@@ -108,10 +106,10 @@ export default function PodiumCard({ user, position }: PodiumCardProps) {
       </div>
 
       {/* Avatar con Corona/Anillo */}
-      <div className="relative my-2">
+      <div className={`relative ${isFirst ? "mt-7 mb-2" : "my-2"}`}>
         {isFirst && (
-          <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-amber-400 animate-bounce">
-            <Crown className="w-7 h-7 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)] fill-amber-400" />
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-amber-400 animate-bounce z-20 pointer-events-none">
+            <Crown className="w-7 h-7 drop-shadow-[0_0_10px_rgba(245,158,11,0.85)] fill-amber-400" />
           </div>
         )}
         <div
@@ -161,20 +159,6 @@ export default function PodiumCard({ user, position }: PodiumCardProps) {
         <p className="mt-2 text-[11px] text-cine-400 text-center font-medium line-clamp-1 max-w-[200px]">
           {user.statsSummary}
         </p>
-
-        {/* Mini badge de su título predilecto si existe */}
-        {user.topItem && (
-          <div className="mt-3 w-full pt-2.5 border-t border-white/10 flex items-center justify-center gap-2 text-[10px] text-cine-300">
-            {user.topItem.type === "movie" ? (
-              <Film className="w-3 h-3 text-amber-400 shrink-0" />
-            ) : (
-              <Gamepad2 className="w-3 h-3 text-purple-400 shrink-0" />
-            )}
-            <span className="truncate max-w-[160px] italic">
-              &quot;{user.topItem.title}&quot;
-            </span>
-          </div>
-        )}
       </div>
     </Link>
   );

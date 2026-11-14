@@ -41,7 +41,7 @@ export default function Header() {
     { href: "/tv/watchlist", label: "Watchlist", icon: Bookmark },
     { href: "/tv/watched", label: "Vistas", icon: CheckCircle2 },
     { href: "/tv/friends", label: "Amigos", icon: Users },
-    { href: "/tv/leaderboard", label: "Ranking", icon: Trophy },
+    { href: "/leaderboard", label: "Ranking", icon: Trophy },
     { href: "/tv/reviews", label: "Reseñas", icon: MessageSquare },
   ];
 
@@ -55,8 +55,13 @@ export default function Header() {
         pathname.startsWith("/tv/friends/") ||
         pathname === "/tv/amigos"
       );
-    if (href === "/tv/leaderboard")
-      return pathname === "/tv/leaderboard" || pathname === "/tv/ranking";
+    if (href === "/leaderboard")
+      return (
+        pathname === "/leaderboard" ||
+        pathname === "/tv/leaderboard" ||
+        pathname === "/ranking" ||
+        pathname === "/tv/ranking"
+      );
     if (href === "/tv/reviews")
       return pathname === "/tv/reviews" || pathname === "/tv/resenas";
     return pathname === href || pathname.startsWith(href + "/");

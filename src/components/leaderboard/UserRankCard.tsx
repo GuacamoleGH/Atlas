@@ -132,7 +132,7 @@ export default function UserRankCard({
         <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-white/5">
           {isLeader ? (
             <div className="flex items-center gap-2 text-xs font-bold text-amber-400 bg-amber-500/15 border border-amber-500/30 px-3.5 py-2 rounded-xl">
-              <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
+              <Sparkles className="w-4 h-4 text-amber-400" />
               <span>¡Lideras el podio indiscutiblemente! 👑</span>
             </div>
           ) : userAhead ? (
