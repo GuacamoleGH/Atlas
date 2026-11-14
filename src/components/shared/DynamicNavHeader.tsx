@@ -84,18 +84,7 @@ export default function DynamicNavHeader() {
         iconColor: "text-amber-400",
         activeBg:
           "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-gold-glow",
-        isActive: (path: string) =>
-          path.startsWith("/tv") && path !== "/tv/recommendations",
-      },
-      {
-        href: "/tv/recommendations",
-        label: "Para ti",
-        mobileLabel: "Para ti (Recomendaciones)",
-        icon: Sparkles,
-        iconColor: "text-amber-400",
-        activeBg:
-          "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-gold-glow",
-        isActive: (path: string) => path === "/tv/recommendations",
+        isActive: (path: string) => path.startsWith("/tv"),
       },
       {
         href: "/games",
