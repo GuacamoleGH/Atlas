@@ -454,13 +454,87 @@ interface CachedRecommendations {
   timestamp: number;
 }
 
+const CACHE_VERSION = "v7_no_anime_";
 const recommendationsCache = new Map<string, CachedRecommendations>();
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 horas
 
 export function invalidateRecommendations(userId: string): void {
-  if (recommendationsCache.has(userId)) {
-    recommendationsCache.delete(userId);
+  const cacheKey = `${CACHE_VERSION}${userId}`;
+  recommendationsCache.delete(cacheKey);
+  recommendationsCache.delete(userId);
+}
+
+/**
+ * Detector estricto de animación, anime y caricaturas/dibujos animados.
+ * Cumple la directiva de usuario para descartar cualquier título animado de semillas y recomendaciones.
+ */
+export function isAnimationOrAnimeWork(item: {
+  genreIds?: number[];
+  genres?: string[];
+  title?: string;
+  originalTitle?: string | null;
+  originalLanguage?: string | null;
+  originCountry?: string[] | null;
+}): boolean {
+  if (!item) return false;
+  const normG = normalizeGenreIds(item.genreIds || []);
+  if (normG.includes(16) || item.genreIds?.includes(16)) return true;
+  if (item.genres?.some((g) => typeof g === "string" && g.toLowerCase().includes("anim"))) {
+    return true;
   }
+  const t = (item.title || "").toLowerCase();
+  const ot = (item.originalTitle || "").toLowerCase();
+  const animKeywords = [
+    "naruto",
+    "dragon ball",
+    "samurai jack",
+    "initial d",
+    "kid vs kat",
+    "hilda",
+    "one piece",
+    "bleach",
+    "death note",
+    "attack on titan",
+    "demon slayer",
+    "jujutsu kaisen",
+    "star contra las fuerzas",
+    "haikyuu",
+    "desaparecido",
+    "quiero comerme tu páncreas",
+    "sakura, cazadora",
+    "evangelion",
+    "yu-gi-oh",
+    "inuyasha",
+    "fullmetal alchemist",
+    "fairy tail",
+    "my hero academia",
+    "hunter x hunter",
+    "sailor moon",
+    "pokémon",
+    "pokemon",
+    "digimon",
+    "shin chan",
+    "doraemon",
+    "gintama",
+    "steins;gate",
+    "cowboy bebop",
+    "spirited away",
+    "el viaje de chihiro",
+    "totoro",
+    "mononoke",
+    "south park",
+    "rick and morty",
+    "rick y morty",
+    "los simpson",
+    "padre de familia",
+    "futurama",
+    "bojack horseman",
+    "arcane",
+  ];
+  if (animKeywords.some((kw) => t.includes(kw) || ot.includes(kw))) {
+    return true;
+  }
+  return false;
 }
 
 // ==========================================
@@ -721,10 +795,8 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
     }
   }
 
-  // Si el usuario rechazó animación o anime, forzar afinidad muy negativa para animación (16)
-  if (animRejectionCount >= 1) {
-    genreAffinities[16] = -1.0;
-  }
+  // REGLA ABSOLUTA: Forzar afinidad radicalmente negativa para animación (16)
+  genreAffinities[16] = -1.0;
   for (const [gStr, count] of Object.entries(exclusionsInfo.genreRejectionCounts)) {
     const gId = Number(gStr);
     if (count >= 2) {
@@ -735,7 +807,7 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
   const favoriteGenreIds = Object.entries(genreAffinities)
     .filter(([g, aff]) => {
       const gId = Number(g);
-      if (gId === 16 && animRejectionCount >= 1) return false;
+      if (gId === 16) return false;
       if ((exclusionsInfo.genreRejectionCounts[gId] || 0) >= 2) return false;
       return aff >= 0.25;
     })
@@ -745,7 +817,7 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
   const dislikedGenreIds = Object.entries(genreAffinities)
     .filter(([g, aff]) => {
       const gId = Number(g);
-      if (gId === 16 && animRejectionCount >= 1) return true;
+      if (gId === 16) return true;
       if ((exclusionsInfo.genreRejectionCounts[gId] || 0) >= 2) return true;
       return aff <= -0.2;
     })
@@ -775,15 +847,9 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
   const eligibleSeeds = signals.filter((s) => {
     if (s.status !== "WATCHED" || s.finalWeight < 0.25) return false;
 
-    // REGLA CRÍTICA: Si el usuario ha rechazado animación o anime mediante "No me interesa",
-    // descalificar radicalmente cualquier obra animada para que NUNCA sea semilla
-    // (evita que Initial D o Star vs las fuerzas del mal generen filas como "Porque viste Initial D")
-    const isAnimSeed =
-      s.genreIds.includes(16) ||
-      s.title.toLowerCase().includes("initial d") ||
-      s.title.toLowerCase().includes("star contra las fuerzas");
-
-    if (isAnimSeed && animRejectionCount >= 1) {
+    // REGLA CRÍTICA: Descalificar tajantemente cualquier obra animada, anime o dibujito
+    // para que NUNCA sea semilla (evita que Initial D, Star contra las fuerzas del mal, etc. generen filas)
+    if (isAnimationOrAnimeWork(s)) {
       return false;
     }
 
@@ -1003,9 +1069,10 @@ export async function getRecommendations(
   userId: string,
   options?: { forceRefresh?: boolean }
 ): Promise<RecommendationsResponse> {
+  const cacheKey = `${CACHE_VERSION}${userId}`;
   // Verificar caché en memoria
-  if (!options?.forceRefresh && recommendationsCache.has(userId)) {
-    const cached = recommendationsCache.get(userId)!;
+  if (!options?.forceRefresh && recommendationsCache.has(cacheKey)) {
+    const cached = recommendationsCache.get(cacheKey)!;
     if (Date.now() - cached.timestamp < CACHE_TTL_MS) {
       return cached.data;
     }
@@ -1028,6 +1095,7 @@ export async function getRecommendations(
       const key = `${item.mediaType}:${item.id}`;
       if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
       if (item.adult || !item.posterPath || item.voteCount < 100) continue;
+      if (isAnimationOrAnimeWork(item)) continue;
 
       const genreNames = normalizeGenreIds(item.genreIds).map(
         (id) => TMDB_GENRE_NAMES[id] || "Cine"
@@ -1076,7 +1144,7 @@ export async function getRecommendations(
       cachedAt: new Date().toISOString(),
     };
 
-    recommendationsCache.set(userId, {
+    recommendationsCache.set(cacheKey, {
       data: coldStartResponse,
       timestamp: Date.now(),
     });
@@ -1113,35 +1181,12 @@ export async function getRecommendations(
     blocked: boolean;
     multiplier: number;
   } => {
-    const normG = normalizeGenreIds(cand.genreIds);
-    const titleLower = (cand.title || "").toLowerCase();
-    const isAnim =
-      normG.includes(16) ||
-      titleLower.includes("initial d") ||
-      titleLower.includes("dragon ball") ||
-      titleLower.includes("naruto") ||
-      titleLower.includes("inuyasha") ||
-      titleLower.includes("one piece") ||
-      titleLower.includes("attack on titan") ||
-      titleLower.includes("demon slayer") ||
-      titleLower.includes("jujutsu kaisen") ||
-      titleLower.includes("bleach") ||
-      titleLower.includes("death note");
-
-    const isAnime =
-      isAnim &&
-      (cand.originalLanguage?.toLowerCase() === "ja" ||
-        cand.originCountry?.includes("JP"));
-
-    // REGLA: Si el usuario rechaza anime/animación 2 o más veces: BLOQUEO TOTAL
-    if ((isAnim || isAnime) && animRejectionTotal >= 2) {
+    // REGLA ABSOLUTA: Descartar tajantemente anime, animación y dibujitos de cualquier recomendación
+    if (isAnimationOrAnimeWork(cand)) {
       return { blocked: true, multiplier: 0 };
     }
 
-    // Con 1 rechazo de anime/animación: reducción drástica (-75%)
-    if ((isAnim || isAnime) && animRejectionTotal === 1) {
-      return { blocked: false, multiplier: 0.25 };
-    }
+    const normG = normalizeGenreIds(cand.genreIds);
 
     // Para cualquier otro género según su número de rechazos
     let maxRejectionsForGenre = 0;
@@ -1299,7 +1344,7 @@ export async function getRecommendations(
   }
 
   // Calcular score y filtrar géneros con rechazo extremo
-  const scoredCandidates: RecommendationItem[] = [];
+  let scoredCandidates: RecommendationItem[] = [];
 
   for (const entry of Array.from(candidatesMap.values())) {
     const cand = entry.item;
@@ -1387,6 +1432,9 @@ export async function getRecommendations(
   // Ordenar por afinidad global
   scoredCandidates.sort((a, b) => b.affinityScore - a.affinityScore);
 
+  // FILTRO DE SEGURIDAD ESTRICTO: Purgar tajantemente cualquier título animado o de anime
+  scoredCandidates = scoredCandidates.filter((cand) => !isAnimationOrAnimeWork(cand));
+
   // ==========================================
   // FILA 1: «Creemos que te va a gustar» (Top 20 con diversidad)
   // ==========================================
@@ -1440,8 +1488,8 @@ export async function getRecommendations(
   for (const seed of profile.seeds) {
     if (seedRowsAdded >= 3) break;
 
-    // Si el usuario rechazó anime/animación, jamás crear fila temática de animación
-    if (seed.genreIds.includes(16) && animRejectionTotal >= 1) continue;
+    // Jamás crear fila temática de animación o anime
+    if (isAnimationOrAnimeWork(seed)) continue;
 
     // Buscar candidatos asociados a esta semilla priorizando nuevos descubrimientos
     const directSeedCandidates = scoredCandidates
@@ -1521,8 +1569,8 @@ export async function getRecommendations(
     cachedAt: new Date().toISOString(),
   };
 
-  // Guardar en caché 6 horas
-  recommendationsCache.set(userId, {
+  // Guardar en caché 6 horas con clave versionada
+  recommendationsCache.set(cacheKey, {
     data: finalResponse,
     timestamp: Date.now(),
   });

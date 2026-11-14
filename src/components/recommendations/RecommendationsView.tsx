@@ -45,7 +45,6 @@ const POPULAR_GENRES = [
   "Suspense",
   "Crimen",
   "Terror",
-  "Animación",
   "Aventura",
   "Misterio",
   "Documental",
@@ -67,7 +66,9 @@ export default function RecommendationsView({
   });
   const [selectedGenre, setSelectedGenre] = useState<string>(() => {
     if (typeof window !== "undefined") {
-      return sessionStorage.getItem("recs_genre") || "all";
+      const saved = sessionStorage.getItem("recs_genre");
+      if (saved === "Animación") return "all";
+      return saved || "all";
     }
     return "all";
   });
