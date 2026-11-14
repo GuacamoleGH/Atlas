@@ -67,6 +67,8 @@ function LeaderboardContent() {
     return data[currentTab] || [];
   }, [data, currentTab]);
 
+  const isGaming = currentTab === "gaming";
+
   // Filtrado por buscador
   const filteredList = useMemo(() => {
     if (!searchQuery.trim()) return activeList;
@@ -99,15 +101,37 @@ function LeaderboardContent() {
   return (
     <div className="space-y-8 pb-20 animate-fadeIn">
       {/* 1. Cabecera Hero del Leaderboard */}
-      <section className="relative overflow-hidden rounded-3xl border border-cine-800 bg-gradient-to-b from-cine-900 via-cine-950 to-cine-900 p-6 sm:p-10 shadow-2xl">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      <section
+        className={`relative overflow-hidden rounded-3xl border ${
+          isGaming ? "border-purple-500/30" : "border-cine-800"
+        } bg-gradient-to-b from-cine-900 via-cine-950 to-cine-900 p-6 sm:p-10 shadow-2xl transition-colors duration-300`}
+      >
+        <div
+          className={`absolute top-0 right-1/4 w-96 h-96 ${
+            isGaming ? "bg-purple-600/15" : "bg-amber-500/10"
+          } rounded-full blur-3xl pointer-events-none transition-all`}
+        />
+        <div
+          className={`absolute bottom-0 left-1/4 w-96 h-96 ${
+            isGaming ? "bg-indigo-600/15" : "bg-purple-500/10"
+          } rounded-full blur-3xl pointer-events-none transition-all`}
+        />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider">
-              <Crown className="w-3.5 h-3.5 fill-amber-400" />
-              <span>Salón de la Fama</span>
+            <div
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${
+                isGaming
+                  ? "bg-purple-500/15 border border-purple-500/30 text-purple-300"
+                  : "bg-amber-500/10 border border-amber-500/30 text-amber-400"
+              }`}
+            >
+              {isGaming ? (
+                <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
+              ) : (
+                <Crown className="w-3.5 h-3.5 fill-amber-400" />
+              )}
+              <span>{isGaming ? "Salón Gamer" : "Salón de la Fama"}</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
               Ranking & Leaderboard
@@ -121,9 +145,23 @@ function LeaderboardContent() {
 
           {/* Estadísticas de la Comunidad */}
           <div className="flex items-center gap-3 shrink-0">
-            <div className="px-4 py-3 rounded-2xl bg-cine-900/90 border border-cine-800 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
-                <Users className="w-5 h-5" />
+            <div
+              className={`px-4 py-3 rounded-2xl bg-cine-900/90 border ${
+                isGaming ? "border-purple-500/30" : "border-cine-800"
+              } flex items-center gap-3`}
+            >
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  isGaming
+                    ? "bg-purple-500/20 text-purple-400"
+                    : "bg-amber-500/15 text-amber-400"
+                }`}
+              >
+                {isGaming ? (
+                  <Gamepad2 className="w-5 h-5 text-purple-400" />
+                ) : (
+                  <Users className="w-5 h-5" />
+                )}
               </div>
               <div>
                 <div className="text-xs font-bold text-cine-400 uppercase tracking-wider">
@@ -193,7 +231,11 @@ function LeaderboardContent() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por nombre, @usuario o título..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-cine-900/80 border border-cine-800 text-xs text-white placeholder-cine-500 focus:outline-none focus:border-amber-500/60 transition-colors"
+            className={`w-full pl-10 pr-4 py-2 rounded-xl bg-cine-900/80 border text-xs text-white placeholder-cine-500 focus:outline-none transition-colors ${
+              isGaming
+                ? "border-purple-900/40 focus:border-purple-500/60"
+                : "border-cine-800 focus:border-amber-500/60"
+            }`}
           />
         </div>
 
@@ -212,7 +254,11 @@ function LeaderboardContent() {
       {/* 4. Estado de Carga */}
       {loading ? (
         <div className="min-h-[40vh] flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+          <Loader2
+            className={`w-8 h-8 animate-spin ${
+              isGaming ? "text-purple-400" : "text-amber-400"
+            }`}
+          />
           <span className="text-xs text-cine-400 font-mono">
             Calculando posiciones y podio en tiempo real...
           </span>
@@ -234,7 +280,11 @@ function LeaderboardContent() {
           {topThree.length > 0 && (
             <div>
               <div className="text-center mb-6">
-                <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-400">
+                <span
+                  className={`text-xs font-mono font-bold uppercase tracking-widest ${
+                    isGaming ? "text-purple-400" : "text-amber-400"
+                  }`}
+                >
                   Podio de Honor
                 </span>
                 <h2 className="text-xl sm:text-2xl font-black text-white">
@@ -251,21 +301,33 @@ function LeaderboardContent() {
                 {/* 2º Lugar (Plata) */}
                 {topThree[1] && (
                   <div className="order-2 md:order-1">
-                    <PodiumCard user={topThree[1]} position={2} />
+                    <PodiumCard
+                      user={topThree[1]}
+                      position={2}
+                      category={currentTab}
+                    />
                   </div>
                 )}
 
                 {/* 1er Lugar (Oro - Central y Elevado) */}
                 {topThree[0] && (
                   <div className="order-1 md:order-2">
-                    <PodiumCard user={topThree[0]} position={1} />
+                    <PodiumCard
+                      user={topThree[0]}
+                      position={1}
+                      category={currentTab}
+                    />
                   </div>
                 )}
 
                 {/* 3er Lugar (Bronce) */}
                 {topThree[2] && (
                   <div className="order-3 md:order-3">
-                    <PodiumCard user={topThree[2]} position={3} />
+                    <PodiumCard
+                      user={topThree[2]}
+                      position={3}
+                      category={currentTab}
+                    />
                   </div>
                 )}
               </div>
@@ -276,7 +338,11 @@ function LeaderboardContent() {
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-cine-800/80 pb-2">
               <h3 className="text-sm font-bold text-cine-200 uppercase tracking-wider flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-400" />
+                <Award
+                  className={`w-4 h-4 ${
+                    isGaming ? "text-purple-400" : "text-amber-400"
+                  }`}
+                />
                 <span>
                   {searchQuery.trim()
                     ? `Resultados de búsqueda (${filteredList.length})`
@@ -296,7 +362,11 @@ function LeaderboardContent() {
             ) : (
               <div className="space-y-2.5">
                 {remainingUsers.map((user) => (
-                  <LeaderboardRow key={user.id} user={user} />
+                  <LeaderboardRow
+                    key={user.id}
+                    user={user}
+                    category={currentTab}
+                  />
                 ))}
               </div>
             )}
