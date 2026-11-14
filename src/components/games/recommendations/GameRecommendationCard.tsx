@@ -210,24 +210,16 @@ export default function GameRecommendationCard({
             {game.title}
           </Link>
 
-          {/* Razón explicativa con tooltip interactivo al pasar el ratón */}
-          <div className="relative group/reason mt-1">
+          {/* Razón explicativa con tooltip nativo al posar el ratón */}
+          {game.primaryReason && (
             <p
               title={game.primaryReason}
-              className="text-[11px] text-zinc-400 line-clamp-1 flex items-center gap-1.5 cursor-help transition-colors hover:text-cyan-300"
+              className="text-[11px] text-zinc-400 hover:text-cyan-300 font-medium truncate mt-1 flex items-center gap-1.5 cursor-help transition-colors"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
               <span className="truncate">{game.primaryReason}</span>
             </p>
-
-            {/* Tooltip flotante emergente al dejar el ratón encima */}
-            <div className="pointer-events-none absolute bottom-full left-0 mb-1.5 hidden group-hover/reason:block w-max max-w-[220px] sm:max-w-[260px] rounded-xl bg-zinc-950/95 border border-purple-500/60 p-2.5 text-[11px] leading-snug text-zinc-100 shadow-[0_4px_24px_rgba(0,0,0,0.9)] backdrop-blur-md z-40">
-              <div className="flex items-start gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 mt-1 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
-                <span className="font-medium text-white">{game.primaryReason}</span>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Pie de tarjeta: Género principal a la izquierda, Confianza a la derecha */}
