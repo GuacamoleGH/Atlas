@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Filter,
-  Globe,
   Search,
   X,
   LayoutGrid,
@@ -27,8 +26,6 @@ import {
   RecommendationItem,
   RecommendationsResponse,
   RecommendationRow as RowType,
-  TMDB_LANGUAGE_NAMES,
-  getLanguageName,
 } from "@/lib/recommendations";
 import RecommendationRow from "./RecommendationRow";
 import RecommendationCard from "./RecommendationCard";
@@ -64,7 +61,6 @@ export default function RecommendationsView({
   // Estados de filtros interactivos
   const [mediaTypeFilter, setMediaTypeFilter] = useState<"all" | "movie" | "tv" | "miniseries">("all");
   const [selectedGenre, setSelectedGenre] = useState("all");
-  const [selectedLanguage, setSelectedLanguage] = useState("all");
   const [selectedEra, setSelectedEra] = useState<"all" | "recent" | "2010s" | "classic">("all");
   const [sortBy, setSortBy] = useState<"affinity" | "rating" | "year">("affinity");
   const [searchQuery, setSearchQuery] = useState("");
@@ -141,15 +137,6 @@ export default function RecommendationsView({
     return POPULAR_GENRES.filter((g) => availableGenres.includes(g));
   }, [availableGenres]);
 
-  // Extraer idiomas disponibles
-  const availableLanguages = useMemo(() => {
-    const set = new Set<string>();
-    allUniqueItems.forEach((i) => {
-      if (i.originalLanguage) set.add(i.originalLanguage.toLowerCase());
-    });
-    return Array.from(set).sort();
-  }, [allUniqueItems]);
-
   // Comprobar coincidencia con los filtros activos
   const matchesFilter = (item: RecommendationItem, q: string) => {
     // Tipo de contenido / Formato
@@ -174,14 +161,6 @@ export default function RecommendationsView({
       } else if (!item.genres?.includes(selectedGenre)) {
         return false;
       }
-    }
-
-    // Idioma original
-    if (
-      selectedLanguage !== "all" &&
-      item.originalLanguage?.toLowerCase() !== selectedLanguage.toLowerCase()
-    ) {
-      return false;
     }
 
     // Época
@@ -232,7 +211,6 @@ export default function RecommendationsView({
     data.rows,
     mediaTypeFilter,
     selectedGenre,
-    selectedLanguage,
     selectedEra,
     sortBy,
     searchQuery,
@@ -246,7 +224,6 @@ export default function RecommendationsView({
     allUniqueItems,
     mediaTypeFilter,
     selectedGenre,
-    selectedLanguage,
     selectedEra,
     sortBy,
     searchQuery,
@@ -260,7 +237,6 @@ export default function RecommendationsView({
   const hasActiveFilters =
     mediaTypeFilter !== "all" ||
     selectedGenre !== "all" ||
-    selectedLanguage !== "all" ||
     selectedEra !== "all" ||
     sortBy !== "affinity" ||
     searchQuery.trim().length > 0;
@@ -268,7 +244,6 @@ export default function RecommendationsView({
   const handleResetFilters = () => {
     setMediaTypeFilter("all");
     setSelectedGenre("all");
-    setSelectedLanguage("all");
     setSelectedEra("all");
     setSortBy("affinity");
     setSearchQuery("");
@@ -547,30 +522,6 @@ export default function RecommendationsView({
               </div>
             </div>
 
-            {/* Selector de Idioma */}
-            <div className="relative">
-              <select
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="appearance-none bg-cine-900/90 border border-cine-800 hover:border-cine-700 text-xs text-cine-200 pl-7 pr-8 py-1.5 rounded-xl focus:outline-none focus:border-amber-500/50 cursor-pointer font-medium transition-colors"
-              >
-                <option value="all">Todos los idiomas ({availableLanguages.length})</option>
-                {availableLanguages.map((code) => {
-                  const label =
-                    TMDB_LANGUAGE_NAMES[code] || getLanguageName(code) || code.toUpperCase();
-                  return (
-                    <option key={code} value={code}>
-                      {label}
-                    </option>
-                  );
-                })}
-              </select>
-              <Globe className="w-3.5 h-3.5 text-cine-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-cine-400 text-[10px]">
-                ▼
-              </div>
-            </div>
-
             {/* Selector de Época */}
             <div className="relative">
               <select
@@ -710,7 +661,7 @@ export default function RecommendationsView({
                 No se encontraron recomendaciones con estos filtros
               </h3>
               <p className="text-xs text-cine-400 leading-relaxed">
-                Prueba a buscar con otro término, seleccionar otro género o idioma, o restablecer los filtros.
+                Prueba a buscar con otro término, seleccionar otro género o época, o restablecer los filtros.
               </p>
               {hasActiveFilters && (
                 <button
