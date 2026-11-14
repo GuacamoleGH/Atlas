@@ -31,6 +31,7 @@ interface MovieCardProps {
     streamingPlatforms?: string[];
     matchPercentage?: number;
     matchReason?: string;
+    originalLanguage?: string;
   };
   userMovie?: {
     status: "WATCHLIST" | "WATCHED";
@@ -199,6 +200,17 @@ export default function MovieCard({
                       title={`Género principal: ${movie.genres[0]}`}
                     >
                       {movie.genres[0]}
+                    </span>
+                  </>
+                )}
+                {movie.originalLanguage && (
+                  <>
+                    <span>•</span>
+                    <span
+                      className="uppercase font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-cine-900 border border-cine-700/60 text-amber-300/90 shadow-sm"
+                      title={`Idioma original: ${movie.originalLanguage.toUpperCase()}`}
+                    >
+                      {movie.originalLanguage}
                     </span>
                   </>
                 )}

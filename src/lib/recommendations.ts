@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import {
   getMovieRecommendations,
   getSeriesRecommendations,
+  getMovieDetail,
+  getSeriesDetail,
   discoverMovies,
   discoverSeries,
   getTrendingAllWeek,
@@ -9,8 +11,34 @@ import {
 } from "./tmdb";
 
 // ==========================================
-// 1. EQUIVALENCIAS Y NORMALIZACIÓN DE GÉNEROS
+// 1. EQUIVALENCIAS Y NORMALIZACIÓN DE GÉNEROS E IDIOMAS
 // ==========================================
+
+export const TMDB_LANGUAGE_NAMES: Record<string, string> = {
+  es: "Español",
+  en: "Inglés",
+  ja: "Japonés",
+  ko: "Coreano",
+  fr: "Francés",
+  de: "Alemán",
+  it: "Italiano",
+  pt: "Portugués",
+  zh: "Chino",
+  hi: "Hindi",
+  ru: "Ruso",
+  sv: "Sueco",
+  da: "Danés",
+  no: "Noruego",
+  pl: "Polaco",
+  nl: "Neerlandés",
+  tr: "Turco",
+};
+
+export function getLanguageName(code?: string | null): string {
+  if (!code) return "Desconocido";
+  const clean = code.toLowerCase().trim();
+  return TMDB_LANGUAGE_NAMES[clean] || clean.toUpperCase();
+}
 
 export const TMDB_GENRE_NAMES: Record<number, string> = {
   // Cine
@@ -150,6 +178,7 @@ export interface RecommendationItem {
   affinityScore: number; // 0 a 100
   confidence: "high" | "medium" | "low" | "none";
   matchReason: string;
+  originalLanguage?: string;
   scoreBreakdown: {
     seedSupport: number; // 0 a 1
     genreAffinity: number; // 0 a 1
@@ -163,12 +192,16 @@ export interface RecommendationRow {
   id: string;
   title: string;
   subtitle?: string;
-  type: "featured" | "seed" | "hidden_gems" | "watchlist_affinity" | "trending";
+  type: "featured" | "seed" | "hidden_gems" | "watchlist_affinity" | "trending" | "language";
   items: RecommendationItem[];
   seedInfo?: {
     title: string;
     mediaType: "movie" | "tv";
     tmdbId: number;
+  };
+  languageInfo?: {
+    code: string;
+    name: string;
   };
 }
 
@@ -195,13 +228,15 @@ interface UserWorkSignal {
   watchedDate?: Date | null;
 }
 
-interface UserTasteProfile {
+export interface UserTasteProfile {
   totalWatched: number;
   totalWatchlist: number;
   genreAffinities: Record<number, number>; // Normalizado -1 a 1
   favoriteGenreIds: number[];
   dislikedGenreIds: number[];
   languageAffinities: Record<string, number>; // Normalizado 0 a 1
+  topLanguage?: string;
+  favoriteLanguages?: string[];
   directorAffinities: Record<string, number>;
   actorAffinities: Record<string, number>;
   seeds: UserWorkSignal[];
@@ -510,12 +545,6 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
     }
   }
 
-  // Idioma (preferencias por idioma original)
-  const languageAffinities: Record<string, number> = {
-    es: 1.0,
-    en: 0.9,
-  };
-
   // 3.4 Selección de Semillas:
   // Hasta 12 obras vistas con finalWeight >= 0.25
   // Diversidad: máximo 3 por género principal
@@ -537,6 +566,47 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
     }
   }
 
+  // Idioma (preferencias por idioma original calculadas dinámicamente)
+  const languageScores: Record<string, number> = { es: 1.0, en: 0.8 };
+  const languageCounts: Record<string, number> = { es: 1, en: 1 };
+
+  // Detectar idioma de las semillas más influyentes
+  const sampleSeeds = (selectedSeeds.length > 0 ? selectedSeeds : signals).slice(0, 10);
+  const seedDetails = await Promise.all(
+    sampleSeeds.map(async (seed) => {
+      try {
+        const detail =
+          seed.mediaType === "movie"
+            ? await getMovieDetail(seed.tmdbId)
+            : await getSeriesDetail(seed.tmdbId);
+        return { seed, lang: detail?.originalLanguage || "es" };
+      } catch {
+        return { seed, lang: "es" };
+      }
+    })
+  );
+
+  for (const { seed, lang } of seedDetails) {
+    if (lang) {
+      const cleanLang = lang.toLowerCase();
+      languageCounts[cleanLang] = (languageCounts[cleanLang] || 0) + 1;
+      languageScores[cleanLang] =
+        (languageScores[cleanLang] || 0) + Math.max(0.2, seed.finalWeight);
+    }
+  }
+
+  const languageAffinities: Record<string, number> = {};
+  for (const [lang, score] of Object.entries(languageScores)) {
+    const count = languageCounts[lang] || 1;
+    const rawAff = score / count;
+    languageAffinities[lang] = Math.max(0.3, Math.min(1.0, rawAff));
+  }
+
+  const favoriteLanguages = Object.entries(languageAffinities)
+    .sort((a, b) => b[1] - a[1])
+    .map(([lang]) => lang);
+  const topLanguage = favoriteLanguages[0] || "es";
+
   return {
     totalWatched,
     totalWatchlist,
@@ -544,6 +614,8 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
     favoriteGenreIds,
     dislikedGenreIds,
     languageAffinities,
+    topLanguage,
+    favoriteLanguages,
     directorAffinities,
     actorAffinities,
     seeds: selectedSeeds,
@@ -675,6 +747,7 @@ export async function getRecommendations(
         voteCount: item.voteCount,
         genres: genreNames,
         genreIds: item.genreIds,
+        originalLanguage: item.originalLanguage || "es",
         affinityScore: 0,
         confidence: "none",
         matchReason: "Tendencia destacada de la semana",
@@ -849,6 +922,7 @@ export async function getRecommendations(
       voteCount: cand.voteCount,
       genres: genreNames,
       genreIds: cand.genreIds,
+      originalLanguage: cand.originalLanguage || "es",
       affinityScore,
       confidence,
       matchReason,
@@ -956,7 +1030,30 @@ export async function getRecommendations(
   }
 
   // ==========================================
-  // FILA 6: «De tu watchlist, lo que más encaja»
+  // FILA 6: «Producciones en {idioma}» (Recomendación basada en idioma)
+  // ==========================================
+  const preferredLang = profile.topLanguage || "es";
+  const preferredLangName = TMDB_LANGUAGE_NAMES[preferredLang] || preferredLang.toUpperCase();
+  const languageCandidates = scoredCandidates
+    .filter((c) => (c.originalLanguage || "es") === preferredLang)
+    .slice(0, 15);
+
+  if (languageCandidates.length >= 3) {
+    rows.push({
+      id: `lang-${preferredLang}`,
+      title: `Producciones en ${preferredLangName.toLowerCase()}`,
+      subtitle: `Títulos destacados en versión original ${preferredLangName.toLowerCase()} adaptados a tus preferencias.`,
+      type: "language",
+      items: languageCandidates,
+      languageInfo: {
+        code: preferredLang,
+        name: preferredLangName,
+      },
+    });
+  }
+
+  // ==========================================
+  // FILA 7: «De tu watchlist, lo que más encaja»
   // ==========================================
   const [watchlistMovies, watchlistSeries] = await Promise.all([
     prisma.userMovie.findMany({
@@ -1001,6 +1098,7 @@ export async function getRecommendations(
       voteCount: 500,
       genres: normGenres.map((g) => TMDB_GENRE_NAMES[g] || "Cine"),
       genreIds,
+      originalLanguage: "es",
       affinityScore,
       confidence: "high",
       matchReason: "Prioridad alta según tus gustos",
@@ -1042,6 +1140,7 @@ export async function getRecommendations(
       voteCount: 500,
       genres: normGenres.map((g) => TMDB_GENRE_NAMES[g] || "Series"),
       genreIds,
+      originalLanguage: "es",
       affinityScore,
       confidence: "high",
       matchReason: "Prioridad alta según tus gustos",
@@ -1108,6 +1207,7 @@ export async function getPersonalizedMovieRecommendations(
         streamingPlatforms: [],
         matchPercentage: m.affinityScore,
         matchReason: m.matchReason,
+        originalLanguage: m.originalLanguage || "es",
       }));
   } catch (err) {
     console.error("Error en getPersonalizedMovieRecommendations:", err);
@@ -1142,6 +1242,7 @@ export async function getPersonalizedSeriesRecommendations(
         streamingPlatforms: [],
         matchPercentage: s.affinityScore,
         matchReason: s.matchReason,
+        originalLanguage: s.originalLanguage || "es",
       }));
   } catch (err) {
     console.error("Error en getPersonalizedSeriesRecommendations:", err);

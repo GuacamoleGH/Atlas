@@ -19,6 +19,7 @@ export interface SeriesDetail {
   imdbId: string | null;
   name: string;
   originalName: string | null;
+  originalLanguage?: string | null;
   firstAirYear: number | null;
   lastAirYear: number | null;
   numberOfSeasons: number | null;

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Sparkles, Filter } from "lucide-react";
+import { Sparkles, Filter, Globe } from "lucide-react";
 import SeriesCard from "./SeriesCard";
+import { TMDB_LANGUAGE_NAMES } from "@/lib/recommendations";
 
 export interface ExploreSeriesItem {
   id: string | number;
@@ -21,6 +22,7 @@ export interface ExploreSeriesItem {
   userSeries?: any;
   matchPercentage?: number;
   matchReason?: string;
+  originalLanguage?: string;
 }
 
 interface ExploreSeriesSectionProps {
@@ -31,6 +33,7 @@ export default function ExploreSeriesSection({
   series,
 }: ExploreSeriesSectionProps) {
   const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedLanguage, setSelectedLanguage] = useState("all");
 
   // Extraer géneros únicos
   const availableGenres = useMemo(() => {
@@ -41,11 +44,26 @@ export default function ExploreSeriesSection({
     return Array.from(set).sort();
   }, [series]);
 
-  // Filtrar según género seleccionado
+  // Extraer idiomas únicos
+  const availableLanguages = useMemo(() => {
+    const set = new Set<string>();
+    series.forEach((s) => {
+      if (s.originalLanguage) set.add(s.originalLanguage.toLowerCase());
+    });
+    return Array.from(set).sort();
+  }, [series]);
+
+  // Filtrar según género e idioma seleccionados
   const filteredSeries = useMemo(() => {
-    if (selectedGenre === "all") return series;
-    return series.filter((s) => s.genres?.includes(selectedGenre));
-  }, [series, selectedGenre]);
+    return series.filter((s) => {
+      const matchGenre =
+        selectedGenre === "all" || s.genres?.includes(selectedGenre);
+      const matchLang =
+        selectedLanguage === "all" ||
+        s.originalLanguage?.toLowerCase() === selectedLanguage;
+      return matchGenre && matchLang;
+    });
+  }, [series, selectedGenre, selectedLanguage]);
 
   if (series.length === 0) return null;
 
@@ -65,35 +83,61 @@ export default function ExploreSeriesSection({
               </span>
             </h2>
             <p className="text-xs text-cine-400 mt-0.5">
-              Recomendaciones basadas en tus preferencias, lo que has visto y tu Watchlist.
+              Recomendaciones basadas en tus preferencias, lo que has visto, tu Watchlist y tu afinidad de idioma.
             </p>
           </div>
         </div>
 
-        {/* Filtro por Género */}
-        {availableGenres.length > 0 && (
-          <div className="flex items-center gap-1.5 bg-cine-900/90 border border-cine-700/80 rounded-xl px-3 py-1.5 text-xs text-cine-200">
-            <Filter className="w-3.5 h-3.5 text-purple-400" />
-            <select
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
-              className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
-            >
-              <option value="all" className="bg-cine-900 text-white">
-                Todos los géneros ({series.length})
-              </option>
-              {availableGenres.map((genre) => (
-                <option
-                  key={genre}
-                  value={genre}
-                  className="bg-cine-900 text-white"
-                >
-                  {genre}
+        {/* Filtros por Género e Idioma */}
+        <div className="flex flex-wrap items-center gap-2">
+          {availableGenres.length > 0 && (
+            <div className="flex items-center gap-1.5 bg-cine-900/90 border border-cine-700/80 rounded-xl px-3 py-1.5 text-xs text-cine-200">
+              <Filter className="w-3.5 h-3.5 text-purple-400" />
+              <select
+                value={selectedGenre}
+                onChange={(e) => setSelectedGenre(e.target.value)}
+                className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
+              >
+                <option value="all" className="bg-cine-900 text-white">
+                  Todos los géneros ({series.length})
                 </option>
-              ))}
-            </select>
-          </div>
-        )}
+                {availableGenres.map((genre) => (
+                  <option
+                    key={genre}
+                    value={genre}
+                    className="bg-cine-900 text-white"
+                  >
+                    {genre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {availableLanguages.length > 0 && (
+            <div className="flex items-center gap-1.5 bg-cine-900/90 border border-cine-700/80 rounded-xl px-3 py-1.5 text-xs text-cine-200">
+              <Globe className="w-3.5 h-3.5 text-purple-400" />
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
+              >
+                <option value="all" className="bg-cine-900 text-white">
+                  Todos los idiomas
+                </option>
+                {availableLanguages.map((code) => (
+                  <option
+                    key={code}
+                    value={code}
+                    className="bg-cine-900 text-white"
+                  >
+                    {TMDB_LANGUAGE_NAMES[code] || code.toUpperCase()} ({code.toUpperCase()})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Grid de Series */}
@@ -117,6 +161,7 @@ export default function ExploreSeriesSection({
               streamingPlatforms: s.streamingPlatforms,
               matchPercentage: s.matchPercentage,
               matchReason: s.matchReason,
+              originalLanguage: s.originalLanguage,
             }}
             userSeries={s.userSeries}
           />

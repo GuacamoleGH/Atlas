@@ -26,6 +26,7 @@ export interface SeriesCardProps {
     streamingPlatforms?: string[];
     matchPercentage?: number;
     matchReason?: string;
+    originalLanguage?: string;
   };
   userSeries?: {
     status: "WATCHLIST" | "WATCHED";
@@ -172,6 +173,17 @@ export default function SeriesCard({
                     </span>
                   </>
                 ) : null}
+                {series.originalLanguage && (
+                  <>
+                    <span>•</span>
+                    <span
+                      className="uppercase font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-cine-900 border border-cine-700/60 text-purple-300/90 shadow-sm"
+                      title={`Idioma original: ${series.originalLanguage.toUpperCase()}`}
+                    >
+                      {series.originalLanguage}
+                    </span>
+                  </>
+                )}
                 {series.originalName && series.originalName !== series.name && (
                   <>
                     <span>•</span>

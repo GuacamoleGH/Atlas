@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Sparkles, Filter } from "lucide-react";
+import { Sparkles, Filter, Globe } from "lucide-react";
 import MovieCard from "./MovieCard";
+import { TMDB_LANGUAGE_NAMES } from "@/lib/recommendations";
 
 interface ExploreMovieItem {
   id: string | number;
@@ -18,6 +19,7 @@ interface ExploreMovieItem {
   userMovie?: any;
   matchPercentage?: number;
   matchReason?: string;
+  originalLanguage?: string;
 }
 
 interface ExploreMoviesSectionProps {
@@ -28,6 +30,7 @@ export default function ExploreMoviesSection({
   movies,
 }: ExploreMoviesSectionProps) {
   const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedLanguage, setSelectedLanguage] = useState("all");
 
   // Extraer géneros únicos
   const availableGenres = useMemo(() => {
@@ -38,15 +41,30 @@ export default function ExploreMoviesSection({
     return Array.from(set).sort();
   }, [movies]);
 
-  // Filtrar según género seleccionado
+  // Extraer idiomas únicos
+  const availableLanguages = useMemo(() => {
+    const set = new Set<string>();
+    movies.forEach((m) => {
+      if (m.originalLanguage) set.add(m.originalLanguage.toLowerCase());
+    });
+    return Array.from(set).sort();
+  }, [movies]);
+
+  // Filtrar según género e idioma seleccionados
   const filteredMovies = useMemo(() => {
-    if (selectedGenre === "all") return movies;
-    return movies.filter((m) => m.genres?.includes(selectedGenre));
-  }, [movies, selectedGenre]);
+    return movies.filter((m) => {
+      const matchGenre =
+        selectedGenre === "all" || m.genres?.includes(selectedGenre);
+      const matchLang =
+        selectedLanguage === "all" ||
+        m.originalLanguage?.toLowerCase() === selectedLanguage;
+      return matchGenre && matchLang;
+    });
+  }, [movies, selectedGenre, selectedLanguage]);
 
   return (
     <section className="space-y-5 pt-4 border-t border-cine-800">
-      {/* Cabecera con controles de género */}
+      {/* Cabecera con controles de género e idioma */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm">
@@ -60,13 +78,14 @@ export default function ExploreMoviesSection({
               </span>
             </h2>
             <p className="text-xs text-cine-400">
-              Recomendaciones personalizadas basadas en tus películas y series vistas y tu Watchlist.
+              Recomendaciones personalizadas basadas en tus películas y series vistas, tu Watchlist y tu afinidad de idioma.
             </p>
           </div>
         </div>
 
-        {/* Desplegable de Géneros */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        {/* Desplegables de Filtro (Género e Idioma) */}
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {/* Desplegable de Géneros */}
           <div
             className="relative inline-flex items-center bg-cine-900 border border-amber-500/30 rounded-xl px-3 py-1.5 text-xs text-cine-200"
             title="Filtra las recomendaciones por género cinematográfico"
@@ -88,6 +107,31 @@ export default function ExploreMoviesSection({
               ))}
             </select>
           </div>
+
+          {/* Desplegable de Idiomas */}
+          {availableLanguages.length > 0 && (
+            <div
+              className="relative inline-flex items-center bg-cine-900 border border-amber-500/30 rounded-xl px-3 py-1.5 text-xs text-cine-200"
+              title="Filtra las recomendaciones por idioma original"
+            >
+              <Globe className="w-3.5 h-3.5 text-amber-400 mr-2" />
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                title="Selecciona un idioma para filtrar"
+                className="bg-transparent focus:outline-none cursor-pointer text-white font-medium pr-2"
+              >
+                <option value="all" className="bg-cine-900 text-white">
+                  Todos los idiomas
+                </option>
+                {availableLanguages.map((code) => (
+                  <option key={code} value={code} className="bg-cine-900 text-white">
+                    {TMDB_LANGUAGE_NAMES[code] || code.toUpperCase()} ({code.toUpperCase()})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
@@ -109,6 +153,7 @@ export default function ExploreMoviesSection({
               streamingPlatforms: movie.streamingPlatforms,
               matchPercentage: movie.matchPercentage,
               matchReason: movie.matchReason,
+              originalLanguage: movie.originalLanguage,
             }}
             userMovie={
               movie.userMovie

@@ -188,6 +188,7 @@ export async function getMovieDetail(
         imdbId,
         title: data.title,
         originalTitle: data.original_title || null,
+        originalLanguage: data.original_language || "en",
         year: data.release_date
           ? parseInt(data.release_date.substring(0, 4), 10)
           : null,
@@ -366,6 +367,7 @@ export async function getSeriesDetail(
         imdbId,
         name: data.name,
         originalName: data.original_name || null,
+        originalLanguage: data.original_language || "en",
         firstAirYear: data.first_air_date
           ? parseInt(data.first_air_date.substring(0, 4), 10)
           : null,
@@ -536,10 +538,13 @@ export async function discoverMovies(
   minVotes: number = 500,
   sortBy: string = "vote_average.desc",
   page: number = 1,
+  withOriginalLanguage?: string,
 ): Promise<TmdbCandidateItem[]> {
   try {
     const apiKeyParam = getApiKeyParam();
-    const url = `${TMDB_BASE_URL}/discover/movie?language=es-ES&with_genres=${encodeURIComponent(withGenres)}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const langParam = withOriginalLanguage ? `&with_original_language=${withOriginalLanguage}` : "";
+    const genresParam = withGenres ? `&with_genres=${encodeURIComponent(withGenres)}` : "";
+    const url = `${TMDB_BASE_URL}/discover/movie?language=es-ES${genresParam}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${langParam}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
     const res = await fetch(url, {
       headers: getHeaders(),
       next: { revalidate: 43200 },
@@ -579,10 +584,13 @@ export async function discoverSeries(
   minVotes: number = 500,
   sortBy: string = "vote_average.desc",
   page: number = 1,
+  withOriginalLanguage?: string,
 ): Promise<TmdbCandidateItem[]> {
   try {
     const apiKeyParam = getApiKeyParam();
-    const url = `${TMDB_BASE_URL}/discover/tv?language=es-ES&with_genres=${encodeURIComponent(withGenres)}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const langParam = withOriginalLanguage ? `&with_original_language=${withOriginalLanguage}` : "";
+    const genresParam = withGenres ? `&with_genres=${encodeURIComponent(withGenres)}` : "";
+    const url = `${TMDB_BASE_URL}/discover/tv?language=es-ES${genresParam}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${langParam}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
     const res = await fetch(url, {
       headers: getHeaders(),
       next: { revalidate: 43200 },

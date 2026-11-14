@@ -3,7 +3,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { X, Sparkles, Film, Tv, CheckCircle2, ShieldCheck, Star } from "lucide-react";
-import { RecommendationItem } from "@/lib/recommendations";
+import { RecommendationItem, getLanguageName } from "@/lib/recommendations";
 
 interface AffinityBreakdownModalProps {
   item: RecommendationItem | null;
@@ -168,6 +168,9 @@ export default function AffinityBreakdownModal({
                 style={{ width: `${Math.round(languageAffinity * 100)}%` }}
               />
             </div>
+            <p className="text-[10px] text-cine-500">
+              Idioma original: {item.originalLanguage ? getLanguageName(item.originalLanguage) : "Español"} ({item.originalLanguage?.toUpperCase() || "ES"})
+            </p>
           </div>
         </div>
 

@@ -13,7 +13,7 @@ import {
   Film,
   ExternalLink,
 } from "lucide-react";
-import { RecommendationItem } from "@/lib/recommendations";
+import { RecommendationItem, getLanguageName } from "@/lib/recommendations";
 import MoviePoster from "@/components/movies/MoviePoster";
 import ReviewModal from "@/components/movies/ReviewModal";
 import { sounds } from "@/lib/sounds";
@@ -241,11 +241,21 @@ export default function RecommendationCard({
                 <span className="text-[9px] text-cine-500">/ 10</span>
               </div>
             )}
-            {item.releaseYear && (
-              <span className="text-[10px] font-mono text-cine-400 bg-black/75 px-1.5 py-0.5 rounded-lg backdrop-blur-md border border-cine-800">
-                {item.releaseYear}
-              </span>
-            )}
+            <div className="flex items-center gap-1.5">
+              {item.originalLanguage && (
+                <span
+                  className="text-[9px] font-mono font-bold uppercase text-amber-300 bg-black/80 px-1.5 py-0.5 rounded-lg backdrop-blur-md border border-amber-500/30"
+                  title={`Idioma original: ${getLanguageName(item.originalLanguage)}`}
+                >
+                  {item.originalLanguage}
+                </span>
+              )}
+              {item.releaseYear && (
+                <span className="text-[10px] font-mono text-cine-400 bg-black/75 px-1.5 py-0.5 rounded-lg backdrop-blur-md border border-cine-800">
+                  {item.releaseYear}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 

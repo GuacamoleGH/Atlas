@@ -24,6 +24,7 @@ export interface MovieDetail {
   imdbId: string | null;
   title: string;
   originalTitle: string | null;
+  originalLanguage?: string | null;
   year: number | null;
   posterPath: string | null;
   backdropPath: string | null;
