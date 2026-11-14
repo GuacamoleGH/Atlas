@@ -1085,118 +1085,6 @@ export async function getRecommendations(
     });
   }
 
-  // ==========================================
-  // FILA 7: «De tu watchlist, lo que más encaja»
-  // ==========================================
-  const [watchlistMovies, watchlistSeries] = await Promise.all([
-    prisma.userMovie.findMany({
-      where: { userId, status: "WATCHLIST" },
-      include: { movie: true },
-    }),
-    prisma.userSeries.findMany({
-      where: { userId, status: "WATCHLIST" },
-      include: { series: true },
-    }),
-  ]);
-
-  const watchlistCandidates: RecommendationItem[] = [];
-
-  for (const wm of watchlistMovies) {
-    const genreIds = parseGenreStringToIds(wm.movie.genres);
-    const normGenres = normalizeGenreIds(genreIds);
-
-    let genreSim = 0.5;
-    if (normGenres.length > 0) {
-      const sum = normGenres.reduce((acc, g) => acc + (profile.genreAffinities[g] || 0), 0);
-      genreSim = clamp01((sum / normGenres.length + 1) / 2);
-    }
-
-    const n = 500;
-    const nota = wm.movie.imdbRating || 7.0;
-    const quality = clamp01((nota - 5.5) / 3);
-    const score = 0.5 * genreSim + 0.3 * quality + 0.2 * 0.9;
-    const affinityScore = Math.min(99, Math.max(50, Math.round(score * 100)));
-
-    watchlistCandidates.push({
-      id: `movie-${wm.movie.tmdbId}`,
-      tmdbId: wm.movie.tmdbId,
-      mediaType: "movie",
-      title: wm.movie.title,
-      originalTitle: wm.movie.originalTitle,
-      overview: wm.movie.overview,
-      posterPath: wm.movie.posterPath,
-      backdropPath: wm.movie.backdropPath,
-      releaseYear: wm.movie.year,
-      voteAverage: wm.movie.imdbRating || 0,
-      voteCount: 500,
-      genres: normGenres.map((g) => TMDB_GENRE_NAMES[g] || "Cine"),
-      genreIds,
-      originalLanguage: "es",
-      affinityScore,
-      confidence: "high",
-      matchReason: "Prioridad alta según tus gustos",
-      scoreBreakdown: {
-        seedSupport: 0,
-        genreAffinity: genreSim,
-        quality,
-        languageAffinity: 0.9,
-      },
-    });
-  }
-
-  for (const ws of watchlistSeries) {
-    const genreIds = parseGenreStringToIds(ws.series.genres);
-    const normGenres = normalizeGenreIds(genreIds);
-
-    let genreSim = 0.5;
-    if (normGenres.length > 0) {
-      const sum = normGenres.reduce((acc, g) => acc + (profile.genreAffinities[g] || 0), 0);
-      genreSim = clamp01((sum / normGenres.length + 1) / 2);
-    }
-
-    const nota = ws.series.imdbRating || 7.0;
-    const quality = clamp01((nota - 5.5) / 3);
-    const score = 0.5 * genreSim + 0.3 * quality + 0.2 * 0.9;
-    const affinityScore = Math.min(99, Math.max(50, Math.round(score * 100)));
-
-    watchlistCandidates.push({
-      id: `tv-${ws.series.tmdbId}`,
-      tmdbId: ws.series.tmdbId,
-      mediaType: "tv",
-      title: ws.series.name,
-      originalTitle: ws.series.originalName,
-      overview: ws.series.overview,
-      posterPath: ws.series.posterPath,
-      backdropPath: ws.series.backdropPath,
-      releaseYear: ws.series.firstAirYear,
-      voteAverage: ws.series.imdbRating || 0,
-      voteCount: 500,
-      genres: normGenres.map((g) => TMDB_GENRE_NAMES[g] || "Series"),
-      genreIds,
-      originalLanguage: "es",
-      affinityScore,
-      confidence: "high",
-      matchReason: "Prioridad alta según tus gustos",
-      scoreBreakdown: {
-        seedSupport: 0,
-        genreAffinity: genreSim,
-        quality,
-        languageAffinity: 0.9,
-      },
-    });
-  }
-
-  if (watchlistCandidates.length > 0) {
-    watchlistCandidates.sort((a, b) => b.affinityScore - a.affinityScore);
-    rows.push({
-      id: "watchlist-affinity",
-      title: "De tu watchlist, lo que más encaja",
-      subtitle: "Títulos que tienes guardados en lista de seguimiento, ordenados por compatibilidad con tu momento cinéfilo.",
-      type: "watchlist_affinity",
-      items: watchlistCandidates.slice(0, 15),
-    });
-  }
-
   const finalResponse: RecommendationsResponse = {
     isColdStart: false,
     watchedCount: profile.totalWatched,
@@ -1243,7 +1131,7 @@ export async function getPersonalizedMovieRecommendations(
         streamingPlatforms: [],
         matchPercentage: m.affinityScore,
         matchReason: m.matchReason,
-        originalLanguage: m.originalLanguage || "es",
+        originalLanguage: m.originalLanguage,
       }));
   } catch (err) {
     console.error("Error en getPersonalizedMovieRecommendations:", err);
@@ -1301,7 +1189,7 @@ export async function getPersonalizedSeriesRecommendations(
         streamingPlatforms: [],
         matchPercentage: s.affinityScore,
         matchReason: s.matchReason,
-        originalLanguage: s.originalLanguage || "es",
+        originalLanguage: s.originalLanguage,
         numberOfSeasons: seasons,
         isMiniseries: isMini,
       };

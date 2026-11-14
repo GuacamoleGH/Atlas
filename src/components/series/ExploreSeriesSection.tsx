@@ -4,7 +4,6 @@ import React, { useState, useMemo } from "react";
 import {
   Sparkles,
   Filter,
-  Globe,
   Search,
   X,
   ArrowUpDown,
@@ -13,7 +12,6 @@ import {
   Layers,
 } from "lucide-react";
 import SeriesCard from "./SeriesCard";
-import { TMDB_LANGUAGE_NAMES } from "@/lib/recommendations";
 
 export interface ExploreSeriesItem {
   id: string | number;
@@ -55,7 +53,6 @@ export default function ExploreSeriesSection({
   series,
 }: ExploreSeriesSectionProps) {
   const [selectedGenre, setSelectedGenre] = useState("all");
-  const [selectedLanguage, setSelectedLanguage] = useState("all");
   const [selectedFormat, setSelectedFormat] = useState<"all" | "miniseries" | "multi">("all");
   const [sortBy, setSortBy] = useState<"match" | "rating" | "year">("match");
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,21 +66,12 @@ export default function ExploreSeriesSection({
     return Array.from(set).sort();
   }, [series]);
 
-  // Extraer idiomas únicos
-  const availableLanguages = useMemo(() => {
-    const set = new Set<string>();
-    series.forEach((s) => {
-      if (s.originalLanguage) set.add(s.originalLanguage.toLowerCase());
-    });
-    return Array.from(set).sort();
-  }, [series]);
-
   // Píldoras rápidas de géneros presentes
   const quickGenres = useMemo(() => {
     return POPULAR_SERIES_GENRES.filter((g) => availableGenres.includes(g));
   }, [availableGenres]);
 
-  // Filtrar según género, idioma, formato y búsqueda
+  // Filtrar según género, formato y búsqueda
   const filteredSeries = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
@@ -98,11 +86,6 @@ export default function ExploreSeriesSection({
               s.genres?.some((g) => g.toLowerCase().includes("miniserie"))
             )
           : s.genres?.includes(selectedGenre));
-
-      // Idioma
-      const matchLang =
-        selectedLanguage === "all" ||
-        s.originalLanguage?.toLowerCase() === selectedLanguage;
 
       // Formato (Miniserie vs Multi-temporada)
       let matchFormat = true;
@@ -123,7 +106,7 @@ export default function ExploreSeriesSection({
         s.name.toLowerCase().includes(query) ||
         (s.originalName && s.originalName.toLowerCase().includes(query));
 
-      return matchGenre && matchLang && matchFormat && matchSearch;
+      return matchGenre && matchFormat && matchSearch;
     });
 
     // Ordenar resultados
@@ -136,18 +119,16 @@ export default function ExploreSeriesSection({
       }
       return (b.matchPercentage || 0) - (a.matchPercentage || 0);
     });
-  }, [series, selectedGenre, selectedLanguage, selectedFormat, sortBy, searchQuery]);
+  }, [series, selectedGenre, selectedFormat, sortBy, searchQuery]);
 
   const hasActiveFilters =
     selectedGenre !== "all" ||
-    selectedLanguage !== "all" ||
     selectedFormat !== "all" ||
     searchQuery.trim().length > 0 ||
     sortBy !== "match";
 
   const handleResetFilters = () => {
     setSelectedGenre("all");
-    setSelectedLanguage("all");
     setSelectedFormat("all");
     setSortBy("match");
     setSearchQuery("");
@@ -292,27 +273,6 @@ export default function ExploreSeriesSection({
               </option>
             </select>
           </div>
-
-          {/* Desplegable de Idioma */}
-          {availableLanguages.length > 0 && (
-            <div className="relative inline-flex items-center bg-cine-900 border border-cine-700/80 rounded-xl px-2.5 py-1.5 text-xs text-cine-200">
-              <Globe className="w-3.5 h-3.5 text-purple-400 mr-1.5" />
-              <select
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="bg-transparent focus:outline-none cursor-pointer text-white font-medium pr-1"
-              >
-                <option value="all" className="bg-cine-900 text-white">
-                  Todos los idiomas
-                </option>
-                {availableLanguages.map((code) => (
-                  <option key={code} value={code} className="bg-cine-900 text-white">
-                    {TMDB_LANGUAGE_NAMES[code] || code.toUpperCase()} ({code.toUpperCase()})
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
 
         {/* Ordenación y Reset */}

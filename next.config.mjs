@@ -38,8 +38,7 @@ const nextConfig = {
       { source: "/tv/leaderboard", destination: "/leaderboard", permanent: true },
       { source: "/tv/ranking", destination: "/leaderboard", permanent: true },
       { source: "/ranking", destination: "/leaderboard", permanent: true },
-      { source: "/reviews", destination: "/tv/reviews", permanent: true },
-      { source: "/resenas", destination: "/tv/reviews", permanent: true },
+      { source: "/resenas", destination: "/reviews", permanent: true },
       { source: "/search", destination: "/tv/search", permanent: true },
       { source: "/achievements", destination: "/tv/achievements", permanent: true },
     ];

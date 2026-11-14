@@ -4,7 +4,6 @@ import React, { useState, useMemo } from "react";
 import {
   Sparkles,
   Filter,
-  Globe,
   Search,
   X,
   ArrowUpDown,
@@ -12,7 +11,6 @@ import {
   Calendar,
 } from "lucide-react";
 import MovieCard from "./MovieCard";
-import { TMDB_LANGUAGE_NAMES } from "@/lib/recommendations";
 
 interface ExploreMovieItem {
   id: string | number;
@@ -52,7 +50,6 @@ export default function ExploreMoviesSection({
   movies,
 }: ExploreMoviesSectionProps) {
   const [selectedGenre, setSelectedGenre] = useState("all");
-  const [selectedLanguage, setSelectedLanguage] = useState("all");
   const [selectedEra, setSelectedEra] = useState("all");
   const [sortBy, setSortBy] = useState<"match" | "rating" | "year">("match");
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,21 +63,12 @@ export default function ExploreMoviesSection({
     return Array.from(set).sort();
   }, [movies]);
 
-  // Extraer idiomas únicos
-  const availableLanguages = useMemo(() => {
-    const set = new Set<string>();
-    movies.forEach((m) => {
-      if (m.originalLanguage) set.add(m.originalLanguage.toLowerCase());
-    });
-    return Array.from(set).sort();
-  }, [movies]);
-
   // Píldoras rápidas de géneros principales presentes en el catálogo
   const quickGenres = useMemo(() => {
     return POPULAR_GENRES.filter((g) => availableGenres.includes(g));
   }, [availableGenres]);
 
-  // Filtrar según género, idioma, época y búsqueda de texto
+  // Filtrar según género, época y búsqueda de texto
   const filteredMovies = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
@@ -88,11 +76,6 @@ export default function ExploreMoviesSection({
       // Género
       const matchGenre =
         selectedGenre === "all" || m.genres?.includes(selectedGenre);
-
-      // Idioma
-      const matchLang =
-        selectedLanguage === "all" ||
-        m.originalLanguage?.toLowerCase() === selectedLanguage;
 
       // Época
       let matchEra = true;
@@ -110,7 +93,7 @@ export default function ExploreMoviesSection({
         m.title.toLowerCase().includes(query) ||
         (m.originalTitle && m.originalTitle.toLowerCase().includes(query));
 
-      return matchGenre && matchLang && matchEra && matchSearch;
+      return matchGenre && matchEra && matchSearch;
     });
 
     // Ordenar resultados
@@ -124,18 +107,16 @@ export default function ExploreMoviesSection({
       // Por afinidad (por defecto)
       return (b.matchPercentage || 0) - (a.matchPercentage || 0);
     });
-  }, [movies, selectedGenre, selectedLanguage, selectedEra, sortBy, searchQuery]);
+  }, [movies, selectedGenre, selectedEra, sortBy, searchQuery]);
 
   const hasActiveFilters =
     selectedGenre !== "all" ||
-    selectedLanguage !== "all" ||
     selectedEra !== "all" ||
     searchQuery.trim().length > 0 ||
     sortBy !== "match";
 
   const handleResetFilters = () => {
     setSelectedGenre("all");
-    setSelectedLanguage("all");
     setSelectedEra("all");
     setSortBy("match");
     setSearchQuery("");
@@ -241,27 +222,6 @@ export default function ExploreMoviesSection({
               ))}
             </select>
           </div>
-
-          {/* Desplegable de Idioma */}
-          {availableLanguages.length > 0 && (
-            <div className="relative inline-flex items-center bg-cine-900 border border-cine-700/80 rounded-xl px-2.5 py-1.5 text-xs text-cine-200">
-              <Globe className="w-3.5 h-3.5 text-amber-400 mr-1.5" />
-              <select
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="bg-transparent focus:outline-none cursor-pointer text-white font-medium pr-1"
-              >
-                <option value="all" className="bg-cine-900 text-white">
-                  Todos los idiomas
-                </option>
-                {availableLanguages.map((code) => (
-                  <option key={code} value={code} className="bg-cine-900 text-white">
-                    {TMDB_LANGUAGE_NAMES[code] || code.toUpperCase()} ({code.toUpperCase()})
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
 
           {/* Desplegable de Época */}
           <div className="relative inline-flex items-center bg-cine-900 border border-cine-700/80 rounded-xl px-2.5 py-1.5 text-xs text-cine-200">
