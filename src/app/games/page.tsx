@@ -10,6 +10,7 @@ import {
 import GameCard from "@/components/games/GameCard";
 import GamerLevelBar from "@/components/games/GamerLevelBar";
 import ExploreGamesSection from "@/components/games/ExploreGamesSection";
+import { getPersonalizedExploreGames } from "@/lib/gameRecommendations/engine";
 import {
   Gamepad2,
   Bookmark,
@@ -154,67 +155,8 @@ export default async function GamerHomePage() {
     .sort((a, b) => b.hours - a.hours)
     .slice(0, 6);
 
-  // 6. Catálogo general para explorar
-  let exploreGames = await prisma.game.findMany({
-    where: userId
-      ? {
-          userGames: {
-            none: { userId },
-          },
-        }
-      : {},
-    orderBy: { metacritic: "desc" },
-    take: 12,
-    include: {
-      userGames: userId ? { where: { userId } } : false,
-    },
-  });
-
-  if (exploreGames.length === 0) {
-    exploreGames = await prisma.game.findMany({
-      take: 12,
-      orderBy: { rating: "desc" },
-      include: {
-        userGames: userId ? { where: { userId } } : false,
-      },
-    });
-  }
-
-  const formattedExploreGames = exploreGames.map((game) => {
-    let platforms: string[] = [];
-    let genres: string[] = [];
-    try {
-      platforms = JSON.parse(game.platforms);
-    } catch {}
-    try {
-      genres = JSON.parse(game.genres);
-    } catch {}
-
-    const uGame = (game as any).userGames?.[0] || null;
-
-    return {
-      id: game.id,
-      rawgId: game.rawgId,
-      title: game.title,
-      released: game.released,
-      backgroundImage: game.backgroundImage,
-      metacritic: game.metacritic,
-      platforms,
-      genres,
-      userGame: uGame
-        ? {
-            status: uGame.status as any,
-            userRating: uGame.userRating,
-            hoursPlayed: uGame.hoursPlayed,
-            platform: uGame.platform,
-            review: uGame.review,
-            gameKnowledge: uGame.gameKnowledge,
-            difference: uGame.difference,
-            platformDetails: uGame.platformDetails,
-          }
-        : null,
-    };
-  });
+  // 6. Recomendaciones personalizadas «Creemos que te va a gustar» según tus gustos, horas y plataformas
+  const formattedExploreGames = await getPersonalizedExploreGames(userId, 60);
 
   return (
     <div className="space-y-12 pb-16 animate-fade-in">
@@ -522,7 +464,7 @@ export default async function GamerHomePage() {
         </section>
       )}
 
-      {/* Continuar Explorando Videojuegos con Desplegable y Modo Colapsable */}
+      {/* Creemos que te va a gustar: Recomendaciones personalizadas según tus gustos, horas y plataformas */}
       <ExploreGamesSection games={formattedExploreGames} />
     </div>
   );

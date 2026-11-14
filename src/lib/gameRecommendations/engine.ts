@@ -81,6 +81,7 @@ async function getColdStartRecommendations(): Promise<GameRecommendationsRespons
 
   return {
     rows,
+    allCandidates: scored,
     profile: {
       totalGames: 0,
       confidence: "baja",
@@ -97,9 +98,13 @@ async function getColdStartRecommendations(): Promise<GameRecommendationsRespons
  * Motor central de recomendaciones de videojuegos para el usuario
  */
 export async function getPersonalizedGameRecommendations(
-  userId: string,
+  userId?: string | null,
   options?: { forceRefresh?: boolean }
 ): Promise<GameRecommendationsResponse> {
+  if (!userId) {
+    return await getColdStartRecommendations();
+  }
+
   // 1. Revisar caché en memoria si no se fuerza refresco
   if (!options?.forceRefresh) {
     const cached = getCachedUserRecommendations<GameRecommendationsResponse>(userId);
@@ -280,4 +285,28 @@ export async function getPersonalizedGameRecommendations(
   setCachedUserRecommendations(userId, response);
 
   return response;
+}
+
+/**
+ * Obtiene la lista consolidada de videojuegos recomendados para la sección "Creemos que te va a gustar" en la Home de Videojuegos
+ */
+export async function getPersonalizedExploreGames(
+  userId?: string | null,
+  limit = 60
+): Promise<ScoredGameCandidate[]> {
+  try {
+    const res = await getPersonalizedGameRecommendations(userId || "");
+    const allItems =
+      res.allCandidates && res.allCandidates.length > 0
+        ? res.allCandidates
+        : res.rows.flatMap((r) => r.items);
+    const uniqueMap = new Map<number, ScoredGameCandidate>();
+    for (const g of allItems) {
+      if (!uniqueMap.has(g.rawgId)) uniqueMap.set(g.rawgId, g);
+    }
+    return Array.from(uniqueMap.values()).slice(0, limit);
+  } catch (err) {
+    console.error("Error en getPersonalizedExploreGames:", err);
+    return [];
+  }
 }
