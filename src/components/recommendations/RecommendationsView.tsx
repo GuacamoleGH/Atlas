@@ -91,7 +91,8 @@ export default function RecommendationsView({
   });
   const [viewMode, setViewMode] = useState<"carousel" | "grid">(() => {
     if (typeof window !== "undefined") {
-      return (sessionStorage.getItem("recs_view_mode") as any) || "grid";
+      const saved = sessionStorage.getItem("recs_view_mode_v2");
+      if (saved === "carousel" || saved === "grid") return saved;
     }
     return "grid";
   });
@@ -118,7 +119,7 @@ export default function RecommendationsView({
   }, [searchQuery]);
 
   React.useEffect(() => {
-    sessionStorage.setItem("recs_view_mode", viewMode);
+    sessionStorage.setItem("recs_view_mode_v2", viewMode);
   }, [viewMode]);
 
   // Restaurar posición de scroll exacta al volver atrás a la lista
@@ -127,29 +128,45 @@ export default function RecommendationsView({
     const lastId = sessionStorage.getItem("recs_last_clicked_id");
 
     if (savedY || lastId) {
+      let attempts = 0;
       const restore = () => {
+        attempts++;
         if (lastId) {
           const el = document.getElementById(`rec-item-${lastId}`);
           if (el) {
             el.scrollIntoView({ block: "center", behavior: "instant" });
-            sessionStorage.removeItem("recs_last_clicked_id");
-            sessionStorage.removeItem("recs_scroll_pos");
+            if (attempts >= 4) {
+              sessionStorage.removeItem("recs_last_clicked_id");
+              sessionStorage.removeItem("recs_scroll_pos");
+            }
             return;
           }
         }
         if (savedY) {
           window.scrollTo({ top: parseInt(savedY, 10), behavior: "instant" });
-          sessionStorage.removeItem("recs_scroll_pos");
-          sessionStorage.removeItem("recs_last_clicked_id");
+          if (attempts >= 4) {
+            sessionStorage.removeItem("recs_scroll_pos");
+            sessionStorage.removeItem("recs_last_clicked_id");
+          }
         }
       };
 
       restore();
-      const t1 = setTimeout(restore, 60);
-      const t2 = setTimeout(restore, 180);
+      const t1 = setTimeout(restore, 50);
+      const t2 = setTimeout(restore, 150);
+      const t3 = setTimeout(restore, 350);
+      const t4 = setTimeout(restore, 650);
+      const cleanup = setTimeout(() => {
+        sessionStorage.removeItem("recs_last_clicked_id");
+        sessionStorage.removeItem("recs_scroll_pos");
+      }, 1500);
+
       return () => {
         clearTimeout(t1);
         clearTimeout(t2);
+        clearTimeout(t3);
+        clearTimeout(t4);
+        clearTimeout(cleanup);
       };
     }
   }, []);
@@ -184,7 +201,7 @@ export default function RecommendationsView({
     }
   };
 
-  // Manejar exclusión local instantánea
+  // Manejar exclusión local instantánea y recálculo adaptativo en segundo plano
   const handleExcludeItem = (itemId: string) => {
     setData((prev) => ({
       ...prev,
@@ -194,6 +211,18 @@ export default function RecommendationsView({
       })),
       allCandidates: prev.allCandidates?.filter((item) => item.id !== itemId),
     }));
+
+    // Recalcular en segundo plano para que el algoritmo aprenda del rechazo
+    // y purgue automáticamente otros títulos afines al género o anime rechazado
+    setTimeout(async () => {
+      try {
+        const res = await fetch("/api/recommendations?refresh=true");
+        if (res.ok) {
+          const freshData: RecommendationsResponse = await res.json();
+          setData(freshData);
+        }
+      } catch {}
+    }, 450);
   };
 
   // Extraer todos los ítems únicos (de allCandidates o aplanando filas)

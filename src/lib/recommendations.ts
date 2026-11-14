@@ -235,6 +235,13 @@ interface UserWorkSignal {
   isSpanish?: boolean;
 }
 
+export interface UserExclusionInfo {
+  excludedKeys: Set<string>;
+  genreRejectionCounts: Record<number, number>;
+  animationRejections: number;
+  animeRejections: number;
+}
+
 export interface UserTasteProfile {
   totalWatched: number;
   totalWatchlist: number;
@@ -251,14 +258,19 @@ export interface UserTasteProfile {
   actorAffinities: Record<string, number>;
   seeds: UserWorkSignal[];
   excludedKeys: Set<string>; // "movie:123" o "tv:456"
+  exclusionsInfo?: UserExclusionInfo;
   seenOrWatchlistKeys: Set<string>;
 }
 
 // ==========================================
-// 3. EXCLUSIONES EN MEMORIA (FALLBACK ROBUSTO)
+// 3. EXCLUSIONES EN MEMORIA Y PERSISTENCIA CON APRENDIZAJE NEGATIVO
 // ==========================================
 
 const memoryExclusions = new Map<string, Set<string>>();
+const memoryExclusionMeta = new Map<
+  string,
+  Map<string, { genreIds: number[]; isAnim: boolean; isAnime: boolean }>
+>();
 
 export async function addRecommendationExclusion(
   userId: string,
@@ -271,6 +283,41 @@ export async function addRecommendationExclusion(
     memoryExclusions.set(userId, new Set());
   }
   memoryExclusions.get(userId)!.add(key);
+
+  // Obtener detalle de TMDB para conocer los géneros excluidos y registrar señal negativa
+  try {
+    const detail =
+      mediaType === "movie"
+        ? await getMovieDetail(tmdbId)
+        : await getSeriesDetail(tmdbId);
+
+    if (detail) {
+      const genreIds = normalizeGenreIds(detail.genres?.map((g: any) => g.id) || []);
+      const isAnim =
+        genreIds.includes(16) ||
+        Boolean(detail.genres?.some((g: any) => g.name?.toLowerCase().includes("anim")));
+      const isAnime =
+        isAnim &&
+        Boolean(
+          detail.originCountry?.includes("JP") ||
+            detail.originalLanguage === "ja" ||
+            detail.productionCountries?.includes("JP") ||
+            (detail as any).keywords?.some?.((k: any) =>
+              ["anime", "manga", "based on manga", "shounen"].some((w) =>
+                k.name?.toLowerCase().includes(w)
+              )
+            ) ||
+            detail.genres?.some((g: any) =>
+              g.name?.toLowerCase().includes("anime")
+            )
+        );
+
+      if (!memoryExclusionMeta.has(userId)) {
+        memoryExclusionMeta.set(userId, new Map());
+      }
+      memoryExclusionMeta.get(userId)!.set(key, { genreIds, isAnim, isAnime });
+    }
+  } catch {}
 
   // Intentar persistir en Prisma si la tabla existe
   try {
@@ -296,12 +343,21 @@ export async function addRecommendationExclusion(
     // Si la BD no tiene la tabla en este momento, queda seguro en memoria
   }
 
-  // Invalidar caché del usuario
+  // Invalidar caché del usuario para recálculo inmediato
   invalidateRecommendations(userId);
 }
 
-export async function getUserExclusions(userId: string): Promise<Set<string>> {
-  const set = new Set<string>(memoryExclusions.get(userId) || []);
+export async function getUserExclusionsInfo(userId: string): Promise<UserExclusionInfo> {
+  const excludedKeys = new Set<string>(memoryExclusions.get(userId) || []);
+  const rawExclusions: { mediaType: "movie" | "tv"; tmdbId: number }[] = [];
+
+  for (const key of Array.from(excludedKeys)) {
+    const [mediaType, tmdbIdStr] = key.split(":");
+    if ((mediaType === "movie" || mediaType === "tv") && tmdbIdStr) {
+      rawExclusions.push({ mediaType: mediaType as "movie" | "tv", tmdbId: Number(tmdbIdStr) });
+    }
+  }
+
   try {
     if ((prisma as any).recommendationExclusion) {
       const dbExclusions = await (prisma as any).recommendationExclusion.findMany({
@@ -309,13 +365,84 @@ export async function getUserExclusions(userId: string): Promise<Set<string>> {
         select: { mediaType: true, tmdbId: true },
       });
       for (const e of dbExclusions) {
-        set.add(`${e.mediaType}:${e.tmdbId}`);
+        const key = `${e.mediaType}:${e.tmdbId}`;
+        excludedKeys.add(key);
+        if (!rawExclusions.some((r) => r.mediaType === e.mediaType && r.tmdbId === e.tmdbId)) {
+          rawExclusions.push({ mediaType: e.mediaType as "movie" | "tv", tmdbId: e.tmdbId });
+        }
       }
     }
-  } catch {
-    // Fallback a set de memoria
-  }
-  return set;
+  } catch {}
+
+  const genreRejectionCounts: Record<number, number> = {};
+  let animationRejections = 0;
+  let animeRejections = 0;
+
+  const userMeta = memoryExclusionMeta.get(userId);
+
+  await Promise.all(
+    rawExclusions.map(async (ex) => {
+      const key = `${ex.mediaType}:${ex.tmdbId}`;
+      let meta = userMeta?.get(key);
+
+      if (!meta) {
+        try {
+          const detail =
+            ex.mediaType === "movie"
+              ? await getMovieDetail(ex.tmdbId)
+              : await getSeriesDetail(ex.tmdbId);
+
+          if (detail) {
+            const genreIds = normalizeGenreIds(detail.genres?.map((g: any) => g.id) || []);
+            const isAnim =
+              genreIds.includes(16) ||
+              Boolean(detail.genres?.some((g: any) => g.name?.toLowerCase().includes("anim")));
+            const isAnime =
+              isAnim &&
+              Boolean(
+                detail.originCountry?.includes("JP") ||
+                  detail.originalLanguage === "ja" ||
+                  detail.productionCountries?.includes("JP") ||
+                  (detail as any).keywords?.some?.((k: any) =>
+                    ["anime", "manga", "based on manga", "shounen"].some((w) =>
+                      k.name?.toLowerCase().includes(w)
+                    )
+                  ) ||
+                  detail.genres?.some((g: any) =>
+                    g.name?.toLowerCase().includes("anime")
+                  )
+              );
+
+            meta = { genreIds, isAnim, isAnime };
+            if (!memoryExclusionMeta.has(userId)) {
+              memoryExclusionMeta.set(userId, new Map());
+            }
+            memoryExclusionMeta.get(userId)!.set(key, meta);
+          }
+        } catch {}
+      }
+
+      if (meta) {
+        if (meta.isAnim) animationRejections++;
+        if (meta.isAnime) animeRejections++;
+        for (const gId of meta.genreIds) {
+          genreRejectionCounts[gId] = (genreRejectionCounts[gId] || 0) + 1;
+        }
+      }
+    })
+  );
+
+  return {
+    excludedKeys,
+    genreRejectionCounts,
+    animationRejections,
+    animeRejections,
+  };
+}
+
+export async function getUserExclusions(userId: string): Promise<Set<string>> {
+  const info = await getUserExclusionsInfo(userId);
+  return info.excludedKeys;
 }
 
 // ==========================================
@@ -389,7 +516,7 @@ function isSpanishWork(
 }
 
 export async function buildUserTasteProfile(userId: string): Promise<UserTasteProfile> {
-  const [userMovies, userSeries, exclusions] = await Promise.all([
+  const [userMovies, userSeries, exclusionsInfo] = await Promise.all([
     prisma.userMovie.findMany({
       where: { userId },
       include: { movie: true },
@@ -398,7 +525,7 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
       where: { userId },
       include: { series: true },
     }),
-    getUserExclusions(userId),
+    getUserExclusionsInfo(userId),
   ]);
 
   const seenOrWatchlistKeys = new Set<string>();
@@ -561,6 +688,22 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
     }
   }
 
+  // Incorporar penalizaciones por rechazos explícitos ("No me interesa")
+  for (const [gStr, count] of Object.entries(exclusionsInfo.genreRejectionCounts)) {
+    const gId = Number(gStr);
+    genreCounts[gId] = (genreCounts[gId] || 0) + count;
+    negativeGenreScores[gId] = (negativeGenreScores[gId] || 0) + count * 3.5;
+  }
+
+  const animRejectionCount = Math.max(
+    exclusionsInfo.animationRejections,
+    exclusionsInfo.animeRejections
+  );
+  if (animRejectionCount > 0) {
+    genreCounts[16] = (genreCounts[16] || 0) + animRejectionCount * 3;
+    negativeGenreScores[16] = (negativeGenreScores[16] || 0) + animRejectionCount * 8.0;
+  }
+
   // Normalizar afinidades de género entre -1 y 1
   const genreAffinities: Record<number, number> = {};
   for (const [gStr, count] of Object.entries(genreCounts)) {
@@ -578,13 +721,34 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
     }
   }
 
+  // Si el usuario rechazó animación o anime, forzar afinidad muy negativa para animación (16)
+  if (animRejectionCount >= 1) {
+    genreAffinities[16] = -1.0;
+  }
+  for (const [gStr, count] of Object.entries(exclusionsInfo.genreRejectionCounts)) {
+    const gId = Number(gStr);
+    if (count >= 2) {
+      genreAffinities[gId] = -0.9;
+    }
+  }
+
   const favoriteGenreIds = Object.entries(genreAffinities)
-    .filter(([_, aff]) => aff >= 0.25)
+    .filter(([g, aff]) => {
+      const gId = Number(g);
+      if (gId === 16 && animRejectionCount >= 1) return false;
+      if ((exclusionsInfo.genreRejectionCounts[gId] || 0) >= 2) return false;
+      return aff >= 0.25;
+    })
     .sort((a, b) => b[1] - a[1])
     .map(([g]) => Number(g));
 
   const dislikedGenreIds = Object.entries(genreAffinities)
-    .filter(([_, aff]) => aff <= -0.2)
+    .filter(([g, aff]) => {
+      const gId = Number(g);
+      if (gId === 16 && animRejectionCount >= 1) return true;
+      if ((exclusionsInfo.genreRejectionCounts[gId] || 0) >= 2) return true;
+      return aff <= -0.2;
+    })
     .sort((a, b) => a[1] - b[1])
     .map(([g]) => Number(g));
 
@@ -608,9 +772,29 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
   // 3.4 Selección de Semillas:
   // Hasta 12 obras vistas con finalWeight >= 0.25
   // Diversidad: máximo 3 por género principal
-  const eligibleSeeds = signals.filter(
-    (s) => s.status === "WATCHED" && s.finalWeight >= 0.25
-  );
+  const eligibleSeeds = signals.filter((s) => {
+    if (s.status !== "WATCHED" || s.finalWeight < 0.25) return false;
+
+    // REGLA CRÍTICA: Si el usuario ha rechazado animación o anime mediante "No me interesa",
+    // descalificar radicalmente cualquier obra animada para que NUNCA sea semilla
+    // (evita que Initial D o Star vs las fuerzas del mal generen filas como "Porque viste Initial D")
+    const isAnimSeed =
+      s.genreIds.includes(16) ||
+      s.title.toLowerCase().includes("initial d") ||
+      s.title.toLowerCase().includes("star contra las fuerzas");
+
+    if (isAnimSeed && animRejectionCount >= 1) {
+      return false;
+    }
+
+    // Si el género primario de la semilla ha sido rechazado 2+ veces, descalificarla
+    const primaryG = s.genreIds[0];
+    if (primaryG && (exclusionsInfo.genreRejectionCounts[primaryG] || 0) >= 2) {
+      return false;
+    }
+
+    return true;
+  });
 
   const selectedSeeds: UserWorkSignal[] = [];
   const genreSeedCount: Record<number, number> = {};
@@ -719,7 +903,8 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
     directorAffinities,
     actorAffinities,
     seeds: selectedSeeds,
-    excludedKeys: exclusions,
+    excludedKeys: exclusionsInfo.excludedKeys,
+    exclusionsInfo,
     seenOrWatchlistKeys,
   };
 }
@@ -915,6 +1100,71 @@ export async function getRecommendations(
     }
   >();
 
+  // ==========================================
+  // FILTROS DE APRENDIZAJE NEGATIVO (RECHAZOS DEL USUARIO)
+  // ==========================================
+  const exclusionsInfo = profile.exclusionsInfo;
+  const animRejectionTotal = Math.max(
+    exclusionsInfo?.animationRejections || 0,
+    exclusionsInfo?.animeRejections || 0
+  );
+
+  const checkCandidateRejection = (cand: TmdbCandidateItem): {
+    blocked: boolean;
+    multiplier: number;
+  } => {
+    const normG = normalizeGenreIds(cand.genreIds);
+    const titleLower = (cand.title || "").toLowerCase();
+    const isAnim =
+      normG.includes(16) ||
+      titleLower.includes("initial d") ||
+      titleLower.includes("dragon ball") ||
+      titleLower.includes("naruto") ||
+      titleLower.includes("inuyasha") ||
+      titleLower.includes("one piece") ||
+      titleLower.includes("attack on titan") ||
+      titleLower.includes("demon slayer") ||
+      titleLower.includes("jujutsu kaisen") ||
+      titleLower.includes("bleach") ||
+      titleLower.includes("death note");
+
+    const isAnime =
+      isAnim &&
+      (cand.originalLanguage?.toLowerCase() === "ja" ||
+        cand.originCountry?.includes("JP"));
+
+    // REGLA: Si el usuario rechaza anime/animación 2 o más veces: BLOQUEO TOTAL
+    if ((isAnim || isAnime) && animRejectionTotal >= 2) {
+      return { blocked: true, multiplier: 0 };
+    }
+
+    // Con 1 rechazo de anime/animación: reducción drástica (-75%)
+    if ((isAnim || isAnime) && animRejectionTotal === 1) {
+      return { blocked: false, multiplier: 0.25 };
+    }
+
+    // Para cualquier otro género según su número de rechazos
+    let maxRejectionsForGenre = 0;
+    if (exclusionsInfo?.genreRejectionCounts) {
+      for (const g of normG) {
+        const c = exclusionsInfo.genreRejectionCounts[g] || 0;
+        if (c > maxRejectionsForGenre) maxRejectionsForGenre = c;
+      }
+    }
+
+    if (maxRejectionsForGenre >= 2) {
+      const primaryG = normG[0];
+      if (primaryG && (exclusionsInfo?.genreRejectionCounts[primaryG] || 0) >= 2) {
+        return { blocked: true, multiplier: 0 };
+      }
+      return { blocked: false, multiplier: 0.35 };
+    } else if (maxRejectionsForGenre === 1) {
+      return { blocked: false, multiplier: 0.60 };
+    }
+
+    return { blocked: false, multiplier: 1.0 };
+  };
+
   // 1. Consultar recomendaciones de cada semilla
   const seedResults = await Promise.all(
     profile.seeds.map(async (seed) => {
@@ -929,9 +1179,12 @@ export async function getRecommendations(
   for (const { seed, recs } of seedResults) {
     for (const cand of recs) {
       const key = `${cand.mediaType}:${cand.id}`;
-      // Filtros de exclusión obligatorios
+      // Filtros de exclusión obligatorios y aprendizaje negativo
       if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
       if (cand.adult || !cand.posterPath || cand.voteCount < 150) continue;
+
+      const rej = checkCandidateRejection(cand);
+      if (rej.blocked) continue;
 
       if (!candidatesMap.has(key)) {
         candidatesMap.set(key, {
@@ -984,6 +1237,9 @@ export async function getRecommendations(
     if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
     if (cand.adult || !cand.posterPath || cand.voteCount < 100) continue;
 
+    const rej = checkCandidateRejection(cand);
+    if (rej.blocked) continue;
+
     if (!candidatesMap.has(key)) {
       candidatesMap.set(key, {
         item: cand,
@@ -1007,6 +1263,9 @@ export async function getRecommendations(
       const key = `${cand.mediaType}:${cand.id}`;
       if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
       if (cand.adult || !cand.posterPath || cand.voteCount < 60) continue;
+
+      const rej = checkCandidateRejection(cand);
+      if (rej.blocked) continue;
 
       cand.isSpanish = true;
       if (!candidatesMap.has(key)) {
@@ -1036,12 +1295,18 @@ export async function getRecommendations(
 
   for (const entry of Array.from(candidatesMap.values())) {
     const cand = entry.item;
-    const { score, breakdown } = calculateCandidateScore(
+    const rej = checkCandidateRejection(cand);
+    if (rej.blocked) continue;
+
+    const { score: rawScore, breakdown } = calculateCandidateScore(
       cand,
       profile,
       entry.seedSupport,
       maxSeedSupport
     );
+
+    const score = rawScore * rej.multiplier;
+    if (score < 0.45) continue;
 
     // Descartar si el género tiene afinidad <= -0.2 salvo soporte muy positivo
     const normGenres = normalizeGenreIds(cand.genreIds);
@@ -1166,6 +1431,9 @@ export async function getRecommendations(
   let seedRowsAdded = 0;
   for (const seed of profile.seeds) {
     if (seedRowsAdded >= 3) break;
+
+    // Si el usuario rechazó anime/animación, jamás crear fila temática de animación
+    if (seed.genreIds.includes(16) && animRejectionTotal >= 1) continue;
 
     // Buscar candidatos asociados a esta semilla priorizando nuevos descubrimientos
     const directSeedCandidates = scoredCandidates

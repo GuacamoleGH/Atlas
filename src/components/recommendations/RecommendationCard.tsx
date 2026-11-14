@@ -113,10 +113,18 @@ export default function RecommendationCard({
     }
   };
 
+  const saveScrollState = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("recs_scroll_pos", window.scrollY.toString());
+      sessionStorage.setItem("recs_last_clicked_id", item.id);
+    }
+  };
+
   return (
     <>
       <div
         id={`rec-item-${item.id}`}
+        onClickCapture={saveScrollState}
         className={`group relative flex flex-col ${
           className || "w-[160px] sm:w-[190px] md:w-[210px] shrink-0"
         } glass-card rounded-2xl overflow-hidden bg-cine-900/60 border border-cine-800 hover:border-amber-500/40 transition-all duration-300 shadow-md`}
@@ -125,12 +133,7 @@ export default function RecommendationCard({
         <div className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950">
           <Link
             href={detailUrl}
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                sessionStorage.setItem("recs_scroll_pos", window.scrollY.toString());
-                sessionStorage.setItem("recs_last_clicked_id", item.id);
-              }
-            }}
+            onClick={saveScrollState}
             className="block w-full h-full"
           >
             <MoviePoster
@@ -280,6 +283,7 @@ export default function RecommendationCard({
           <div>
             <Link
               href={detailUrl}
+              onClick={saveScrollState}
               className="font-bold text-xs sm:text-sm text-white group-hover:text-amber-400 transition-colors line-clamp-1"
               title={item.title}
             >

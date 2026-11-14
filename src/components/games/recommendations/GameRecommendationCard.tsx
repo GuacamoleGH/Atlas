@@ -77,9 +77,17 @@ export default function GameRecommendationCard({
 
   const mainPlatform = game.platforms[0]?.name || "JUEGO";
 
+  const saveScrollState = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("game_recs_scroll_pos", window.scrollY.toString());
+      sessionStorage.setItem("game_recs_last_clicked_id", game.rawgId.toString());
+    }
+  };
+
   return (
     <div
       id={`rec-item-${game.rawgId}`}
+      onClickCapture={saveScrollState}
       className={`group relative flex flex-col ${
         className || "w-[160px] sm:w-[190px] md:w-[210px] shrink-0"
       } glass-card rounded-2xl overflow-hidden bg-cine-900/60 border border-cine-800 hover:border-purple-500/40 transition-all duration-300 shadow-md`}
@@ -88,12 +96,7 @@ export default function GameRecommendationCard({
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950">
         <Link
           href={`/games/${game.rawgId}`}
-          onClick={() => {
-            if (typeof window !== "undefined") {
-              sessionStorage.setItem("game_recs_scroll_pos", window.scrollY.toString());
-              sessionStorage.setItem("game_recs_last_clicked_id", game.rawgId.toString());
-            }
-          }}
+          onClick={saveScrollState}
           className="block w-full h-full"
         >
           <GamePoster
@@ -188,6 +191,7 @@ export default function GameRecommendationCard({
         <div>
           <Link
             href={`/games/${game.rawgId}`}
+            onClick={saveScrollState}
             className="block font-bold text-xs sm:text-sm text-white hover:text-cyan-400 transition-colors line-clamp-1"
             title={game.title}
           >
