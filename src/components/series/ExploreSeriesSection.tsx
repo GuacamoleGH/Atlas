@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Sparkles,
   Filter,
@@ -11,32 +11,12 @@ import {
   Tv,
   Layers,
 } from "lucide-react";
-import SeriesCard from "./SeriesCard";
-
-export interface ExploreSeriesItem {
-  id: string | number;
-  tmdbId: number;
-  imdbId?: string | null;
-  name: string;
-  originalName?: string | null;
-  firstAirYear?: number | null;
-  lastAirYear?: number | null;
-  numberOfSeasons?: number | null;
-  numberOfEpisodes?: number | null;
-  posterPath?: string | null;
-  imdbRating?: number | null;
-  genres: string[];
-  streamingPlatforms?: string[];
-  userSeries?: any;
-  matchPercentage?: number;
-  matchReason?: string;
-  originalLanguage?: string;
-  isMiniseries?: boolean;
-  isSpanish?: boolean;
-}
+import { RecommendationItem } from "@/lib/recommendations";
+import RecommendationCard from "@/components/recommendations/RecommendationCard";
+import AffinityBreakdownModal from "@/components/recommendations/AffinityBreakdownModal";
 
 interface ExploreSeriesSectionProps {
-  series: ExploreSeriesItem[];
+  series: RecommendationItem[];
 }
 
 const POPULAR_SERIES_GENRES = [
@@ -53,20 +33,26 @@ const POPULAR_SERIES_GENRES = [
 export default function ExploreSeriesSection({
   series,
 }: ExploreSeriesSectionProps) {
+  const [items, setItems] = useState<RecommendationItem[]>(series);
+  const [breakdownItem, setBreakdownItem] = useState<RecommendationItem | null>(null);
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [selectedFormat, setSelectedFormat] = useState<"all" | "miniseries" | "multi">("all");
   const [onlySpanish, setOnlySpanish] = useState(false);
   const [sortBy, setSortBy] = useState<"match" | "rating" | "year">("match");
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    setItems(series);
+  }, [series]);
+
   // Extraer géneros únicos
   const availableGenres = useMemo(() => {
     const set = new Set<string>();
-    series.forEach((s) => {
+    items.forEach((s) => {
       s.genres?.forEach((g) => set.add(g));
     });
     return Array.from(set).sort();
-  }, [series]);
+  }, [items]);
 
   // Píldoras rápidas de géneros presentes
   const quickGenres = useMemo(() => {
@@ -77,7 +63,7 @@ export default function ExploreSeriesSection({
   const filteredSeries = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    const filtered = series.filter((s) => {
+    const filtered = items.filter((s) => {
       // Género
       const matchGenre =
         selectedGenre === "all" ||
@@ -93,8 +79,9 @@ export default function ExploreSeriesSection({
       if (onlySpanish) {
         const isEsp = Boolean(
           s.isSpanish ||
-          (s as any).originCountry?.includes("ES") ||
-          (s.originalLanguage?.toLowerCase() === "es" && !["MX", "AR", "CO", "CL", "US"].includes((s as any).originCountry?.[0]))
+          s.originCountry?.includes("ES") ||
+          (s.originalLanguage?.toLowerCase() === "es" &&
+            !["MX", "AR", "CO", "CL", "US"].includes(s.originCountry?.[0] || ""))
         );
         if (!isEsp) return false;
       }
@@ -115,8 +102,8 @@ export default function ExploreSeriesSection({
       // Búsqueda
       const matchSearch =
         !query ||
-        s.name.toLowerCase().includes(query) ||
-        (s.originalName && s.originalName.toLowerCase().includes(query));
+        s.title.toLowerCase().includes(query) ||
+        (s.originalTitle && s.originalTitle.toLowerCase().includes(query));
 
       return matchGenre && matchFormat && matchSearch;
     });
@@ -124,14 +111,14 @@ export default function ExploreSeriesSection({
     // Ordenar resultados
     return filtered.sort((a, b) => {
       if (sortBy === "rating") {
-        return (b.imdbRating || 0) - (a.imdbRating || 0);
+        return (b.voteAverage || 0) - (a.voteAverage || 0);
       }
       if (sortBy === "year") {
-        return (b.firstAirYear || 0) - (a.firstAirYear || 0);
+        return (b.releaseYear || 0) - (a.releaseYear || 0);
       }
-      return (b.matchPercentage || 0) - (a.matchPercentage || 0);
+      return (b.affinityScore || 0) - (a.affinityScore || 0);
     });
-  }, [series, selectedGenre, selectedFormat, onlySpanish, sortBy, searchQuery]);
+  }, [items, selectedGenre, selectedFormat, onlySpanish, sortBy, searchQuery]);
 
   const hasActiveFilters =
     selectedGenre !== "all" ||
@@ -343,31 +330,18 @@ export default function ExploreSeriesSection({
         </div>
       </div>
 
-      {/* Grid de Series */}
+      {/* Grid de Series con tarjetas interactivas de recomendación */}
       {filteredSeries.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5 sm:gap-4">
           {filteredSeries.map((s) => (
-            <SeriesCard
+            <RecommendationCard
               key={s.id}
-              series={{
-                id: s.id,
-                tmdbId: s.tmdbId,
-                imdbId: s.imdbId,
-                name: s.name,
-                originalName: s.originalName,
-                firstAirYear: s.firstAirYear,
-                lastAirYear: s.lastAirYear,
-                numberOfSeasons: s.numberOfSeasons,
-                numberOfEpisodes: s.numberOfEpisodes,
-                posterPath: s.posterPath,
-                imdbRating: s.imdbRating,
-                genres: s.genres,
-                streamingPlatforms: s.streamingPlatforms,
-                matchPercentage: s.matchPercentage,
-                matchReason: s.matchReason,
-                originalLanguage: s.originalLanguage,
+              item={s}
+              className="w-full shrink-0"
+              onExclude={(id) => {
+                setItems((prev) => prev.filter((item) => item.id !== id));
               }}
-              userSeries={s.userSeries}
+              onOpenBreakdown={(it) => setBreakdownItem(it)}
             />
           ))}
         </div>
@@ -384,6 +358,14 @@ export default function ExploreSeriesSection({
             Restablecer todos los filtros
           </button>
         </div>
+      )}
+
+      {/* Modal de desglose de afinidad */}
+      {breakdownItem && (
+        <AffinityBreakdownModal
+          item={breakdownItem}
+          onClose={() => setBreakdownItem(null)}
+        />
       )}
     </section>
   );

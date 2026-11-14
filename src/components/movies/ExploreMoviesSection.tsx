@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Sparkles,
   Filter,
@@ -10,28 +10,12 @@ import {
   RotateCcw,
   Calendar,
 } from "lucide-react";
-import MovieCard from "./MovieCard";
-
-interface ExploreMovieItem {
-  id: string | number;
-  tmdbId: number;
-  imdbId?: string | null;
-  title: string;
-  originalTitle?: string | null;
-  year?: number | null;
-  posterPath?: string | null;
-  imdbRating?: number | null;
-  genres: string[];
-  streamingPlatforms?: string[];
-  userMovie?: any;
-  matchPercentage?: number;
-  matchReason?: string;
-  originalLanguage?: string;
-  isSpanish?: boolean;
-}
+import { RecommendationItem } from "@/lib/recommendations";
+import RecommendationCard from "@/components/recommendations/RecommendationCard";
+import AffinityBreakdownModal from "@/components/recommendations/AffinityBreakdownModal";
 
 interface ExploreMoviesSectionProps {
-  movies: ExploreMovieItem[];
+  movies: RecommendationItem[];
 }
 
 const POPULAR_GENRES = [
@@ -50,20 +34,26 @@ const POPULAR_GENRES = [
 export default function ExploreMoviesSection({
   movies,
 }: ExploreMoviesSectionProps) {
+  const [items, setItems] = useState<RecommendationItem[]>(movies);
+  const [breakdownItem, setBreakdownItem] = useState<RecommendationItem | null>(null);
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [selectedEra, setSelectedEra] = useState("all");
   const [onlySpanish, setOnlySpanish] = useState(false);
   const [sortBy, setSortBy] = useState<"match" | "rating" | "year">("match");
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    setItems(movies);
+  }, [movies]);
+
   // Extraer géneros únicos
   const availableGenres = useMemo(() => {
     const set = new Set<string>();
-    movies.forEach((m) => {
+    items.forEach((m) => {
       m.genres?.forEach((g) => set.add(g));
     });
     return Array.from(set).sort();
-  }, [movies]);
+  }, [items]);
 
   // Píldoras rápidas de géneros principales presentes en el catálogo
   const quickGenres = useMemo(() => {
@@ -74,7 +64,7 @@ export default function ExploreMoviesSection({
   const filteredMovies = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    const filtered = movies.filter((m) => {
+    const filtered = items.filter((m) => {
       // Género
       const matchGenre =
         selectedGenre === "all" || m.genres?.includes(selectedGenre);
@@ -83,20 +73,22 @@ export default function ExploreMoviesSection({
       if (onlySpanish) {
         const isEsp = Boolean(
           m.isSpanish ||
-          (m as any).originCountry?.includes("ES") ||
-          (m.originalLanguage?.toLowerCase() === "es" && !["MX", "AR", "CO", "CL", "US"].includes((m as any).originCountry?.[0]))
+          m.originCountry?.includes("ES") ||
+          (m.originalLanguage?.toLowerCase() === "es" &&
+            !["MX", "AR", "CO", "CL", "US"].includes(m.originCountry?.[0] || ""))
         );
         if (!isEsp) return false;
       }
 
       // Época
       let matchEra = true;
+      const year = m.releaseYear;
       if (selectedEra === "recent") {
-        matchEra = Boolean(m.year && m.year >= 2020);
+        matchEra = Boolean(year && year >= 2020);
       } else if (selectedEra === "2010s") {
-        matchEra = Boolean(m.year && m.year >= 2010 && m.year < 2020);
+        matchEra = Boolean(year && year >= 2010 && year < 2020);
       } else if (selectedEra === "classic") {
-        matchEra = Boolean(m.year && m.year < 2000);
+        matchEra = Boolean(year && year < 2000);
       }
 
       // Búsqueda
@@ -111,15 +103,15 @@ export default function ExploreMoviesSection({
     // Ordenar resultados
     return filtered.sort((a, b) => {
       if (sortBy === "rating") {
-        return (b.imdbRating || 0) - (a.imdbRating || 0);
+        return (b.voteAverage || 0) - (a.voteAverage || 0);
       }
       if (sortBy === "year") {
-        return (b.year || 0) - (a.year || 0);
+        return (b.releaseYear || 0) - (a.releaseYear || 0);
       }
       // Por afinidad (por defecto)
-      return (b.matchPercentage || 0) - (a.matchPercentage || 0);
+      return (b.affinityScore || 0) - (a.affinityScore || 0);
     });
-  }, [movies, selectedGenre, selectedEra, onlySpanish, sortBy, searchQuery]);
+  }, [items, selectedGenre, selectedEra, onlySpanish, sortBy, searchQuery]);
 
   const hasActiveFilters =
     selectedGenre !== "all" ||
@@ -317,39 +309,18 @@ export default function ExploreMoviesSection({
         </div>
       </div>
 
-      {/* Grid completo de Películas */}
+      {/* Grid completo de Películas con tarjetas interactivas de recomendación */}
       {filteredMovies.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5 sm:gap-4">
           {filteredMovies.map((movie) => (
-            <MovieCard
+            <RecommendationCard
               key={movie.id}
-              movie={{
-                id: movie.id,
-                tmdbId: movie.tmdbId,
-                imdbId: movie.imdbId,
-                title: movie.title,
-                originalTitle: movie.originalTitle,
-                year: movie.year,
-                posterPath: movie.posterPath,
-                imdbRating: movie.imdbRating,
-                genres: movie.genres,
-                streamingPlatforms: movie.streamingPlatforms,
-                matchPercentage: movie.matchPercentage,
-                matchReason: movie.matchReason,
-                originalLanguage: movie.originalLanguage,
+              item={movie}
+              className="w-full shrink-0"
+              onExclude={(id) => {
+                setItems((prev) => prev.filter((m) => m.id !== id));
               }}
-              userMovie={
-                movie.userMovie
-                  ? {
-                      status: movie.userMovie.status,
-                      userRating: movie.userMovie.userRating,
-                      review: movie.userMovie.review,
-                      ballKnowledge: movie.userMovie.ballKnowledge,
-                      difference: movie.userMovie.difference,
-                      platform: movie.userMovie.platform,
-                    }
-                  : null
-              }
+              onOpenBreakdown={(it) => setBreakdownItem(it)}
             />
           ))}
         </div>
@@ -366,6 +337,14 @@ export default function ExploreMoviesSection({
             Restablecer todos los filtros
           </button>
         </div>
+      )}
+
+      {/* Modal de desglose de afinidad */}
+      {breakdownItem && (
+        <AffinityBreakdownModal
+          item={breakdownItem}
+          onClose={() => setBreakdownItem(null)}
+        />
       )}
     </section>
   );

@@ -1556,7 +1556,7 @@ export async function getRecommendations(
 export async function getPersonalizedMovieRecommendations(
   userId?: string | null,
   limit: number = 100
-) {
+): Promise<RecommendationItem[]> {
   if (!userId) return [];
   try {
     const res = await getRecommendations(userId);
@@ -1564,33 +1564,11 @@ export async function getPersonalizedMovieRecommendations(
       ? res.allCandidates
       : res.rows.flatMap((r) => r.items);
     const movies = allItems.filter((i) => i.mediaType === "movie");
-    const uniqueMap = new Map<number, typeof movies[0]>();
+    const uniqueMap = new Map<number, RecommendationItem>();
     for (const m of movies) {
       if (!uniqueMap.has(m.tmdbId)) uniqueMap.set(m.tmdbId, m);
     }
-    return Array.from(uniqueMap.values())
-      .slice(0, limit)
-      .map((m) => ({
-        id: String(m.tmdbId),
-        tmdbId: m.tmdbId,
-        title: m.title,
-        originalTitle: m.originalTitle,
-        year: m.releaseYear,
-        posterPath: m.posterPath,
-        imdbRating: m.voteAverage,
-        genres: m.genres,
-        streamingPlatforms: [],
-        matchPercentage: m.affinityScore,
-        matchReason: m.matchReason,
-        originalLanguage: m.originalLanguage,
-        originCountry: m.originCountry,
-        isSpanish: Boolean(
-          m.isSpanish ||
-          m.originCountry?.includes("ES") ||
-          (m.originalLanguage?.toLowerCase() === "es" &&
-            !["MX", "AR", "CO", "CL", "US"].some((c) => m.originCountry?.includes(c)))
-        ),
-      }));
+    return Array.from(uniqueMap.values()).slice(0, limit);
   } catch (err) {
     console.error("Error en getPersonalizedMovieRecommendations:", err);
     return [];
@@ -1600,7 +1578,7 @@ export async function getPersonalizedMovieRecommendations(
 export async function getPersonalizedSeriesRecommendations(
   userId?: string | null,
   limit: number = 100
-) {
+): Promise<RecommendationItem[]> {
   if (!userId) return [];
   try {
     const res = await getRecommendations(userId);
@@ -1608,57 +1586,11 @@ export async function getPersonalizedSeriesRecommendations(
       ? res.allCandidates
       : res.rows.flatMap((r) => r.items);
     const series = allItems.filter((i) => i.mediaType === "tv");
-    const uniqueMap = new Map<number, typeof series[0]>();
+    const uniqueMap = new Map<number, RecommendationItem>();
     for (const s of series) {
       if (!uniqueMap.has(s.tmdbId)) uniqueMap.set(s.tmdbId, s);
     }
-
-    const seriesList = Array.from(uniqueMap.values()).slice(0, limit);
-    const seriesTmdbIds = seriesList.map((s) => s.tmdbId);
-
-    const dbSeries = await prisma.series.findMany({
-      where: { tmdbId: { in: seriesTmdbIds } },
-      select: { tmdbId: true, numberOfSeasons: true },
-    });
-    const dbMap = new Map(dbSeries.map((d) => [d.tmdbId, d.numberOfSeasons]));
-
-    return seriesList.map((s) => {
-      const dbSeasons = dbMap.get(s.tmdbId);
-      const seasons = dbSeasons ?? s.numberOfSeasons ?? null;
-      const isMini = Boolean(
-        s.isMiniseries ||
-        seasons === 1 ||
-        s.genres.some((g) => g.toLowerCase().includes("miniserie"))
-      );
-      const genres = [...s.genres];
-      if (isMini && !genres.some((g) => g.toLowerCase().includes("miniserie"))) {
-        genres.unshift("Miniserie");
-      }
-
-      return {
-        id: String(s.tmdbId),
-        tmdbId: s.tmdbId,
-        name: s.title,
-        originalName: s.originalTitle,
-        firstAirYear: s.releaseYear,
-        posterPath: s.posterPath,
-        imdbRating: s.voteAverage,
-        genres,
-        streamingPlatforms: [],
-        matchPercentage: s.affinityScore,
-        matchReason: s.matchReason,
-        originalLanguage: s.originalLanguage,
-        numberOfSeasons: seasons,
-        isMiniseries: isMini,
-        originCountry: s.originCountry,
-        isSpanish: Boolean(
-          s.isSpanish ||
-          s.originCountry?.includes("ES") ||
-          (s.originalLanguage?.toLowerCase() === "es" &&
-            !["MX", "AR", "CO", "CL", "US"].some((c) => s.originCountry?.includes(c)))
-        ),
-      };
-    });
+    return Array.from(uniqueMap.values()).slice(0, limit);
   } catch (err) {
     console.error("Error en getPersonalizedSeriesRecommendations:", err);
     return [];
