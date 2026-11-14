@@ -65,12 +65,89 @@ export default function DynamicNavHeader() {
   if (
     pathname === "/" ||
     pathname === "/friends" ||
+    pathname.startsWith("/friends/") ||
+    pathname === "/amigos" ||
     pathname === "/reviews" ||
+    pathname.startsWith("/reviews/") ||
     pathname === "/resenas" ||
     pathname === "/leaderboard" ||
+    pathname.startsWith("/leaderboard/") ||
     pathname === "/ranking" ||
     pathname.startsWith("/u/")
   ) {
+    const centralNavLinks = [
+      {
+        href: "/tv/movies",
+        label: "Cine & Series",
+        mobileLabel: "Cine & Series",
+        icon: Film,
+        iconColor: "text-amber-400",
+        activeBg:
+          "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-gold-glow",
+        isActive: (path: string) =>
+          path.startsWith("/tv") && path !== "/tv/recommendations",
+      },
+      {
+        href: "/tv/recommendations",
+        label: "Para ti",
+        mobileLabel: "Para ti (Recomendaciones)",
+        icon: Sparkles,
+        iconColor: "text-amber-400",
+        activeBg:
+          "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-gold-glow",
+        isActive: (path: string) => path === "/tv/recommendations",
+      },
+      {
+        href: "/games",
+        label: "Videojuegos",
+        mobileLabel: "Videojuegos",
+        icon: Gamepad2,
+        iconColor: "text-purple-400",
+        activeBg:
+          "bg-purple-600/20 text-purple-300 border border-purple-500/40 shadow-[0_0_10px_rgba(139,92,246,0.2)]",
+        isActive: (path: string) => path.startsWith("/games"),
+      },
+      {
+        href: "/friends",
+        label: "Amigos",
+        mobileLabel: "Amigos",
+        icon: Users,
+        iconColor: "text-sky-400",
+        activeBg:
+          "bg-sky-500/15 text-sky-400 border border-sky-500/30 shadow-[0_0_10px_rgba(14,165,233,0.2)]",
+        isActive: (path: string) =>
+          path === "/friends" ||
+          path === "/amigos" ||
+          path.startsWith("/friends/"),
+      },
+      {
+        href: "/leaderboard",
+        label: "Ranking",
+        mobileLabel: "Ranking",
+        icon: Trophy,
+        iconColor: "text-amber-400",
+        activeBg:
+          "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-gold-glow",
+        isActive: (path: string) =>
+          path === "/leaderboard" ||
+          path === "/ranking" ||
+          path.startsWith("/leaderboard/"),
+      },
+      {
+        href: "/reviews",
+        label: "Reseñas",
+        mobileLabel: "Reseñas",
+        icon: MessageSquare,
+        iconColor: "text-pink-400",
+        activeBg:
+          "bg-pink-500/15 text-pink-400 border border-pink-500/30 shadow-[0_0_10px_rgba(244,114,182,0.2)]",
+        isActive: (path: string) =>
+          path === "/reviews" ||
+          path === "/resenas" ||
+          path.startsWith("/reviews/"),
+      },
+    ];
+
     return (
       <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/90 backdrop-blur-xl shadow-lg">
         <div className="relative w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -92,53 +169,24 @@ export default function DynamicNavHeader() {
           </Link>
 
           <nav className="hidden md:flex items-center justify-center gap-1.5 xl:gap-2 absolute left-1/2 -translate-x-1/2 pointer-events-auto">
-            <Link
-              href="/tv/movies"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
-            >
-              <Film className="w-3.5 h-3.5 text-amber-400" />
-              <span>Cine & Series</span>
-            </Link>
-
-            <Link
-              href="/tv/recommendations"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white hover:bg-cine-900 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Para ti</span>
-            </Link>
-
-            <Link
-              href="/games"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
-            >
-              <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
-              <span>Videojuegos</span>
-            </Link>
-
-            <Link
-              href="/friends"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
-            >
-              <Users className="w-3.5 h-3.5 text-sky-400" />
-              <span>Amigos</span>
-            </Link>
-
-            <Link
-              href="/leaderboard"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
-            >
-              <Trophy className="w-3.5 h-3.5 text-amber-400" />
-              <span>Ranking</span>
-            </Link>
-
-            <Link
-              href="/reviews"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-pink-400" />
-              <span>Reseñas</span>
-            </Link>
+            {centralNavLinks.map((link) => {
+              const Icon = link.icon;
+              const active = link.isActive(pathname);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all border ${
+                    active
+                      ? link.activeBg
+                      : "border-transparent text-cine-300 hover:text-white hover:bg-cine-900"
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${link.iconColor}`} />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0 z-10">

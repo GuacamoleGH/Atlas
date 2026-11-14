@@ -1492,29 +1492,6 @@ export async function getRecommendations(
   }
 
   // ==========================================
-  // FILA 6: «Producciones en {idioma}» (Recomendación basada en idioma)
-  // ==========================================
-  const preferredLang = profile.topLanguage || "es";
-  const preferredLangName = TMDB_LANGUAGE_NAMES[preferredLang] || preferredLang.toUpperCase();
-  const languageCandidates = scoredCandidates
-    .filter((c) => (c.originalLanguage || "es") === preferredLang)
-    .slice(0, 15);
-
-  if (languageCandidates.length >= 3) {
-    rows.push({
-      id: `lang-${preferredLang}`,
-      title: `Producciones en ${preferredLangName.toLowerCase()}`,
-      subtitle: `Títulos destacados en versión original ${preferredLangName.toLowerCase()} adaptados a tus preferencias.`,
-      type: "language",
-      items: languageCandidates,
-      languageInfo: {
-        code: preferredLang,
-        name: preferredLangName,
-      },
-    });
-  }
-
-  // ==========================================
   // FILA ESPAÑA: «Hecho en España · Recomendaciones»
   // ==========================================
   if (profile.hasSpanishPreference) {

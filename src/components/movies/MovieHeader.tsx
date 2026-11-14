@@ -115,7 +115,7 @@ export default function Header() {
                 }`}
               >
                 <Icon
-                  className={`w-3.5 h-3.5 shrink-0 ${active ? "fill-amber-400 text-amber-400" : "text-cine-400"}`}
+                  className={`w-3.5 h-3.5 shrink-0 ${active ? "text-amber-400" : "text-cine-400"}`}
                 />
                 <span className="whitespace-nowrap">{link.label}</span>
               </Link>

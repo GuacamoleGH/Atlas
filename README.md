@@ -1,6 +1,6 @@
 # 🌍 Atlas: Multi-Universo Personal (Cinephile & Gamer Hub)
 
-> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming, Recomendaciones Personalizadas estilo Netflix y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Motor de Recomendaciones Basado en Contenido («Para ti»), Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.1)**. Desplegado en **servidor propio (Self-Hosted)** con base de datos **PostgreSQL** y accesible en **[atlas.guacamolegh.es](https://atlas.guacamolegh.es)**.
+> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming, Recomendaciones Personalizadas estilo Netflix y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, Recomendaciones Inteligentes RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Motores de Recomendaciones Basados en Contenido («Para ti» en Cine y Videojuegos), Aprendizaje Negativo & Bloqueo Progresivo, Filtro «Hecho en España» 🇪🇸, Tarjetas Interactivas Unificadas, Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.2)**. Desplegado en **servidor propio (Self-Hosted)** con base de datos **PostgreSQL** y accesible en **[atlas.guacamolegh.es](https://atlas.guacamolegh.es)**.
 
 <div align="center">
 
@@ -17,7 +17,39 @@
 
 ## 📜 Historial de Versiones (Changelog)
 
-### 🍿 v5.1.0 — Motor de Recomendaciones Personalizadas «Para ti» (Estilo Netflix) _(Versión Actual)_
+### 🎮 v5.2.0 — Recomendaciones Gamer Hub, Aprendizaje Negativo, Filtro «Hecho en España» y Tarjetas Interactivas Unificadas _(Versión Actual)_
+
+- **Motor de Recomendaciones de Videojuegos en Gamer Hub (`/games/recommendations`):**
+  - **Algoritmo propio basado en RAWG API (`src/lib/gameRecommendations/`):** Arquitectura modular pura con motor de perfiles de gustos (`tasteProfile.ts`), scoring en dos etapas (`scoring.ts`), generador de candidatos (`candidates.ts`), explicaciones transparentes (`explain.ts`) y control estricto de caché (`cache.ts`).
+  - **Ponderación continua por comportamiento real:** Valoraciones numéricas ($w = (\text{nota}-5)/5$), estados completado/platino ($+0.6$), dedicación por horas ($+0.3$ a $+0.6$ logarítmico en función del tiempo acumulado), backlog ($+0.25$) y decaimiento temporal exponencial de gustos recientes ($0.5 + 0.5 \cdot e^{-\text{días}/540}$).
+  - **Scoring en dos etapas (Two-Stage Ranking):**
+    - *Etapa 1 (Ligera):* Pre-filtrado y puntuación rápida sobre candidatos por géneros, plataformas del usuario, ratings bayesianos de Metacritic/RAWG y apoyo de títulos semilla favoritos.
+    - *Etapa 2 (Profunda):* Obtención de detalles de los mejores candidatos para evaluar tags finos de RAWG (*Open World, Souls-like, Story Rich, Roguelike...* excluyendo tags genéricos), desarrolladores/editores de confianza y duración media de juego (*playtime*).
+  - **Filtro duro de plataformas del usuario:** Exclusión matemática de títulos incompatibles con los sistemas reales del usuario (PC, PS5, Xbox, Switch, Retro/Emuladores derivados de su biblioteca).
+  - **Alineación estética y funcional:** Modo de visualización dual conmutables entre **Carruseles** horizontales por afinidad y **Catálogo** en cuadrícula con filtros en vivo (título, plataforma, ordenación por afinidad), badge de **Confianza Algorítmica** (Baja / Media / Alta) e insignia de **Gamer Intelligence**.
+- **Aprendizaje Negativo & Bloqueo Progresivo:**
+  - Descarte inteligente de contenido al pulsar **«No me interesa»**:
+    - **Penalización severa al primer rechazo:** Si el usuario descarta una obra animada o anime, la afinidad por animación se reduce drásticamente (-75%) y se eliminan las filas de semillas asociadas (*«Porque viste Initial D»*).
+    - **Bloqueo permanente al segundo rechazo:** Con 2 o más descartes de animación, el motor bloquea y purga por completo el género y los títulos animados de todo el sistema de recomendaciones.
+  - Retirada de la fila de idioma («Producciones en {idioma}») en Cine y Series para evitar sesgos automáticos de producciones en japonés.
+- **Filtro Nacional «Hecho en España» 🇪🇸:**
+  - Detección precisa de cine y series de producción española mediante metadatos `productionCountries` y `originCountry` ('ES') combinados con idioma original en español, discriminando producciones hispanohablantes de otros países.
+  - Filtro interactivo `🇪🇸 Hecho en España` disponible en tiempo real en los catálogos y secciones de exploración de **Películas** (`/movies`), **Series** (`/series`) y **Recomendaciones** (`/recommendations`), respaldado por un hilo de descubrimiento continuo en TMDB.
+- **Tarjetas Interactivas Unificadas en Catálogos de Películas y Series:**
+  - Migración de las tarjetas de catálogo en `/movies` y `/series` a tarjetas interactivas de recomendación (`RecommendationCard`).
+  - Menú flotante interactivo de 4 acciones de un clic:
+    - 🔖 **Watchlist:** Guardar o quitar de pendientes al instante.
+    - ✔️ **Marcar como vista:** Con apertura de modal para asignación de nota numérica y reseña.
+    - 🚫 **No me interesa:** Descarte inmediato con retroalimentación algorítmica negativa.
+    - ℹ️ **Desglose de Afinidad:** Modal detallado con desglose ponderado por criterios (semillas, géneros, calidad bayesiana e idioma).
+- **Persistencia de Navegación, Restauración de Scroll & Catálogo por Defecto:**
+  - Establecimiento de la vista de **Catálogo (cuadrícula)** como modo predeterminado para una exploración más rápida.
+  - Al hacer clic en un título para ver sus detalles y pulsar «Volver atrás», se restaura automáticamente la posición exacta del scroll y los filtros previamente seleccionados.
+- **Comunidad y Perfiles Sociales:**
+  - Corrección del contador de miembros registrados de la comunidad (3 miembros activos).
+  - Tarjetas de amigos completamente clicables con enlace directo al perfil público unificado tanto en `/friends` como en `/games/friends`.
+
+### 🍿 v5.1.0 — Motor de Recomendaciones Personalizadas «Para ti» (Estilo Netflix)
 
 - **Sección Dedicada de Recomendaciones (`/recommendations` o «Para ti»):**
   - Nuevo apartado protegido por autenticación (`/login?callbackUrl=/recommendations`), integrado de forma destacada en la barra de navegación de Cine & Series y en el Centro de Mando.
@@ -170,6 +202,7 @@ Atlas/
 │   │   ├── search/            # Búsqueda en catálogo de cine y series (TMDB)
 │   │   ├── games/             # Gamer Hub (Home de Videojuegos)
 │   │   ├── games/[id]/        # Ficha de videojuego (trailers, screenshots, veredicto)
+│   │   ├── games/recommendations/ # Recomendaciones «Para ti» Gamer Hub con RAWG (v5.2)
 │   │   ├── games/friends/     # Amigos y comunidad gamer
 │   │   ├── games/reviews/     # Muro de reseñas de Videojuegos
 │   │   ├── games/backlog/     # Backlog de videojuegos pendientes
@@ -177,7 +210,7 @@ Atlas/
 │   │   ├── games/profile/     # Perfil Gamer, Critic vs You y Hot Takes
 │   │   ├── games/search/      # Buscador de videojuegos con RAWG API
 │   │   ├── games/u/[username]/# Redirección canónica a /u/[username]?tab=gaming
-│   │   └── api/               # Endpoints REST (auth, recommendations, leaderboard, reviews, games, movies, series, u)
+│   │   └── api/               # Endpoints REST (auth, recommendations, games/recommendations, reviews, u)
 │   ├── components/
 │   │   ├── DynamicNavHeader.tsx # Barra de navegación inteligente multi-universo (Atlas, Cine, Juegos)
 │   │   ├── DynamicFooter.tsx    # Pie de página dinámico por universo
@@ -185,12 +218,15 @@ Atlas/
 │   │   ├── reviews/             # Componentes de muro de opiniones (ReviewFeedCard)
 │   │   ├── recommendations/     # Filas, tarjetas interactivas y modal de desglose de afinidad
 │   │   ├── profile/             # TopFiveCard, WatchedCatalogSection, AffinityCard, SocialWrappedModal
-│   │   ├── movies/              # Componentes cinéfilos (MovieCard, EditCinephileProfileModal, ReviewModal)
+│   │   ├── movies/              # Componentes cinéfilos (ExploreMoviesSection, EditCinephileProfileModal, ReviewModal)
+│   │   ├── series/              # Componentes de series (ExploreSeriesSection)
 │   │   ├── games/               # Componentes gamer (GameCard, EditGamerProfileModal, GamerLevelBar, CriticVsYouChart)
+│   │   ├── games/recommendations/ # Carruseles y tarjetas de recomendación gamer (v5.2)
 │   │   └── shared/              # Sonido, Toasts, Avatares, Badges de Knowledge
 │   ├── lib/
 │   │   ├── prisma.ts          # Cliente Prisma ORM compartido
-│   │   ├── recommendations.ts # Algoritmo de afinidad bayesiana, perfil de gustos, diversidad y caché
+│   │   ├── recommendations.ts # Algoritmo de afinidad bayesiana, perfil de gustos, diversidad y caché (Cine/Series)
+│   │   ├── gameRecommendations/ # Motor de recomendación de videojuegos (engine, scoring, tasteProfile, candidates, explain, cache) (v5.2)
 │   │   ├── auth.ts            # Configuración de NextAuth (Credenciales, Google, Discord)
 │   │   ├── avatars.ts         # Catálogo de 16 avatares temáticos predefinidos
 │   │   ├── sounds.ts          # Motor de audio Web sintetizado
@@ -232,18 +268,31 @@ Atlas/
 - **Muro de Reseñas Cinéfilo (`/reviews`):** Feed comunitario con filtros de búsqueda instantánea y ordenación múltiple.
 - **Comunidad Cinéfila (`/friends`):** Espacio para descubrir qué están viendo tus amigos en tiempo real.
 
-### 4. 🍿 Motor de Recomendaciones Personalizadas (`/recommendations`)
+### 4. 🍿 Motor de Recomendaciones Personalizadas de Cine & Series (`/recommendations`)
 
 - **Algoritmo propio basado en contenido:** Sin modelos de IA externos ni dependencias de terceros; calcula la afinidad real a partir del historial del usuario.
 - **Ponderación multicriterio:** Combina el peso de obras vistas (notas 0 a 10 con fórmula $(\text{nota}-5)/5$), obras vistas sin nota ($+0.5$) y watchlist ($+0.3$), aplicando un factor de decaimiento temporal exponencial para priorizar gustos recientes sin olvidar títulos desfavorables.
 - **Normalización de géneros cruzada:** Mapeo de identificadores de series a cine (Action & Adventure $\rightarrow$ Acción y Aventura; Sci-Fi & Fantasy $\rightarrow$ Ciencia ficción y Fantasía; War & Politics $\rightarrow$ Bélica).
-- **Filas temáticas al estilo Netflix:**
+- **Aprendizaje Negativo & Bloqueo Progresivo:** Al marcar «No me interesa», el motor aprende de los géneros descartados. En contenidos de animación/anime, 1 descarte reduce drásticamente la presencia de animación y suprime semillas; 2 descartes activan el bloqueo completo de anime.
+- **Filtro Nacional «Hecho en España» 🇪🇸:** Integrado en Películas, Series y Recomendaciones para explorar al instante producciones originales rodadas y producidas en España.
+- **Tarjetas de Catálogo Interactivas Unificadas:** Menú flotante con Watchlist rápida, marcar vista con reseña y nota, descarte «No me interesa» y modal interactivo de Desglose de Afinidad.
+- **Filas temáticas al estilo Netflix & Modo Catálogo:**
   - *«Creemos que te va a gustar»* (top 20 con control de diversidad: máximo $\lceil n/3 \rceil$ por género principal).
   - *«Porque viste {título}»* (candidatos directos de obras de referencia).
   - *«Joyas menos conocidas»* (obras con popularidad $< 30$ y nota $\ge 7.3$).
+  - *«Hecho en España»* (obras destacadas de producción española adaptadas a tu perfil).
   - *«De tu watchlist, lo que más encaja»* (tus pendientes priorizados por afinidad).
 - **Transparencia algorítmica:** Píldora de afinidad estilo Netflix y modal interactivo con desglose de la fórmula (40% soporte de semillas, 30% géneros, 20% calidad bayesiana TMDB y 10% idioma).
-- **Acciones y exclusión inmediata:** Botón «No me interesa» para descartar títulos de recomendaciones futuras, y caché invalidable de 6 horas.
+- **Persistencia de Navegación:** Vista de catálogo por defecto y conservación de posición de scroll y filtros aplicados al regresar desde la ficha de un título.
+
+### 5. 🎮 Motor de Recomendaciones Gamer (`/games/recommendations`)
+
+- **Algoritmo propio basado en RAWG API (`src/lib/gameRecommendations/`):** Diseñado con arquitectura modular pura adaptada al ecosistema Gamer Hub.
+- **Ponderación continua por comportamiento real:** Asigna pesos continuos a notas (0-10), horas jugadas acumuladas (función logarítmica $+0.3$ a $+0.6$), estados completado o platino ($+0.6$), backlog ($+0.25$) y penalización en juegos abandonados.
+- **Perfil de gustos multidimensional:** Análisis de afinidad sobre géneros (G), tags finos de RAWG (T), desarrolladores y editoras (D), sagas y títulos semilla (M), plataformas jugadas (P), época/duración (Y) y factor de consenso bayesiano ajustado con el Game Knowledge del usuario (Q).
+- **Two-Stage Ranking (Puntuación en Dos Etapas):** Pre-filtrado económico de candidatos en lote seguido de análisis en profundidad con detalles completos para los títulos más prometedores.
+- **Filtro duro de plataformas reales:** Solo recomienda videojuegos disponibles en las plataformas que el usuario posee o en las que ha registrado horas de juego.
+- **Diseño Cyberpunk / Gamer Hub:** Carruseles horizontales, vista en cuadrícula de catálogo, filtros en tiempo real por título, plataforma y afinidad, con indicador de confianza algorítmica (Baja/Media/Alta) e insignia de Gamer Intelligence.
 
 ---
 
