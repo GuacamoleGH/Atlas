@@ -1555,7 +1555,7 @@ export async function getRecommendations(
 
 export async function getPersonalizedMovieRecommendations(
   userId?: string | null,
-  limit: number = 60
+  limit: number = 100
 ) {
   if (!userId) return [];
   try {
@@ -1583,7 +1583,13 @@ export async function getPersonalizedMovieRecommendations(
         matchPercentage: m.affinityScore,
         matchReason: m.matchReason,
         originalLanguage: m.originalLanguage,
-        isSpanish: Boolean(m.isSpanish || m.originCountry?.includes("ES")),
+        originCountry: m.originCountry,
+        isSpanish: Boolean(
+          m.isSpanish ||
+          m.originCountry?.includes("ES") ||
+          (m.originalLanguage?.toLowerCase() === "es" &&
+            !["MX", "AR", "CO", "CL", "US"].some((c) => m.originCountry?.includes(c)))
+        ),
       }));
   } catch (err) {
     console.error("Error en getPersonalizedMovieRecommendations:", err);
@@ -1593,7 +1599,7 @@ export async function getPersonalizedMovieRecommendations(
 
 export async function getPersonalizedSeriesRecommendations(
   userId?: string | null,
-  limit: number = 60
+  limit: number = 100
 ) {
   if (!userId) return [];
   try {
@@ -1644,7 +1650,13 @@ export async function getPersonalizedSeriesRecommendations(
         originalLanguage: s.originalLanguage,
         numberOfSeasons: seasons,
         isMiniseries: isMini,
-        isSpanish: Boolean(s.isSpanish || s.originCountry?.includes("ES")),
+        originCountry: s.originCountry,
+        isSpanish: Boolean(
+          s.isSpanish ||
+          s.originCountry?.includes("ES") ||
+          (s.originalLanguage?.toLowerCase() === "es" &&
+            !["MX", "AR", "CO", "CL", "US"].some((c) => s.originCountry?.includes(c)))
+        ),
       };
     });
   } catch (err) {

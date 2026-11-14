@@ -80,8 +80,13 @@ export default function ExploreMoviesSection({
         selectedGenre === "all" || m.genres?.includes(selectedGenre);
 
       // Hecho en España (solo producciones españolas)
-      if (onlySpanish && !m.isSpanish) {
-        return false;
+      if (onlySpanish) {
+        const isEsp = Boolean(
+          m.isSpanish ||
+          (m as any).originCountry?.includes("ES") ||
+          (m.originalLanguage?.toLowerCase() === "es" && !["MX", "AR", "CO", "CL", "US"].includes((m as any).originCountry?.[0]))
+        );
+        if (!isEsp) return false;
       }
 
       // Época
@@ -114,7 +119,7 @@ export default function ExploreMoviesSection({
       // Por afinidad (por defecto)
       return (b.matchPercentage || 0) - (a.matchPercentage || 0);
     });
-  }, [movies, selectedGenre, selectedEra, sortBy, searchQuery]);
+  }, [movies, selectedGenre, selectedEra, onlySpanish, sortBy, searchQuery]);
 
   const hasActiveFilters =
     selectedGenre !== "all" ||

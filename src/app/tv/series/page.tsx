@@ -89,7 +89,7 @@ export default async function SeriesHomePage() {
     : [];
 
   // 4. Recomendaciones inteligentes según tus gustos (películas vistas, series vistas y watchlist)
-  const formattedExploreSeries = await getPersonalizedSeriesRecommendations(userId, 60);
+  const formattedExploreSeries = await getPersonalizedSeriesRecommendations(userId, 100);
 
   // 5. Estadísticas resumidas de Series
   const allWatched = userId

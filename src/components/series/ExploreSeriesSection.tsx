@@ -90,8 +90,13 @@ export default function ExploreSeriesSection({
           : s.genres?.includes(selectedGenre));
 
       // Hecho en España (solo series producidas en España)
-      if (onlySpanish && !s.isSpanish) {
-        return false;
+      if (onlySpanish) {
+        const isEsp = Boolean(
+          s.isSpanish ||
+          (s as any).originCountry?.includes("ES") ||
+          (s.originalLanguage?.toLowerCase() === "es" && !["MX", "AR", "CO", "CL", "US"].includes((s as any).originCountry?.[0]))
+        );
+        if (!isEsp) return false;
       }
 
       // Formato (Miniserie vs Multi-temporada)
@@ -126,7 +131,7 @@ export default function ExploreSeriesSection({
       }
       return (b.matchPercentage || 0) - (a.matchPercentage || 0);
     });
-  }, [series, selectedGenre, selectedFormat, sortBy, searchQuery]);
+  }, [series, selectedGenre, selectedFormat, onlySpanish, sortBy, searchQuery]);
 
   const hasActiveFilters =
     selectedGenre !== "all" ||

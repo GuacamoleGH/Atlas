@@ -37,6 +37,7 @@ interface FriendUser {
 
 export default function CinemaFriendsPage() {
   const [friends, setFriends] = useState<FriendUser[]>([]);
+  const [totalMembers, setTotalMembers] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<
@@ -50,7 +51,12 @@ export default function CinemaFriendsPage() {
         const res = await fetch("/api/friends");
         if (res.ok) {
           const data = await res.json();
-          setFriends(data.friends || []);
+          const friendsList = data.friends || [];
+          setFriends(friendsList);
+          const membersCount =
+            data.totalMembers ||
+            (friendsList.length > 0 ? friendsList.length + 1 : 3);
+          setTotalMembers(membersCount);
         }
       } catch (err) {
         console.error("Error al cargar amigos:", err);
@@ -123,7 +129,10 @@ export default function CinemaFriendsPage() {
           <div className="flex items-center gap-3">
             <div className="px-4 py-2 rounded-2xl bg-cine-950/80 border border-amber-500/30 text-center shadow-gold-glow">
               <span className="block text-2xl font-black text-amber-400 font-mono">
-                {friends.length}
+                {isLoading
+                  ? "..."
+                  : totalMembers ||
+                    (friends.length > 0 ? friends.length + 1 : 3)}
               </span>
               <span className="text-[10px] text-cine-400 font-mono uppercase tracking-wider">
                 Registrados
