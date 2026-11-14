@@ -243,7 +243,7 @@ export default function SeriesDetailPage() {
                   {series.name}
                 </h1>
                 {series.originalName && series.originalName !== series.name && (
-                  <p className="text-sm sm:text-base text-cine-400 italic mt-0.5 font-medium">
+                  <p className="text-sm sm:text-base text-cine-400 italic mt-2 font-medium">
                     Título original: {series.originalName}
                   </p>
                 )}

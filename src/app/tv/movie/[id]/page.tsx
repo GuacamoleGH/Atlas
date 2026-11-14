@@ -246,7 +246,7 @@ export default function MovieDetailPage() {
                   {movie.title}
                 </h1>
                 {movie.originalTitle && movie.originalTitle !== movie.title && (
-                  <p className="text-sm sm:text-base text-cine-400 italic mt-0.5 font-medium">
+                  <p className="text-sm sm:text-base text-cine-400 italic mt-2 font-medium">
                     Título original: {movie.originalTitle}
                   </p>
                 )}
