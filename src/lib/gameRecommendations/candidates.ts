@@ -54,69 +54,79 @@ export async function getCandidatePool(
     }
   };
 
-  // 1. Sagas / Franquicias de los juegos semilla (~12 semillas)
-  const topSeeds = profile.seedGames.slice(0, 8);
+  // 1. Preparar todas las consultas concurrentes a RAWG en paralelo
+  const queryPromises: Promise<RawgApiGameItem[]>[] = [];
+
+  // Sagas / Franquicias de los top juegos semilla (~4 semillas principales)
+  const topSeeds = profile.seedGames.slice(0, 4);
   for (const seed of topSeeds) {
-    try {
-      const seriesGames = await fetchRawgGameSeries(seed.rawgId);
-      addCandidates(seriesGames);
-    } catch (e) {
-      console.warn(`Error buscando saga para semilla ${seed.title}:`, e);
-    }
+    queryPromises.push(
+      fetchRawgGameSeries(seed.rawgId).catch(() => [])
+    );
   }
 
-  // 2. Top géneros afines del usuario
+  // Top géneros afines del usuario
   const topGenres = Object.entries(profile.genreAffinities)
     .filter(([_, aff]) => aff > 0.2)
     .sort((a, b) => b[1] - a[1])
     .map(([g]) => g)
-    .slice(0, 3);
+    .slice(0, 2);
 
   for (const genre of topGenres) {
-    const genreCandidates = await queryRawgGames({
-      genres: genre,
-      metacritic: "72,100",
-      ordering: "-metacritic",
-      page_size: 25,
-    });
-    addCandidates(genreCandidates);
+    queryPromises.push(
+      queryRawgGames({
+        genres: genre,
+        metacritic: "72,100",
+        ordering: "-metacritic",
+        page_size: 25,
+      }).catch(() => [])
+    );
   }
 
-  // 3. Top tags característicos del usuario (Souls-like, Roguelike, Open World, Story Rich, etc.)
+  // Top tags característicos del usuario (Souls-like, Roguelike, Open World, Story Rich, etc.)
   const topTags = Object.entries(profile.tagAffinities)
     .filter(([_, aff]) => aff > 0.3)
     .sort((a, b) => b[1] - a[1])
     .map(([t]) => t)
-    .slice(0, 3);
+    .slice(0, 2);
 
   for (const tag of topTags) {
-    const tagCandidates = await queryRawgGames({
-      tags: tag,
-      ordering: "-rating",
-      page_size: 20,
-    });
-    addCandidates(tagCandidates);
+    queryPromises.push(
+      queryRawgGames({
+        tags: tag,
+        ordering: "-rating",
+        page_size: 20,
+      }).catch(() => [])
+    );
   }
 
-  // 4. Candidatos para la plataforma principal del usuario
+  // Candidatos para la plataforma principal del usuario
   if (profile.activePlatformIds.length > 0) {
     const mainPlatformId = profile.activePlatformIds[0];
-    const platformCandidates = await queryRawgGames({
-      platforms: mainPlatformId,
-      metacritic: "75,100",
-      ordering: "-metacritic",
-      page_size: 25,
-    });
-    addCandidates(platformCandidates);
+    queryPromises.push(
+      queryRawgGames({
+        platforms: mainPlatformId,
+        metacritic: "75,100",
+        ordering: "-metacritic",
+        page_size: 25,
+      }).catch(() => [])
+    );
   }
 
-  // 5. Joyas ocultas / Calidad de culto (alto rating pero no necesariamente mainstream)
-  const hiddenGems = await queryRawgGames({
-    metacritic: "78,100",
-    ordering: "-rating",
-    page_size: 30,
-  });
-  addCandidates(hiddenGems);
+  // Joyas ocultas / Calidad de culto
+  queryPromises.push(
+    queryRawgGames({
+      metacritic: "78,100",
+      ordering: "-rating",
+      page_size: 30,
+    }).catch(() => [])
+  );
+
+  // Ejecutar todas las fuentes de candidatos simultáneamente
+  const candidateLists = await Promise.all(queryPromises);
+  for (const list of candidateLists) {
+    addCandidates(list);
+  }
 
   // 6. Si el catálogo es pequeño (cold start o pocos resultados), añadir generales aclamados
   if (candidatesMap.size < 20) {

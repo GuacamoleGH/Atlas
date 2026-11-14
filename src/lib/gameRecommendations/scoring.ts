@@ -310,22 +310,29 @@ export async function scoreCandidatesTwoStage(
   preScored.sort((a, b) => b.preScore - a.preScore);
   const top40 = preScored.slice(0, 40).map((item) => item.game);
 
-  // Fase 2: Detalle profundo en RAWG
+  // Fase 2: Detalle profundo en RAWG solo para los candidatos más prometedores (máx 12) en paralelo
   const detailedCandidates: ScoredGameCandidate[] = [];
+  const top12 = top40.slice(0, 12);
+  const restCandidates = top40.slice(12);
 
-  for (let i = 0; i < top40.length; i += 5) {
-    const batch = top40.slice(i, i + 5);
-    const results = await Promise.all(
-      batch.map(async (g) => {
-        // Si ya tiene tags y developers, usarlo directamente; si no, pedir detalle
-        if (g.tags && g.developers) {
-          return scoreDetailedGame(g, profile);
-        }
+  const top12Results = await Promise.all(
+    top12.map(async (g) => {
+      if (g.tags && g.developers && g.developers.length > 0) {
+        return scoreDetailedGame(g, profile);
+      }
+      try {
         const detailed = await fetchRawgGameDetail(g.id);
         return scoreDetailedGame(detailed || g, profile);
-      })
-    );
-    detailedCandidates.push(...results);
+      } catch {
+        return scoreDetailedGame(g, profile);
+      }
+    })
+  );
+  detailedCandidates.push(...top12Results);
+
+  // Para el resto de candidatos (13-40), puntuar inmediatamente en memoria sin latencia de red
+  for (const g of restCandidates) {
+    detailedCandidates.push(scoreDetailedGame(g, profile));
   }
 
   // Ordenar por score final descendente

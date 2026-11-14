@@ -335,54 +335,25 @@ export default function DynamicNavHeader() {
                 </Link>
               </div>
             )}
-            <Link
-              href="/tv/movies"
-              onClick={() => setIsMobileNavOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
-            >
-              <Film className="w-4 h-4 text-amber-400" />
-              <span>Cine & Series</span>
-            </Link>
-            <Link
-              href="/tv/recommendations"
-              onClick={() => setIsMobileNavOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-amber-300 hover:text-white hover:bg-cine-900"
-            >
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <span>Para ti (Recomendaciones)</span>
-            </Link>
-            <Link
-              href="/games"
-              onClick={() => setIsMobileNavOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
-            >
-              <Gamepad2 className="w-4 h-4 text-purple-400" />
-              <span>Videojuegos</span>
-            </Link>
-            <Link
-              href="/friends"
-              onClick={() => setIsMobileNavOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
-            >
-              <Users className="w-4 h-4 text-sky-400" />
-              <span>Amigos</span>
-            </Link>
-            <Link
-              href="/leaderboard"
-              onClick={() => setIsMobileNavOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
-            >
-              <Trophy className="w-4 h-4 text-amber-400" />
-              <span>Ranking</span>
-            </Link>
-            <Link
-              href="/reviews"
-              onClick={() => setIsMobileNavOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
-            >
-              <MessageSquare className="w-4 h-4 text-pink-400" />
-              <span>Reseñas</span>
-            </Link>
+            {centralNavLinks.map((link) => {
+              const Icon = link.icon;
+              const active = link.isActive(pathname);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsMobileNavOpen(false)}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all border ${
+                    active
+                      ? link.activeBg
+                      : "border-transparent text-cine-300 hover:text-white hover:bg-cine-900"
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${link.iconColor}`} />
+                  <span>{link.mobileLabel}</span>
+                </Link>
+              );
+            })}
           </div>
         )}
       </header>

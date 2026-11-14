@@ -132,18 +132,21 @@ export async function buildGameTasteProfile(
   weightedGames.sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight));
   const topInfluential = weightedGames.slice(0, 40);
 
-  // 2. Recolectar detalles de RAWG para los top influyentes (tags, developers, playtime)
-  // Se procesan en lotes pequeños para no bloquear el hilo
+  // 2. Recolectar detalles de RAWG solo para los top semillas (máx 6) en paralelo
+  // Para el resto, usamos los metadatos de géneros, desarrolladores y plataformas ya en la BD de Atlas
   const rawgDetails = new Map<number, RawgApiGameItem>();
-  const topRawgIds = topInfluential.map((item) => item.userGame.game.rawgId);
+  const topSeedIds = topInfluential
+    .filter((item) => item.weight > 0.25)
+    .slice(0, 6)
+    .map((item) => item.userGame.game.rawgId);
 
-  // Consultar en paralelo controlado (máx 5 simultáneas)
-  for (let i = 0; i < topRawgIds.length; i += 5) {
-    const batch = topRawgIds.slice(i, i + 5);
+  if (topSeedIds.length > 0) {
     await Promise.all(
-      batch.map(async (id) => {
-        const detail = await fetchRawgGameDetail(id);
-        if (detail) rawgDetails.set(id, detail);
+      topSeedIds.map(async (id) => {
+        try {
+          const detail = await fetchRawgGameDetail(id);
+          if (detail) rawgDetails.set(id, detail);
+        } catch {}
       })
     );
   }

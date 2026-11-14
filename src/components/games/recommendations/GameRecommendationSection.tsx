@@ -49,7 +49,7 @@ export default function GameRecommendationSection({
         <div>
           <h2 className="text-lg sm:text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
             <span>{row.title}</span>
-            <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-cine-900 border border-cine-800 text-amber-400">
+            <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-950/80 border border-purple-500/30 text-purple-300 shadow-[0_0_8px_rgba(168,85,247,0.2)]">
               {row.items.length}
             </span>
           </h2>

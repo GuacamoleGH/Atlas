@@ -384,24 +384,26 @@ export default function GameRecommendationsView({
 
   return (
     <div className="space-y-8 pb-20">
-      {/* Cabecera Principal al estilo exacto de Atlas */}
-      <section className="relative rounded-3xl overflow-hidden glass-panel border border-amber-500/20 p-6 sm:p-10 bg-gradient-to-br from-cine-900 via-cine-950 to-cine-900 shadow-2xl">
-        <div className="absolute -right-10 -bottom-10 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-0 right-1/4 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Cabecera Principal al estilo exacto de Gamer Hub */}
+      <section className="relative rounded-3xl overflow-hidden glass-panel border border-purple-500/25 p-6 sm:p-10 bg-gradient-to-br from-purple-950/40 via-zinc-950 to-cyan-950/30 shadow-[0_0_40px_rgba(168,85,247,0.15)]">
+        <div className="absolute -right-10 -bottom-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-1/4 w-80 h-80 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold shadow-gold-glow">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-semibold shadow-[0_0_12px_rgba(168,85,247,0.25)]">
+              <Gamepad2 className="w-3.5 h-3.5 text-cyan-400" />
               <span>Algoritmo Gamer Atlas · Basado en Contenido</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight flex items-center gap-3">
               <span>Para ti ·</span>
-              <span className="text-amber-400">Recomendaciones</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">
+                Recomendaciones
+              </span>
             </h1>
 
-            <p className="text-sm sm:text-base text-cine-300 leading-relaxed">
+            <p className="text-sm sm:text-base text-zinc-300 leading-relaxed">
               Descubre títulos minuciosamente seleccionados para tus gustos a partir de tus videojuegos jugados, tus valoraciones y tus plataformas. Sin algoritmos externos, calculado íntegramente con tus preferencias.
             </p>
           </div>
@@ -412,16 +414,16 @@ export default function GameRecommendationsView({
               type="button"
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="px-4 py-2 bg-cine-900/90 hover:bg-cine-800 text-cine-200 hover:text-white border border-cine-700/80 hover:border-amber-500/40 font-semibold rounded-xl text-xs transition-all flex items-center gap-2 shadow-sm disabled:opacity-50"
+              className="px-4 py-2 bg-cine-900/90 hover:bg-purple-950/60 text-purple-200 hover:text-white border border-purple-500/30 hover:border-purple-400 font-semibold rounded-xl text-xs transition-all flex items-center gap-2 shadow-sm disabled:opacity-50"
             >
               <RefreshCw
-                className={`w-3.5 h-3.5 text-amber-400 ${
+                className={`w-3.5 h-3.5 text-cyan-400 ${
                   isRefreshing ? "animate-spin" : ""
                 }`}
               />
               <span>{isRefreshing ? "Analizando..." : "Actualizar recomendaciones"}</span>
             </button>
-            <span className="text-[10px] text-cine-500 font-mono">
+            <span className="text-[10px] text-zinc-500 font-mono">
               Último análisis: {new Date(data.cachedAt || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </span>
           </div>
@@ -467,13 +469,13 @@ export default function GameRecommendationsView({
                   onClick={() => setPlatformCategoryFilter(pill.id)}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 ${
                     isSelected
-                      ? "bg-amber-500 text-black border border-amber-400 font-bold shadow-md shadow-amber-500/20"
-                      : "bg-cine-900/80 text-cine-300 hover:text-white hover:bg-cine-800 border border-cine-800"
+                      ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white border border-purple-400/50 font-bold shadow-md shadow-purple-500/25"
+                      : "bg-cine-900/80 text-zinc-300 hover:text-white hover:bg-purple-950/30 border border-cine-800"
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 ${
-                      isSelected ? "text-black" : "text-amber-400"
+                      isSelected ? "text-white" : "text-cyan-400"
                     }`}
                   />
                   <span>
@@ -488,19 +490,19 @@ export default function GameRecommendationsView({
           <div className="flex items-center gap-2.5">
             {/* Buscador */}
             <div className="relative flex-1 sm:w-60">
-              <Search className="w-3.5 h-3.5 text-cine-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Filtrar por título..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-7 py-1.5 bg-cine-900/80 border border-cine-800 focus:border-amber-500/50 rounded-xl text-xs text-white placeholder-cine-500 focus:outline-none transition-colors"
+                className="w-full pl-8 pr-7 py-1.5 bg-cine-900/80 border border-cine-800 focus:border-purple-500/50 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none transition-colors"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-cine-400 hover:text-white p-0.5"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-0.5"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -514,8 +516,8 @@ export default function GameRecommendationsView({
                 onClick={() => setViewMode("carousel")}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
                   viewMode === "carousel"
-                    ? "bg-amber-500 text-black font-bold shadow-sm"
-                    : "text-cine-400 hover:text-white"
+                    ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold shadow-sm"
+                    : "text-zinc-400 hover:text-white"
                 }`}
                 title="Ver organizado en carruseles por filas"
               >
@@ -527,8 +529,8 @@ export default function GameRecommendationsView({
                 onClick={() => setViewMode("grid")}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
                   viewMode === "grid"
-                    ? "bg-amber-500 text-black font-bold shadow-sm"
-                    : "text-cine-400 hover:text-white"
+                    ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold shadow-sm"
+                    : "text-zinc-400 hover:text-white"
                 }`}
                 title="Ver catálogo completo en cuadrícula"
               >
@@ -546,13 +548,13 @@ export default function GameRecommendationsView({
             onClick={() => setSelectedGenre("all")}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 ${
               selectedGenre === "all"
-                ? "bg-amber-500 text-black border border-amber-400 font-bold shadow-md shadow-amber-500/20"
-                : "bg-cine-900/80 text-cine-300 hover:text-white hover:bg-cine-800 border border-cine-800"
+                ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white border border-purple-400/50 font-bold shadow-md shadow-purple-500/25"
+                : "bg-cine-900/80 text-zinc-300 hover:text-white hover:bg-purple-950/30 border border-cine-800"
             }`}
           >
             <Sparkles
               className={`w-3 h-3 ${
-                selectedGenre === "all" ? "text-black" : "text-amber-400"
+                selectedGenre === "all" ? "text-white" : "text-cyan-400"
               }`}
             />
             <span>Todos los géneros</span>
@@ -567,8 +569,8 @@ export default function GameRecommendationsView({
                 onClick={() => setSelectedGenre(isSelected ? "all" : genre)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all ${
                   isSelected
-                    ? "bg-amber-500 text-black border border-amber-400 font-bold shadow-md shadow-amber-500/20"
-                    : "bg-cine-900/80 text-cine-300 hover:text-white hover:bg-cine-800 border border-cine-800"
+                    ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white border border-purple-400/50 font-bold shadow-md shadow-purple-500/25"
+                    : "bg-cine-900/80 text-zinc-300 hover:text-white hover:bg-purple-950/30 border border-cine-800"
                 }`}
               >
                 {genre}
@@ -585,7 +587,7 @@ export default function GameRecommendationsView({
               <select
                 value={selectedGenre}
                 onChange={(e) => setSelectedGenre(e.target.value)}
-                className="appearance-none bg-cine-900/90 border border-cine-800 hover:border-cine-700 text-xs text-cine-200 pl-7 pr-8 py-1.5 rounded-xl focus:outline-none focus:border-amber-500/50 cursor-pointer font-medium transition-colors"
+                className="appearance-none bg-cine-900/90 border border-cine-800 hover:border-cine-700 text-xs text-zinc-200 pl-7 pr-8 py-1.5 rounded-xl focus:outline-none focus:border-purple-500/50 cursor-pointer font-medium transition-colors"
               >
                 <option value="all">
                   Todos los géneros ({availableGenres.length})
@@ -596,8 +598,8 @@ export default function GameRecommendationsView({
                   </option>
                 ))}
               </select>
-              <Filter className="w-3.5 h-3.5 text-cine-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-cine-400 text-[10px]">
+              <Filter className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-[10px]">
                 ▼
               </div>
             </div>
@@ -607,7 +609,7 @@ export default function GameRecommendationsView({
               <select
                 value={selectedPlatform}
                 onChange={(e) => setSelectedPlatform(e.target.value)}
-                className="appearance-none bg-cine-900/90 border border-cine-800 hover:border-cine-700 text-xs text-cine-200 pl-7 pr-8 py-1.5 rounded-xl focus:outline-none focus:border-amber-500/50 cursor-pointer font-medium transition-colors"
+                className="appearance-none bg-cine-900/90 border border-cine-800 hover:border-cine-700 text-xs text-zinc-200 pl-7 pr-8 py-1.5 rounded-xl focus:outline-none focus:border-purple-500/50 cursor-pointer font-medium transition-colors"
               >
                 <option value="all">Todas las plataformas ({availablePlatforms.length})</option>
                 {availablePlatforms.map((p) => (
@@ -616,8 +618,8 @@ export default function GameRecommendationsView({
                   </option>
                 ))}
               </select>
-              <Laptop className="w-3.5 h-3.5 text-cine-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-cine-400 text-[10px]">
+              <Laptop className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-[10px]">
                 ▼
               </div>
             </div>
@@ -627,15 +629,15 @@ export default function GameRecommendationsView({
               <select
                 value={selectedEra}
                 onChange={(e) => setSelectedEra(e.target.value as any)}
-                className="appearance-none bg-cine-900/90 border border-cine-800 hover:border-cine-700 text-xs text-cine-200 pl-7 pr-8 py-1.5 rounded-xl focus:outline-none focus:border-amber-500/50 cursor-pointer font-medium transition-colors"
+                className="appearance-none bg-cine-900/90 border border-cine-800 hover:border-cine-700 text-xs text-zinc-200 pl-7 pr-8 py-1.5 rounded-xl focus:outline-none focus:border-purple-500/50 cursor-pointer font-medium transition-colors"
               >
                 <option value="all">Todas las épocas</option>
                 <option value="recent">Recientes (2020+)</option>
                 <option value="2010s">Década 2010</option>
                 <option value="classic">Clásicos (&lt;2000)</option>
               </select>
-              <Calendar className="w-3.5 h-3.5 text-cine-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-cine-400 text-[10px]">
+              <Calendar className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-[10px]">
                 ▼
               </div>
             </div>
@@ -655,19 +657,19 @@ export default function GameRecommendationsView({
 
           {/* Selector de Ordenación */}
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-cine-400 hidden sm:inline">Ordenar:</span>
+            <span className="text-[11px] text-zinc-400 hidden sm:inline">Ordenar:</span>
             <div className="relative">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="appearance-none bg-cine-900/90 border border-cine-800 hover:border-cine-700 text-xs text-amber-300 pl-7 pr-8 py-1.5 rounded-xl focus:outline-none focus:border-amber-500/50 cursor-pointer font-semibold transition-colors"
+                className="appearance-none bg-cine-900/90 border border-cine-800 hover:border-cine-700 text-xs text-cyan-300 pl-7 pr-8 py-1.5 rounded-xl focus:outline-none focus:border-purple-500/50 cursor-pointer font-semibold transition-colors"
               >
                 <option value="affinity">Mayor afinidad (% para ti)</option>
                 <option value="metacritic">Mejor valorados (Metacritic)</option>
                 <option value="year">Más recientes</option>
               </select>
-              <ArrowUpDown className="w-3.5 h-3.5 text-amber-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-cine-400 text-[10px]">
+              <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-[10px]">
                 ▼
               </div>
             </div>
@@ -675,17 +677,17 @@ export default function GameRecommendationsView({
         </div>
 
         {/* Resumen de resultados filtrados */}
-        <div className="flex items-center justify-between text-xs text-cine-400 px-1 pt-1 border-t border-cine-800/40">
+        <div className="flex items-center justify-between text-xs text-zinc-400 px-1 pt-1 border-t border-cine-800/40">
           <div>
             Mostrando{" "}
-            <span className="text-amber-400 font-bold font-mono">
+            <span className="text-cyan-400 font-bold font-mono">
               {totalFilteredCount}
             </span>{" "}
             recomendaciones{" "}
             {viewMode === "carousel" ? "en carruseles" : "en catálogo"} (de{" "}
-            {allUniqueItems.length} totales calculadas)
+            <span className="text-purple-300 font-mono font-semibold">{allUniqueItems.length}</span> totales calculadas)
           </div>
-          <div className="hidden sm:block text-[11px] text-cine-500">
+          <div className="hidden sm:block text-[11px] text-zinc-500">
             Vista: {viewMode === "carousel" ? "Carruseles por Fila" : "Catálogo en Cuadrícula"}
           </div>
         </div>
@@ -698,20 +700,20 @@ export default function GameRecommendationsView({
         <div className="space-y-4">
           {filteredGridItems.length === 0 ? (
             <div className="glass-panel p-12 rounded-3xl border border-cine-800 text-center space-y-4 max-w-lg mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-cine-900 border border-cine-800 flex items-center justify-center text-amber-400 mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-purple-950/40 border border-purple-500/30 flex items-center justify-center text-cyan-400 mx-auto shadow-[0_0_15px_rgba(6,182,212,0.2)]">
                 <Sparkles className="w-6 h-6" />
               </div>
               <h3 className="text-base font-bold text-white">
                 No se encontraron recomendaciones con estos filtros
               </h3>
-              <p className="text-xs text-cine-400 leading-relaxed">
+              <p className="text-xs text-zinc-400 leading-relaxed">
                 Prueba a buscar con otro término, seleccionar otro género o restablecer los filtros.
               </p>
               {hasActiveFilters && (
                 <button
                   type="button"
                   onClick={handleResetFilters}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl text-xs transition-colors shadow-md"
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold rounded-xl text-xs transition-colors shadow-md shadow-purple-500/25"
                 >
                   Restablecer todos los filtros
                 </button>
@@ -735,20 +737,20 @@ export default function GameRecommendationsView({
         <div className="space-y-12">
           {filteredRows.length === 0 ? (
             <div className="glass-panel p-12 rounded-3xl border border-cine-800 text-center space-y-4 max-w-lg mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-cine-900 border border-cine-800 flex items-center justify-center text-amber-400 mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-purple-950/40 border border-purple-500/30 flex items-center justify-center text-cyan-400 mx-auto shadow-[0_0_15px_rgba(6,182,212,0.2)]">
                 <Sparkles className="w-6 h-6" />
               </div>
               <h3 className="text-base font-bold text-white">
                 No hay carruseles que coincidan con estos filtros
               </h3>
-              <p className="text-xs text-cine-400 leading-relaxed">
+              <p className="text-xs text-zinc-400 leading-relaxed">
                 Prueba a cambiar el género, la plataforma o a restablecer los filtros.
               </p>
               {hasActiveFilters && (
                 <button
                   type="button"
                   onClick={handleResetFilters}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl text-xs transition-colors shadow-md"
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold rounded-xl text-xs transition-colors shadow-md shadow-purple-500/25"
                 >
                   Restablecer todos los filtros
                 </button>

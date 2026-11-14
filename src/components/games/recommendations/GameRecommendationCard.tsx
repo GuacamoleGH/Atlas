@@ -170,15 +170,15 @@ export default function GameRecommendationCard({
         {/* Nota Metacritic y Duración en la parte inferior del póster */}
         <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between z-10 pointer-events-none">
           {(game.metacritic || game.rating) && (
-            <div className="flex items-center gap-1 bg-black/80 border border-amber-500/30 backdrop-blur-md px-1.5 py-0.5 rounded-lg text-[10px] font-bold text-amber-400 shadow">
-              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+            <div className="flex items-center gap-1 bg-black/85 border border-emerald-500/30 backdrop-blur-md px-1.5 py-0.5 rounded-lg text-[10px] font-bold text-emerald-400 shadow">
+              <Star className="w-2.5 h-2.5 fill-emerald-400 text-emerald-400" />
               <span>{game.metacritic ? game.metacritic : `${game.rating}/5`}</span>
-              {game.metacritic && <span className="text-[9px] text-cine-500">/ 100</span>}
+              {game.metacritic && <span className="text-[9px] text-zinc-500">/ 100</span>}
             </div>
           )}
 
           {game.playtime > 0 && (
-            <div className="flex items-center gap-1 bg-black/80 border border-cine-700/60 backdrop-blur-md px-1.5 py-0.5 rounded-lg text-[10px] font-mono text-zinc-300 shadow">
+            <div className="flex items-center gap-1 bg-black/85 border border-cyan-500/30 backdrop-blur-md px-1.5 py-0.5 rounded-lg text-[10px] font-mono text-cyan-300 shadow">
               <Clock className="w-2.5 h-2.5 text-cyan-400" />
               <span>~{game.playtime}h</span>
             </div>
