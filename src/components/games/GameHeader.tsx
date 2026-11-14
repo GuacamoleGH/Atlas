@@ -35,6 +35,7 @@ export default function GameHeader() {
 
   const navLinks = [
     { href: "/games", label: "Inicio", icon: Gamepad2 },
+    { href: "/games/recommendations", label: "Para ti", icon: Sparkles },
     { href: "/games/backlog", label: "Backlog", icon: Bookmark },
     { href: "/games/completed", label: "Completados", icon: CheckCircle2 },
     { href: "/games/friends", label: "Amigos", icon: Users },
