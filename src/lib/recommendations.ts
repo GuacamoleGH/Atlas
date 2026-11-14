@@ -179,6 +179,8 @@ export interface RecommendationItem {
   confidence: "high" | "medium" | "low" | "none";
   matchReason: string;
   originalLanguage?: string;
+  numberOfSeasons?: number | null;
+  isMiniseries?: boolean;
   scoreBreakdown: {
     seedSupport: number; // 0 a 1
     genreAffinity: number; // 0 a 1
@@ -839,30 +841,44 @@ export async function getRecommendations(
     }
   }
 
-  // 2. Exploración mediante Discover con los géneros favoritos
-  if (profile.favoriteGenreIds.length > 0) {
-    const top2Genres = profile.favoriteGenreIds.slice(0, 2).join("|");
-    const [discoverMov1, discoverMov2, discoverTv1, discoverTv2] = await Promise.all([
-      discoverMovies(top2Genres, 500, "vote_average.desc", 1),
-      discoverMovies(top2Genres, 250, "vote_average.desc", 2),
-      discoverSeries(top2Genres, 500, "vote_average.desc", 1),
-      discoverSeries(top2Genres, 250, "vote_average.desc", 2),
-    ]);
+  // 2. Exploración mediante Discover con los géneros favoritos y miniseries
+  const top2Genres = profile.favoriteGenreIds.slice(0, 2).join("|");
+  const [
+    discoverMov1,
+    discoverMov2,
+    discoverMov3,
+    discoverTv1,
+    discoverTv2,
+    discoverMiniseries,
+  ] = await Promise.all([
+    discoverMovies(top2Genres, 400, "vote_average.desc", 1),
+    discoverMovies(top2Genres, 200, "vote_average.desc", 2),
+    discoverMovies(top2Genres, 150, "vote_average.desc", 3),
+    discoverSeries(top2Genres, 400, "vote_average.desc", 1),
+    discoverSeries(top2Genres, 200, "vote_average.desc", 2),
+    discoverSeries("", 200, "vote_average.desc", 1, undefined, 2),
+  ]);
 
-    for (const cand of [...discoverMov1, ...discoverMov2, ...discoverTv1, ...discoverTv2]) {
-      const key = `${cand.mediaType}:${cand.id}`;
-      if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
-      if (cand.adult || !cand.posterPath || cand.voteCount < 150) continue;
+  for (const cand of [
+    ...discoverMov1,
+    ...discoverMov2,
+    ...discoverMov3,
+    ...discoverTv1,
+    ...discoverTv2,
+    ...discoverMiniseries,
+  ]) {
+    const key = `${cand.mediaType}:${cand.id}`;
+    if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
+    if (cand.adult || !cand.posterPath || cand.voteCount < 100) continue;
 
-      if (!candidatesMap.has(key)) {
-        candidatesMap.set(key, {
-          item: cand,
-          seedSupport: 0.1,
-          bestSeedTitle: null,
-          bestSeedWeight: 0,
-          fromSeeds: [],
-        });
-      }
+    if (!candidatesMap.has(key)) {
+      candidatesMap.set(key, {
+        item: cand,
+        seedSupport: 0.1,
+        bestSeedTitle: null,
+        bestSeedWeight: 0,
+        fromSeeds: [],
+      });
     }
   }
 
@@ -894,12 +910,18 @@ export async function getRecommendations(
     }
 
     const genreNames = normGenres.map((g) => TMDB_GENRE_NAMES[g] || "Cine");
+    if (cand.isMiniseries && !genreNames.includes("Miniserie")) {
+      genreNames.unshift("Miniserie");
+    }
+
     const affinityScore = Math.min(99, Math.max(50, Math.round(score * 100)));
 
     // Razón de coincidencia
     let matchReason = "Recomendada para ti";
     if (entry.bestSeedTitle) {
       matchReason = `Porque viste ${entry.bestSeedTitle}`;
+    } else if (cand.isMiniseries) {
+      matchReason = "Miniserie aclamada imprescindible";
     } else if (normGenres.some((g) => profile.favoriteGenreIds.includes(g))) {
       const favId = normGenres.find((g) => profile.favoriteGenreIds.includes(g))!;
       matchReason = `Por tu interés en ${TMDB_GENRE_NAMES[favId] || "este género"}`;
@@ -923,6 +945,8 @@ export async function getRecommendations(
       genres: genreNames,
       genreIds: cand.genreIds,
       originalLanguage: cand.originalLanguage || "es",
+      numberOfSeasons: cand.numberOfSeasons ?? (cand.isMiniseries ? 1 : null),
+      isMiniseries: cand.isMiniseries,
       affinityScore,
       confidence,
       matchReason,
@@ -937,22 +961,22 @@ export async function getRecommendations(
   scoredCandidates.sort((a, b) => b.affinityScore - a.affinityScore);
 
   // ==========================================
-  // FILA 1: «Creemos que te va a gustar» (Top 30 con diversidad)
+  // FILA 1: «Creemos que te va a gustar» (Top 60 con diversidad)
   // ==========================================
   const featuredCandidates: RecommendationItem[] = [];
   const primaryGenreCount: Record<number, number> = {};
   const seedContributionCount: Record<string, number> = {};
-  const maxPerGenre = Math.ceil(30 / 3); // 10
+  const maxPerGenre = Math.ceil(60 / 3); // 20
 
   for (const cand of scoredCandidates) {
-    if (featuredCandidates.length >= 30) break;
+    if (featuredCandidates.length >= 60) break;
 
     const primaryG = normalizeGenreIds(cand.genreIds)[0] || 0;
     const gCount = primaryGenreCount[primaryG] || 0;
     const sTitle = cand.scoreBreakdown.seedTitle || "discover";
     const sCount = seedContributionCount[sTitle] || 0;
 
-    if (gCount < maxPerGenre && sCount < 4) {
+    if (gCount < maxPerGenre && sCount < 6) {
       featuredCandidates.push(cand);
       primaryGenreCount[primaryG] = gCount + 1;
       seedContributionCount[sTitle] = sCount + 1;
@@ -960,9 +984,9 @@ export async function getRecommendations(
   }
 
   // Si quedaron huecos por las restricciones de diversidad, rellenar con los siguientes
-  if (featuredCandidates.length < 30) {
+  if (featuredCandidates.length < 60) {
     for (const cand of scoredCandidates) {
-      if (featuredCandidates.length >= 30) break;
+      if (featuredCandidates.length >= 60) break;
       if (!featuredCandidates.some((f) => f.id === cand.id)) {
         featuredCandidates.push(cand);
       }
@@ -1182,7 +1206,7 @@ export async function getRecommendations(
 
 export async function getPersonalizedMovieRecommendations(
   userId?: string | null,
-  limit: number = 24
+  limit: number = 60
 ) {
   if (!userId) return [];
   try {
@@ -1217,7 +1241,7 @@ export async function getPersonalizedMovieRecommendations(
 
 export async function getPersonalizedSeriesRecommendations(
   userId?: string | null,
-  limit: number = 24
+  limit: number = 60
 ) {
   if (!userId) return [];
   try {
@@ -1228,9 +1252,30 @@ export async function getPersonalizedSeriesRecommendations(
     for (const s of series) {
       if (!uniqueMap.has(s.tmdbId)) uniqueMap.set(s.tmdbId, s);
     }
-    return Array.from(uniqueMap.values())
-      .slice(0, limit)
-      .map((s) => ({
+
+    const seriesList = Array.from(uniqueMap.values()).slice(0, limit);
+    const seriesTmdbIds = seriesList.map((s) => s.tmdbId);
+
+    const dbSeries = await prisma.series.findMany({
+      where: { tmdbId: { in: seriesTmdbIds } },
+      select: { tmdbId: true, numberOfSeasons: true },
+    });
+    const dbMap = new Map(dbSeries.map((d) => [d.tmdbId, d.numberOfSeasons]));
+
+    return seriesList.map((s) => {
+      const dbSeasons = dbMap.get(s.tmdbId);
+      const seasons = dbSeasons ?? s.numberOfSeasons ?? null;
+      const isMini = Boolean(
+        s.isMiniseries ||
+        seasons === 1 ||
+        s.genres.some((g) => g.toLowerCase().includes("miniserie"))
+      );
+      const genres = [...s.genres];
+      if (isMini && !genres.some((g) => g.toLowerCase().includes("miniserie"))) {
+        genres.unshift("Miniserie");
+      }
+
+      return {
         id: String(s.tmdbId),
         tmdbId: s.tmdbId,
         name: s.title,
@@ -1238,12 +1283,15 @@ export async function getPersonalizedSeriesRecommendations(
         firstAirYear: s.releaseYear,
         posterPath: s.posterPath,
         imdbRating: s.voteAverage,
-        genres: s.genres,
+        genres,
         streamingPlatforms: [],
         matchPercentage: s.affinityScore,
         matchReason: s.matchReason,
         originalLanguage: s.originalLanguage || "es",
-      }));
+        numberOfSeasons: seasons,
+        isMiniseries: isMini,
+      };
+    });
   } catch (err) {
     console.error("Error en getPersonalizedSeriesRecommendations:", err);
     return [];

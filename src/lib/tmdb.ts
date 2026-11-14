@@ -446,6 +446,8 @@ export interface TmdbCandidateItem {
   popularity: number;
   originalLanguage: string;
   adult: boolean;
+  numberOfSeasons?: number | null;
+  isMiniseries?: boolean;
 }
 
 /**
@@ -585,12 +587,14 @@ export async function discoverSeries(
   sortBy: string = "vote_average.desc",
   page: number = 1,
   withOriginalLanguage?: string,
+  withType?: number | string,
 ): Promise<TmdbCandidateItem[]> {
   try {
     const apiKeyParam = getApiKeyParam();
     const langParam = withOriginalLanguage ? `&with_original_language=${withOriginalLanguage}` : "";
+    const typeParam = withType !== undefined ? `&with_type=${withType}` : "";
     const genresParam = withGenres ? `&with_genres=${encodeURIComponent(withGenres)}` : "";
-    const url = `${TMDB_BASE_URL}/discover/tv?language=es-ES${genresParam}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${langParam}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+    const url = `${TMDB_BASE_URL}/discover/tv?language=es-ES${genresParam}&sort_by=${sortBy}&vote_count.gte=${minVotes}&page=${page}&include_adult=false${langParam}${typeParam}${apiKeyParam ? `&${apiKeyParam}` : ""}`;
     const res = await fetch(url, {
       headers: getHeaders(),
       next: { revalidate: 43200 },
@@ -599,23 +603,34 @@ export async function discoverSeries(
     const data = await res.json();
     if (!data.results || !Array.isArray(data.results)) return [];
 
-    return data.results.map((item: any) => ({
-      id: item.id,
-      mediaType: "tv" as const,
-      title: item.name || item.original_name || "Sin título",
-      originalTitle: item.original_name || null,
-      overview: item.overview || null,
-      posterPath: item.poster_path ? `${TMDB_IMAGE_BASE}/w342${item.poster_path}` : null,
-      backdropPath: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
-      releaseDate: item.first_air_date || null,
-      releaseYear: item.first_air_date ? parseInt(item.first_air_date.substring(0, 4), 10) : null,
-      genreIds: Array.isArray(item.genre_ids) ? item.genre_ids : [],
-      voteAverage: Number((item.vote_average || 0).toFixed(1)),
-      voteCount: Number(item.vote_count || 0),
-      popularity: Number(item.popularity || 0),
-      originalLanguage: item.original_language || "en",
-      adult: Boolean(item.adult),
-    }));
+    const isExplicitMiniseries = String(withType) === "2";
+
+    return data.results.map((item: any) => {
+      const isMini =
+        isExplicitMiniseries ||
+        item.name?.toLowerCase().includes("miniserie") ||
+        item.overview?.toLowerCase().includes("miniserie");
+
+      return {
+        id: item.id,
+        mediaType: "tv" as const,
+        title: item.name || item.original_name || "Sin título",
+        originalTitle: item.original_name || null,
+        overview: item.overview || null,
+        posterPath: item.poster_path ? `${TMDB_IMAGE_BASE}/w342${item.poster_path}` : null,
+        backdropPath: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
+        releaseDate: item.first_air_date || null,
+        releaseYear: item.first_air_date ? parseInt(item.first_air_date.substring(0, 4), 10) : null,
+        genreIds: Array.isArray(item.genre_ids) ? item.genre_ids : [],
+        voteAverage: Number((item.vote_average || 0).toFixed(1)),
+        voteCount: Number(item.vote_count || 0),
+        popularity: Number(item.popularity || 0),
+        originalLanguage: item.original_language || "en",
+        adult: Boolean(item.adult),
+        numberOfSeasons: isMini ? 1 : null,
+        isMiniseries: isMini,
+      };
+    });
   } catch (error) {
     console.error("Error en discoverSeries:", error);
     return [];
