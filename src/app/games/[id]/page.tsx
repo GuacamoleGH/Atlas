@@ -356,9 +356,9 @@ export default function GameDetailPage() {
                 }`}
               >
                 <Bookmark
-                  className={`w-4 h-4 ${isBacklog ? "fill-cine-950" : "text-cyan-400"}`}
+                  className={`w-5 h-5 ${isBacklog ? "fill-cine-950" : "text-cyan-400"}`}
                 />
-                {isBacklog ? "En tu Backlog" : "+ Añadir a Backlog"}
+                {isBacklog ? "En tu Backlog" : "Añadir a Backlog"}
               </button>
 
               <button
@@ -369,7 +369,7 @@ export default function GameDetailPage() {
                     : "bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.3)]"
                 }`}
               >
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-5 h-5" />
                 {game.userGame && game.userGame.status !== "BACKLOG"
                   ? "Modificar veredicto"
                   : "Registrar partida"}

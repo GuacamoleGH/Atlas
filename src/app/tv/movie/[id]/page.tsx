@@ -334,9 +334,9 @@ export default function MovieDetailPage() {
                 }`}
               >
                 <Bookmark
-                  className={`w-4 h-4 ${isWatchlist ? "fill-cine-950" : "text-sky-400"}`}
+                  className={`w-5 h-5 ${isWatchlist ? "fill-cine-950" : "text-sky-400"}`}
                 />
-                {isWatchlist ? "En tu Watchlist" : "+ Añadir a Watchlist"}
+                {isWatchlist ? "En tu Watchlist" : "Añadir a Watchlist"}
               </button>
 
               <button
@@ -347,7 +347,7 @@ export default function MovieDetailPage() {
                     : "bg-amber-500 hover:bg-amber-400 text-cine-950 font-bold shadow-gold-glow"
                 }`}
               >
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-5 h-5" />
                 {isWatched ? "Editar valoración" : "Marcar como vista"}
               </button>
 
@@ -358,12 +358,12 @@ export default function MovieDetailPage() {
                   className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap glass-card border border-amber-500/30 text-amber-200 hover:text-white hover:bg-amber-950/40 active:scale-95 shadow"
                   title="Marcar como vista hace tiempo sin nota ni fecha exacta (+10 XP)"
                 >
-                  <History className="w-4 h-4 text-amber-400" />
+                  <History className="w-5 h-5 text-amber-400" />
                   <span>Visto hace tiempo</span>
                 </button>
               ) : movie.userMovie?.watchedDate === null ? (
                 <div className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl text-sm font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center justify-center gap-1.5 whitespace-nowrap">
-                  <History className="w-3.5 h-3.5 text-amber-400" />
+                  <History className="w-5 h-5 text-amber-400" />
                   <span>Visto en el pasado</span>
                 </div>
               ) : null}
