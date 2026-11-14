@@ -211,9 +211,11 @@ export default function CinemaFriendsPage() {
               : 2026;
 
             return (
-              <div
+              <Link
                 key={friend.id}
-                className="glass-panel p-5 rounded-3xl border border-cine-800/80 hover:border-amber-500/40 bg-gradient-to-b from-cine-900/90 to-cine-950/90 shadow-lg hover:shadow-gold-glow transition-all duration-300 flex flex-col justify-between group"
+                href={friend.profileUrl || `/u/${friend.username || friend.id}`}
+                onClick={() => sounds.nav()}
+                className="glass-panel p-5 rounded-3xl border border-cine-800/80 hover:border-amber-500/50 bg-gradient-to-b from-cine-900/90 to-cine-950/90 shadow-lg hover:shadow-gold-glow transition-all duration-300 flex flex-col justify-between group cursor-pointer hover:-translate-y-0.5"
               >
                 {/* Parte Superior: Avatar + Nombres */}
                 <div className="space-y-4">
@@ -308,17 +310,13 @@ export default function CinemaFriendsPage() {
 
                 {/* Botón de Enlace a Perfil Cinéfilo */}
                 <div className="pt-4 mt-3 border-t border-cine-800/60">
-                  <Link
-                    href={`/u/${friend.username || friend.id}`}
-                    onClick={() => sounds.click()}
-                    className="w-full py-2.5 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-white border border-amber-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm hover:shadow-gold-glow"
-                  >
+                  <div className="w-full py-2.5 px-3 rounded-xl bg-amber-500/15 group-hover:bg-amber-500/25 text-amber-300 group-hover:text-white border border-amber-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm group-hover:shadow-gold-glow">
                     <Film className="w-3.5 h-3.5" />
                     <span>Ver Perfil Cinéfilo</span>
-                    <ArrowRight className="w-3.5 h-3.5 ml-auto" />
-                  </Link>
+                    <ArrowRight className="w-3.5 h-3.5 ml-auto group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

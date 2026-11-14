@@ -38,6 +38,7 @@ interface FriendUser {
 
 export default function GamerFriendsPage() {
   const [friends, setFriends] = useState<FriendUser[]>([]);
+  const [totalMembers, setTotalMembers] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<
@@ -51,7 +52,12 @@ export default function GamerFriendsPage() {
         const res = await fetch("/api/friends");
         if (res.ok) {
           const data = await res.json();
-          setFriends(data.friends || []);
+          const friendsList = data.friends || [];
+          setFriends(friendsList);
+          const membersCount =
+            data.totalMembers ||
+            (friendsList.length > 0 ? friendsList.length + 1 : 3);
+          setTotalMembers(membersCount);
         }
       } catch (err) {
         console.error("Error al cargar amigos gamers:", err);
@@ -127,7 +133,10 @@ export default function GamerFriendsPage() {
           <div className="flex items-center gap-3">
             <div className="px-4 py-2 rounded-2xl bg-cine-950/80 border border-purple-500/30 text-center shadow-[0_0_20px_rgba(168,85,247,0.2)]">
               <span className="block text-2xl font-black text-purple-400 font-mono">
-                {friends.length}
+                {isLoading
+                  ? "..."
+                  : totalMembers ||
+                    (friends.length > 0 ? friends.length + 1 : 3)}
               </span>
               <span className="text-[10px] text-cine-400 font-mono uppercase tracking-wider">
                 Registrados
@@ -207,9 +216,11 @@ export default function GamerFriendsPage() {
               : 2026;
 
             return (
-              <div
+              <Link
                 key={friend.id}
-                className="glass-panel p-5 rounded-3xl border border-cine-800/80 hover:border-purple-500/40 bg-gradient-to-b from-cine-900/90 to-cine-950/90 shadow-lg hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all duration-300 flex flex-col justify-between group"
+                href={friend.profileUrl ? `${friend.profileUrl}?tab=gaming` : `/u/${friend.username || friend.id}?tab=gaming`}
+                onClick={() => sounds.nav()}
+                className="glass-panel p-5 rounded-3xl border border-cine-800/80 hover:border-purple-500/50 bg-gradient-to-b from-cine-900/90 to-cine-950/90 shadow-lg hover:shadow-[0_0_20px_rgba(168,85,247,0.25)] transition-all duration-300 flex flex-col justify-between group cursor-pointer hover:-translate-y-0.5"
               >
                 {/* Parte Superior: Avatar + Nombres */}
                 <div className="space-y-4">
@@ -302,17 +313,13 @@ export default function GamerFriendsPage() {
 
                 {/* Botón de Enlace a Perfil Gamer */}
                 <div className="pt-4 mt-3 border-t border-cine-800/60">
-                  <Link
-                    href={`/u/${friend.username || friend.id}?tab=gaming`}
-                    onClick={() => sounds.click()}
-                    className="w-full py-2.5 px-3 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(168,85,247,0.25)]"
-                  >
+                  <div className="w-full py-2.5 px-3 rounded-xl bg-purple-500/15 group-hover:bg-purple-500/25 text-purple-300 group-hover:text-white border border-purple-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm group-hover:shadow-[0_0_15px_rgba(168,85,247,0.25)]">
                     <Gamepad2 className="w-3.5 h-3.5" />
                     <span>Ver Perfil Gamer</span>
-                    <ArrowRight className="w-3.5 h-3.5 ml-auto" />
-                  </Link>
+                    <ArrowRight className="w-3.5 h-3.5 ml-auto group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
