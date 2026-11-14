@@ -1251,34 +1251,42 @@ export async function getRecommendations(
     }
   }
 
-  // 2.2 Si el usuario tiene afinidad por producciones españolas, descubrir obras rodadas en España
-  if (profile.hasSpanishPreference) {
-    const favGenres = profile.favoriteGenreIds.slice(0, 3).join("|") || "";
-    const [spanishMovies, spanishSeries] = await Promise.all([
-      discoverMovies(favGenres, 100, "vote_average.desc", 1, "es", "ES"),
-      discoverSeries(favGenres, 100, "vote_average.desc", 1, "es", undefined, "ES"),
-    ]);
+  // 2.2 Descubrir obras rodadas y producidas en España (para preferencias y filtro "Hecho en España")
+  const favGenres = profile.favoriteGenreIds.slice(0, 3).join("|") || "";
+  const [spanishMovies, spanishSeries, spanishTopMovies, spanishTopSeries] = await Promise.all([
+    discoverMovies(favGenres, 70, "vote_average.desc", 1, "es", "ES"),
+    discoverSeries(favGenres, 70, "vote_average.desc", 1, "es", undefined, "ES"),
+    discoverMovies("", 50, "vote_average.desc", 1, "es", "ES"),
+    discoverSeries("", 50, "vote_average.desc", 1, "es", undefined, "ES"),
+  ]);
 
-    for (const cand of [...spanishMovies, ...spanishSeries]) {
-      const key = `${cand.mediaType}:${cand.id}`;
-      if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
-      if (cand.adult || !cand.posterPath || cand.voteCount < 60) continue;
+  for (const cand of [
+    ...spanishMovies,
+    ...spanishSeries,
+    ...spanishTopMovies,
+    ...spanishTopSeries,
+  ]) {
+    const key = `${cand.mediaType}:${cand.id}`;
+    if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
+    if (cand.adult || !cand.posterPath || cand.voteCount < 50) continue;
 
-      const rej = checkCandidateRejection(cand);
-      if (rej.blocked) continue;
+    const rej = checkCandidateRejection(cand);
+    if (rej.blocked) continue;
 
-      cand.isSpanish = true;
-      if (!candidatesMap.has(key)) {
-        candidatesMap.set(key, {
-          item: cand,
-          seedSupport: 0.25,
-          bestSeedTitle: null,
-          bestSeedWeight: 0,
-          fromSeeds: [],
-        });
-      } else {
-        candidatesMap.get(key)!.item.isSpanish = true;
-      }
+    cand.isSpanish = true;
+    if (!cand.originCountry) cand.originCountry = ["ES"];
+    else if (!cand.originCountry.includes("ES")) cand.originCountry.push("ES");
+
+    if (!candidatesMap.has(key)) {
+      candidatesMap.set(key, {
+        item: cand,
+        seedSupport: profile.hasSpanishPreference ? 0.25 : 0.15,
+        bestSeedTitle: null,
+        bestSeedWeight: 0,
+        fromSeeds: [],
+      });
+    } else {
+      candidatesMap.get(key)!.item.isSpanish = true;
     }
   }
 
@@ -1575,6 +1583,7 @@ export async function getPersonalizedMovieRecommendations(
         matchPercentage: m.affinityScore,
         matchReason: m.matchReason,
         originalLanguage: m.originalLanguage,
+        isSpanish: Boolean(m.isSpanish || m.originCountry?.includes("ES")),
       }));
   } catch (err) {
     console.error("Error en getPersonalizedMovieRecommendations:", err);
@@ -1635,6 +1644,7 @@ export async function getPersonalizedSeriesRecommendations(
         originalLanguage: s.originalLanguage,
         numberOfSeasons: seasons,
         isMiniseries: isMini,
+        isSpanish: Boolean(s.isSpanish || s.originCountry?.includes("ES")),
       };
     });
   } catch (err) {

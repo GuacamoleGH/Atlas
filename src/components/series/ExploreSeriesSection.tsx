@@ -32,6 +32,7 @@ export interface ExploreSeriesItem {
   matchReason?: string;
   originalLanguage?: string;
   isMiniseries?: boolean;
+  isSpanish?: boolean;
 }
 
 interface ExploreSeriesSectionProps {
@@ -54,6 +55,7 @@ export default function ExploreSeriesSection({
 }: ExploreSeriesSectionProps) {
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [selectedFormat, setSelectedFormat] = useState<"all" | "miniseries" | "multi">("all");
+  const [onlySpanish, setOnlySpanish] = useState(false);
   const [sortBy, setSortBy] = useState<"match" | "rating" | "year">("match");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -86,6 +88,11 @@ export default function ExploreSeriesSection({
               s.genres?.some((g) => g.toLowerCase().includes("miniserie"))
             )
           : s.genres?.includes(selectedGenre));
+
+      // Hecho en España (solo series producidas en España)
+      if (onlySpanish && !s.isSpanish) {
+        return false;
+      }
 
       // Formato (Miniserie vs Multi-temporada)
       let matchFormat = true;
@@ -124,12 +131,14 @@ export default function ExploreSeriesSection({
   const hasActiveFilters =
     selectedGenre !== "all" ||
     selectedFormat !== "all" ||
+    onlySpanish ||
     searchQuery.trim().length > 0 ||
     sortBy !== "match";
 
   const handleResetFilters = () => {
     setSelectedGenre("all");
     setSelectedFormat("all");
+    setOnlySpanish(false);
     setSortBy("match");
     setSearchQuery("");
   };
@@ -179,22 +188,41 @@ export default function ExploreSeriesSection({
         </div>
       </div>
 
-      {/* Barra de píldoras rápidas (incluyendo Miniseries y géneros populares) */}
+      {/* Barra de píldoras rápidas (incluyendo Miniseries, Hecho en España y géneros populares) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
         <button
           type="button"
           onClick={() => {
             setSelectedGenre("all");
             setSelectedFormat("all");
+            setOnlySpanish(false);
           }}
           className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all border ${
-            selectedGenre === "all" && selectedFormat === "all"
+            selectedGenre === "all" && selectedFormat === "all" && !onlySpanish
               ? "bg-purple-600 text-white border-purple-400 shadow-md"
               : "bg-cine-900/90 text-cine-300 hover:text-white hover:bg-cine-800 border-cine-700/80"
           }`}
         >
           <Sparkles className="w-3.5 h-3.5" />
           <span>Todas</span>
+        </button>
+
+        {/* Filtro Hecho en España */}
+        <button
+          type="button"
+          onClick={() => setOnlySpanish(!onlySpanish)}
+          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all border ${
+            onlySpanish
+              ? "bg-purple-600 text-white border-purple-400 shadow-md shadow-purple-600/30 font-bold"
+              : "bg-cine-900/90 text-cine-300 hover:text-white hover:bg-cine-800 border-cine-700/80"
+          }`}
+          title="Mostrar únicamente series rodadas y producidas en España"
+        >
+          <span>🇪🇸</span>
+          <span>Hecho en España</span>
+          {onlySpanish && (
+            <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />
+          )}
         </button>
         <button
           type="button"

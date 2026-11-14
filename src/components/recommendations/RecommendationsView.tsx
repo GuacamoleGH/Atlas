@@ -83,6 +83,12 @@ export default function RecommendationsView({
     }
     return "affinity";
   });
+  const [onlySpanish, setOnlySpanish] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("recs_only_spanish") === "true";
+    }
+    return false;
+  });
   const [searchQuery, setSearchQuery] = useState(() => {
     if (typeof window !== "undefined") {
       return sessionStorage.getItem("recs_search") || "";
@@ -113,6 +119,10 @@ export default function RecommendationsView({
   React.useEffect(() => {
     sessionStorage.setItem("recs_sort_by", sortBy);
   }, [sortBy]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("recs_only_spanish", String(onlySpanish));
+  }, [onlySpanish]);
 
   React.useEffect(() => {
     sessionStorage.setItem("recs_search", searchQuery);
@@ -267,6 +277,11 @@ export default function RecommendationsView({
       if (!isMini) return false;
     }
 
+    // Hecho en España (solo obras producidas o rodadas en España)
+    if (onlySpanish && !item.isSpanish && !item.originCountry?.includes("ES")) {
+      return false;
+    }
+
     // Género
     if (selectedGenre !== "all") {
       if (selectedGenre === "Miniserie") {
@@ -329,6 +344,7 @@ export default function RecommendationsView({
     mediaTypeFilter,
     selectedGenre,
     selectedEra,
+    onlySpanish,
     sortBy,
     searchQuery,
   ]);
@@ -342,6 +358,7 @@ export default function RecommendationsView({
     mediaTypeFilter,
     selectedGenre,
     selectedEra,
+    onlySpanish,
     sortBy,
     searchQuery,
   ]);
@@ -355,6 +372,7 @@ export default function RecommendationsView({
     mediaTypeFilter !== "all" ||
     selectedGenre !== "all" ||
     selectedEra !== "all" ||
+    onlySpanish ||
     sortBy !== "affinity" ||
     searchQuery.trim().length > 0;
 
@@ -362,12 +380,14 @@ export default function RecommendationsView({
     setMediaTypeFilter("all");
     setSelectedGenre("all");
     setSelectedEra("all");
+    setOnlySpanish(false);
     setSortBy("affinity");
     setSearchQuery("");
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("recs_media_type");
       sessionStorage.removeItem("recs_genre");
       sessionStorage.removeItem("recs_era");
+      sessionStorage.removeItem("recs_only_spanish");
       sessionStorage.removeItem("recs_sort_by");
       sessionStorage.removeItem("recs_search");
     }
@@ -525,6 +545,24 @@ export default function RecommendationsView({
                 }`}
               />
               <span>Miniseries</span>
+            </button>
+
+            {/* Filtro Hecho en España */}
+            <button
+              type="button"
+              onClick={() => setOnlySpanish(!onlySpanish)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 ${
+                onlySpanish
+                  ? "bg-amber-500 text-black border border-amber-400 font-bold shadow-md shadow-amber-500/20"
+                  : "bg-cine-900/80 text-cine-300 hover:text-white hover:bg-cine-800 border border-cine-800"
+              }`}
+              title="Filtrar solo títulos rodados y producidos en España"
+            >
+              <span>🇪🇸</span>
+              <span>Hecho en España</span>
+              {onlySpanish && (
+                <span className="w-1.5 h-1.5 rounded-full bg-black shrink-0" />
+              )}
             </button>
           </div>
 

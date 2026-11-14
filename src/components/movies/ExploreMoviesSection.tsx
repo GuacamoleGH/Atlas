@@ -27,6 +27,7 @@ interface ExploreMovieItem {
   matchPercentage?: number;
   matchReason?: string;
   originalLanguage?: string;
+  isSpanish?: boolean;
 }
 
 interface ExploreMoviesSectionProps {
@@ -51,6 +52,7 @@ export default function ExploreMoviesSection({
 }: ExploreMoviesSectionProps) {
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [selectedEra, setSelectedEra] = useState("all");
+  const [onlySpanish, setOnlySpanish] = useState(false);
   const [sortBy, setSortBy] = useState<"match" | "rating" | "year">("match");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -76,6 +78,11 @@ export default function ExploreMoviesSection({
       // Género
       const matchGenre =
         selectedGenre === "all" || m.genres?.includes(selectedGenre);
+
+      // Hecho en España (solo producciones españolas)
+      if (onlySpanish && !m.isSpanish) {
+        return false;
+      }
 
       // Época
       let matchEra = true;
@@ -112,12 +119,14 @@ export default function ExploreMoviesSection({
   const hasActiveFilters =
     selectedGenre !== "all" ||
     selectedEra !== "all" ||
+    onlySpanish ||
     searchQuery.trim().length > 0 ||
     sortBy !== "match";
 
   const handleResetFilters = () => {
     setSelectedGenre("all");
     setSelectedEra("all");
+    setOnlySpanish(false);
     setSortBy("match");
     setSearchQuery("");
   };
@@ -169,21 +178,42 @@ export default function ExploreMoviesSection({
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
         <button
           type="button"
-          onClick={() => setSelectedGenre("all")}
+          onClick={() => {
+            setSelectedGenre("all");
+            setOnlySpanish(false);
+          }}
           className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all border ${
-            selectedGenre === "all"
+            selectedGenre === "all" && !onlySpanish
               ? "bg-amber-500 text-black border-amber-400 shadow-md"
               : "bg-cine-900/90 text-cine-300 hover:text-white hover:bg-cine-800 border-cine-700/80"
           }`}
         >
           <Sparkles
             className={`w-3.5 h-3.5 ${
-              selectedGenre === "all"
+              selectedGenre === "all" && !onlySpanish
                 ? "text-black fill-black"
                 : "text-amber-400"
             }`}
           />
           <span>Todos</span>
+        </button>
+
+        {/* Filtro Hecho en España */}
+        <button
+          type="button"
+          onClick={() => setOnlySpanish(!onlySpanish)}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all border ${
+            onlySpanish
+              ? "bg-amber-500 text-black border-amber-400 shadow-md shadow-amber-500/20 font-bold"
+              : "bg-cine-900/90 text-cine-300 hover:text-white hover:bg-cine-800 border-cine-700/80"
+          }`}
+          title="Mostrar únicamente películas rodadas y producidas en España"
+        >
+          <span>🇪🇸</span>
+          <span>Hecho en España</span>
+          {onlySpanish && (
+            <span className="w-1.5 h-1.5 rounded-full bg-black shrink-0" />
+          )}
         </button>
         {quickGenres.map((genre) => (
           <button
