@@ -172,6 +172,31 @@ export default function AffinityBreakdownModal({
               Idioma original: {item.originalLanguage ? getLanguageName(item.originalLanguage) : "Español"} ({item.originalLanguage?.toUpperCase() || "ES"})
             </p>
           </div>
+
+          {/* 5. Bonus Producción Española */}
+          {Boolean(item.scoreBreakdown.spanishBonus && item.scoreBreakdown.spanishBonus > 0) && (
+            <div className="space-y-1 pt-0.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-amber-300 font-medium">
+                  Bonus: Producción rodada en España
+                </span>
+                <span className="font-mono text-amber-400 font-bold">
+                  +{Math.round((item.scoreBreakdown.spanishBonus || 0) * 100)}%
+                </span>
+              </div>
+              <div className="h-2 w-full bg-cine-900 rounded-full overflow-hidden border border-amber-500/30">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(100, Math.round((item.scoreBreakdown.spanishBonus || 0) * 100 * 5))}%`,
+                  }}
+                />
+              </div>
+              <p className="text-[10px] text-amber-400/80">
+                Potenciado por tus obras vistas y títulos en Watchlist de España
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Pie de modal */}

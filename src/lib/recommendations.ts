@@ -181,11 +181,14 @@ export interface RecommendationItem {
   originalLanguage?: string;
   numberOfSeasons?: number | null;
   isMiniseries?: boolean;
+  originCountry?: string[];
+  isSpanish?: boolean;
   scoreBreakdown: {
     seedSupport: number; // 0 a 1
     genreAffinity: number; // 0 a 1
     quality: number; // 0 a 1
     languageAffinity: number; // 0 a 1
+    spanishBonus?: number;
     seedTitle?: string | null;
   };
 }
@@ -194,7 +197,7 @@ export interface RecommendationRow {
   id: string;
   title: string;
   subtitle?: string;
-  type: "featured" | "seed" | "hidden_gems" | "watchlist_affinity" | "trending" | "language";
+  type: "featured" | "seed" | "hidden_gems" | "trending" | "language" | "spanish_production";
   items: RecommendationItem[];
   seedInfo?: {
     title: string;
@@ -229,6 +232,7 @@ interface UserWorkSignal {
   directorOrCreator?: string | null;
   actors: string[];
   watchedDate?: Date | null;
+  isSpanish?: boolean;
 }
 
 export interface UserTasteProfile {
@@ -240,6 +244,9 @@ export interface UserTasteProfile {
   languageAffinities: Record<string, number>; // Normalizado 0 a 1
   topLanguage?: string;
   favoriteLanguages?: string[];
+  spanishContentAffinity?: number; // 0 a 1 según afinidad por producciones españolas
+  hasSpanishPreference?: boolean;
+  spanishWorksCount?: number;
   directorAffinities: Record<string, number>;
   actorAffinities: Record<string, number>;
   seeds: UserWorkSignal[];
@@ -337,6 +344,50 @@ function clamp01(v: number): number {
   return Math.min(1, Math.max(0, v));
 }
 
+// Creadores y figuras destacadas del cine y series producidas en España
+const SPANISH_DIRECTORS = new Set([
+  "pedro almodóvar", "pedro almodovar", "alejandro amenábar", "alejandro amenabar",
+  "j.a. bayona", "juan antonio bayona", "rodrigo sorogoyen", "álex de la iglesia",
+  "alex de la iglesia", "paco plaza", "alberto rodríguez", "alberto rodriguez",
+  "carlos saura", "daniel monzón", "daniel monzon", "jaume balagueró", "jaume balaguero",
+  "oriol paulo", "fernando león de aranoa", "fernando leon de aranoa", "icíar bollaín",
+  "iciar bollain", "cesc gay", "nacho vigalondo", "carlos vermut", "rodrigo cortés",
+  "rodrigo cortes", "daniel sánchez arévalo", "daniel sanchez arevalo", "koldo serra",
+  "mateo gil", "paco cabezas", "borja cobeaga", "javier fesser", "salvador calvo",
+  "david trueba", "fernando trueba", "enrique urbizu", "mariano barroso", "aitor gabilondo",
+  "álex pina", "alex pina", "carlos montero", "javier ambrossi", "javier calvo"
+]);
+
+const SPANISH_ACTORS = new Set([
+  "javier bardem", "penélope cruz", "penelope cruz", "antonio banderas", "mario casas",
+  "blanca suárez", "blanca suarez", "luis tosar", "javier gutiérrez", "javier gutierrez",
+  "antonio de la torre", "josé coronado", "jose coronado", "bárbara lennie", "barbara lennie",
+  "eduard fernández", "eduard fernandez", "carmen maura", "maribel verdú", "maribel verdu",
+  "hugo silva", "anna castillo", "inma cuesta", "quim gutiérrez", "quim gutierrez",
+  "raúl arévalo", "raul arevalo", "macarena garcía", "macarena garcia", "clara lago",
+  "dani rovira", "paco león", "paco leon", "belén rueda", "belen rueda", "ángela molina",
+  "angela molina", "najwa nimri", "miguel herrán", "miguel herran", "jaime lorente",
+  "úrsula corberó", "ursula corbero", "pedro alonso", "álvaro morte", "alvaro morte",
+  "luis zahera", "hovik keuchkerian", "javier cámara", "javier camara", "tristán ulloa",
+  "tristan ulloa", "karra elejalde", "blanca portillo", "rodolfo sancho", "michelle jenner"
+]);
+
+function isSpanishWork(
+  director?: string | null,
+  actors: string[] = []
+): boolean {
+  if (director && SPANISH_DIRECTORS.has(director.toLowerCase().trim())) {
+    return true;
+  }
+  const spanishActorMatches = actors.filter((a) =>
+    SPANISH_ACTORS.has(a.toLowerCase().trim())
+  );
+  if (spanishActorMatches.length >= 2) {
+    return true;
+  }
+  return false;
+}
+
 export async function buildUserTasteProfile(userId: string): Promise<UserTasteProfile> {
   const [userMovies, userSeries, exclusions] = await Promise.all([
     prisma.userMovie.findMany({
@@ -397,6 +448,8 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
       }
     } catch {}
 
+    const isSpanish = isSpanishWork(um.movie.director, actors);
+
     signals.push({
       mediaType: "movie",
       tmdbId: um.movie.tmdbId,
@@ -411,6 +464,7 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
       directorOrCreator: um.movie.director?.trim() || null,
       actors,
       watchedDate: um.watchedDate,
+      isSpanish,
     });
   }
 
@@ -452,6 +506,8 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
       }
     } catch {}
 
+    const isSpanish = isSpanishWork(us.series.creator, actors);
+
     signals.push({
       mediaType: "tv",
       tmdbId: us.series.tmdbId,
@@ -466,6 +522,7 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
       directorOrCreator: us.series.creator?.trim() || null,
       actors,
       watchedDate: us.watchedDate,
+      isSpanish,
     });
   }
 
@@ -573,8 +630,8 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
   const languageScores: Record<string, number> = { es: 1.0, en: 0.8 };
   const languageCounts: Record<string, number> = { es: 1, en: 1 };
 
-  // Detectar idioma de las semillas más influyentes
-  const sampleSeeds = (selectedSeeds.length > 0 ? selectedSeeds : signals).slice(0, 10);
+  // Detectar idioma y origen de producción de las semillas más influyentes
+  const sampleSeeds = (selectedSeeds.length > 0 ? selectedSeeds : signals).slice(0, 15);
   const seedDetails = await Promise.all(
     sampleSeeds.map(async (seed) => {
       try {
@@ -582,9 +639,19 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
           seed.mediaType === "movie"
             ? await getMovieDetail(seed.tmdbId)
             : await getSeriesDetail(seed.tmdbId);
-        return { seed, lang: detail?.originalLanguage || "es" };
+        const isSpanishProd = Boolean(
+          detail?.originCountry?.includes("ES") ||
+          detail?.productionCountries?.includes("ES") ||
+          seed.isSpanish
+        );
+        seed.isSpanish = isSpanishProd;
+        return {
+          seed,
+          lang: detail?.originalLanguage || "es",
+          isSpanish: isSpanishProd,
+        };
       } catch {
-        return { seed, lang: "es" };
+        return { seed, lang: "es", isSpanish: Boolean(seed.isSpanish) };
       }
     })
   );
@@ -610,6 +677,33 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
     .map(([lang]) => lang);
   const topLanguage = favoriteLanguages[0] || "es";
 
+  // Detección de afinidad por obras y producciones rodadas en España
+  // Analiza tanto obras vistas como obras en la Watchlist
+  let spanishWorksCount = 0;
+  let spanishPositiveWeight = 0;
+  let totalPositiveWeight = 0;
+
+  for (const s of signals) {
+    if (s.finalWeight > 0) {
+      totalPositiveWeight += s.finalWeight;
+      if (s.isSpanish) {
+        spanishWorksCount++;
+        spanishPositiveWeight += s.finalWeight;
+      }
+    }
+  }
+
+  const spanishRatio =
+    totalPositiveWeight > 0 ? spanishPositiveWeight / totalPositiveWeight : 0;
+
+  // Si tiene al menos 2 obras españolas (vistas o en watchlist) o representan más del 15% de su peso cinéfilo:
+  const hasSpanishPreference =
+    spanishWorksCount >= 2 || (spanishWorksCount >= 1 && spanishRatio >= 0.15);
+
+  const spanishContentAffinity = hasSpanishPreference
+    ? clamp01(Math.max(0.4, spanishRatio * 2 + (spanishWorksCount >= 3 ? 0.3 : 0.15)))
+    : 0;
+
   return {
     totalWatched,
     totalWatchlist,
@@ -619,6 +713,9 @@ export async function buildUserTasteProfile(userId: string): Promise<UserTastePr
     languageAffinities,
     topLanguage,
     favoriteLanguages,
+    spanishContentAffinity,
+    hasSpanishPreference,
+    spanishWorksCount,
     directorAffinities,
     actorAffinities,
     seeds: selectedSeeds,
@@ -643,6 +740,7 @@ export function calculateCandidateScore(
     genreAffinity: number;
     quality: number;
     languageAffinity: number;
+    spanishBonus?: number;
   };
 } {
   // 6.1 Soporte de semillas (0 a 1)
@@ -679,13 +777,26 @@ export function calculateCandidateScore(
   const lang = candidate.originalLanguage.toLowerCase();
   const languageAffinity = profile.languageAffinities[lang] ?? 0.6;
 
-  // 6.5 Puntuación global:
-  // score = 0.40 * supportNormalizado + 0.30 * afinidadGeneros + 0.20 * calidad + 0.10 * afinidadIdioma
+  // 6.5 Bonus para producciones rodadas en España si el usuario tiene preferencia española
+  const isSpanishProduction = Boolean(
+    candidate.isSpanish ||
+    candidate.originCountry?.includes("ES") ||
+    (candidate.originalLanguage === "es" && candidate.originCountry?.includes("ES"))
+  );
+
+  let spanishBonus = 0;
+  if (isSpanishProduction && profile.hasSpanishPreference && profile.spanishContentAffinity) {
+    spanishBonus = Number((profile.spanishContentAffinity * 0.16).toFixed(3));
+  }
+
+  // 6.6 Puntuación global:
+  // score = 0.40 * supportNormalizado + 0.30 * afinidadGeneros + 0.20 * calidad + 0.10 * afinidadIdioma + bonus
   const score =
     0.40 * supportNormalizado +
     0.30 * genreAffinity +
     0.20 * quality +
-    0.10 * languageAffinity;
+    0.10 * languageAffinity +
+    spanishBonus;
 
   return {
     score: clamp01(score),
@@ -694,6 +805,7 @@ export function calculateCandidateScore(
       genreAffinity: Number(genreAffinity.toFixed(3)),
       quality: Number(quality.toFixed(3)),
       languageAffinity: Number(languageAffinity.toFixed(3)),
+      spanishBonus: spanishBonus > 0 ? spanishBonus : undefined,
     },
   };
 }
@@ -883,6 +995,34 @@ export async function getRecommendations(
     }
   }
 
+  // 2.2 Si el usuario tiene afinidad por producciones españolas, descubrir obras rodadas en España
+  if (profile.hasSpanishPreference) {
+    const favGenres = profile.favoriteGenreIds.slice(0, 3).join("|") || "";
+    const [spanishMovies, spanishSeries] = await Promise.all([
+      discoverMovies(favGenres, 100, "vote_average.desc", 1, "es", "ES"),
+      discoverSeries(favGenres, 100, "vote_average.desc", 1, "es", undefined, "ES"),
+    ]);
+
+    for (const cand of [...spanishMovies, ...spanishSeries]) {
+      const key = `${cand.mediaType}:${cand.id}`;
+      if (profile.seenOrWatchlistKeys.has(key) || profile.excludedKeys.has(key)) continue;
+      if (cand.adult || !cand.posterPath || cand.voteCount < 60) continue;
+
+      cand.isSpanish = true;
+      if (!candidatesMap.has(key)) {
+        candidatesMap.set(key, {
+          item: cand,
+          seedSupport: 0.25,
+          bestSeedTitle: null,
+          bestSeedWeight: 0,
+          fromSeeds: [],
+        });
+      } else {
+        candidatesMap.get(key)!.item.isSpanish = true;
+      }
+    }
+  }
+
   // Calcular maxSeedSupport
   let maxSeedSupport = 0.1;
   for (const entry of Array.from(candidatesMap.values())) {
@@ -915,12 +1055,23 @@ export async function getRecommendations(
       genreNames.unshift("Miniserie");
     }
 
+    const isSpanishCandidate = Boolean(
+      cand.isSpanish ||
+      cand.originCountry?.includes("ES") ||
+      (cand.originalLanguage === "es" && cand.originCountry?.includes("ES"))
+    );
+
     const affinityScore = Math.min(99, Math.max(50, Math.round(score * 100)));
 
     // Razón de coincidencia
     let matchReason = "Recomendada para ti";
     if (entry.bestSeedTitle) {
       matchReason = `Porque viste ${entry.bestSeedTitle}`;
+    } else if (isSpanishCandidate && profile.hasSpanishPreference) {
+      matchReason =
+        cand.mediaType === "movie"
+          ? "Cine español según tus gustos"
+          : "Serie española según tus gustos";
     } else if (cand.isMiniseries) {
       matchReason = "Miniserie aclamada imprescindible";
     } else if (normGenres.some((g) => profile.favoriteGenreIds.includes(g))) {
@@ -948,6 +1099,8 @@ export async function getRecommendations(
       originalLanguage: cand.originalLanguage || "es",
       numberOfSeasons: cand.numberOfSeasons ?? (cand.isMiniseries ? 1 : null),
       isMiniseries: cand.isMiniseries,
+      originCountry: cand.originCountry,
+      isSpanish: isSpanishCandidate,
       affinityScore,
       confidence,
       matchReason,
@@ -1083,6 +1236,28 @@ export async function getRecommendations(
         name: preferredLangName,
       },
     });
+  }
+
+  // ==========================================
+  // FILA ESPAÑA: «Hecho en España · Recomendaciones»
+  // ==========================================
+  if (profile.hasSpanishPreference) {
+    const spanishCandidates = scoredCandidates.filter(
+      (c) => c.isSpanish || c.originCountry?.includes("ES")
+    );
+    const freshSpanish = spanishCandidates.filter((c) => !shownItemIds.has(c.id));
+    const finalSpanish = (freshSpanish.length >= 4 ? freshSpanish : spanishCandidates).slice(0, 15);
+
+    if (finalSpanish.length >= 4) {
+      rows.push({
+        id: "spanish-productions",
+        title: "Hecho en España · Selección para ti",
+        subtitle: "Películas y series rodadas en España acordes a tus gustos y géneros favoritos.",
+        type: "spanish_production",
+        items: finalSpanish,
+      });
+      finalSpanish.forEach((c) => shownItemIds.add(c.id));
+    }
   }
 
   const finalResponse: RecommendationsResponse = {
