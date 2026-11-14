@@ -23,12 +23,14 @@ interface RecommendationCardProps {
   item: RecommendationItem;
   onExclude: (id: string) => void;
   onOpenBreakdown: (item: RecommendationItem) => void;
+  className?: string;
 }
 
 export default function RecommendationCard({
   item,
   onExclude,
   onOpenBreakdown,
+  className,
 }: RecommendationCardProps) {
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [isWatched, setIsWatched] = useState(false);
@@ -113,7 +115,11 @@ export default function RecommendationCard({
 
   return (
     <>
-      <div className="group relative flex flex-col w-[160px] sm:w-[190px] md:w-[210px] shrink-0 glass-card rounded-2xl overflow-hidden bg-cine-900/60 border border-cine-800 hover:border-amber-500/40 transition-all duration-300 shadow-md">
+      <div
+        className={`group relative flex flex-col ${
+          className || "w-[160px] sm:w-[190px] md:w-[210px] shrink-0"
+        } glass-card rounded-2xl overflow-hidden bg-cine-900/60 border border-cine-800 hover:border-amber-500/40 transition-all duration-300 shadow-md`}
+      >
         {/* Contenedor del Póster */}
         <div className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950">
           <Link href={detailUrl} className="block w-full h-full">

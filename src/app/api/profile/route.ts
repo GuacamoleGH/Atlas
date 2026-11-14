@@ -462,7 +462,7 @@ export async function GET() {
         totalWatched: watchedList.length + watchedSeriesList.length,
         totalMovies: watchedList.length,
         totalSeries: watchedSeriesList.length,
-        totalWatchlist: watchlistCount,
+        totalWatchlist: watchlistMovies.length + watchlistSeries.length,
         totalReviews: reviewedCount,
         averageRating,
         averageImdbRating,

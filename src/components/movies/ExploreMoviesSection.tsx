@@ -189,13 +189,20 @@ export default function ExploreMoviesSection({
         <button
           type="button"
           onClick={() => setSelectedGenre("all")}
-          className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all border ${
+          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all border ${
             selectedGenre === "all"
-              ? "bg-amber-500 text-cine-950 border-amber-400 shadow-sm"
-              : "bg-cine-900/80 text-cine-300 hover:text-white hover:bg-cine-800 border-cine-700/80"
+              ? "bg-amber-500 text-black border-amber-400 shadow-md"
+              : "bg-cine-900/90 text-cine-300 hover:text-white hover:bg-cine-800 border-cine-700/80"
           }`}
         >
-          ✨ Todos
+          <Sparkles
+            className={`w-3.5 h-3.5 ${
+              selectedGenre === "all"
+                ? "text-black fill-black"
+                : "text-amber-400"
+            }`}
+          />
+          <span>Todos</span>
         </button>
         {quickGenres.map((genre) => (
           <button
@@ -204,7 +211,7 @@ export default function ExploreMoviesSection({
             onClick={() => setSelectedGenre(selectedGenre === genre ? "all" : genre)}
             className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all border ${
               selectedGenre === genre
-                ? "bg-amber-500 text-cine-950 border-amber-400 shadow-sm"
+                ? "bg-amber-500 text-black border-amber-400 shadow-md font-bold"
                 : "bg-cine-900/80 text-cine-300 hover:text-white hover:bg-cine-800 border-cine-700/80"
             }`}
           >

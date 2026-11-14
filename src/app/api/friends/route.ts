@@ -5,6 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { calculateLevelAndRank } from "@/lib/ballKnowledge";
 import { calculateGamerLevelAndRank } from "@/lib/gameKnowledge";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

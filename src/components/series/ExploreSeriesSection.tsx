@@ -206,13 +206,14 @@ export default function ExploreSeriesSection({
             setSelectedGenre("all");
             setSelectedFormat("all");
           }}
-          className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all border ${
+          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all border ${
             selectedGenre === "all" && selectedFormat === "all"
-              ? "bg-purple-600 text-white border-purple-500 shadow-sm"
-              : "bg-cine-900/80 text-cine-300 hover:text-white hover:bg-cine-800 border-cine-700/80"
+              ? "bg-purple-600 text-white border-purple-400 shadow-md"
+              : "bg-cine-900/90 text-cine-300 hover:text-white hover:bg-cine-800 border-cine-700/80"
           }`}
         >
-          ✨ Todas
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Todas</span>
         </button>
         <button
           type="button"
@@ -223,13 +224,14 @@ export default function ExploreSeriesSection({
               setSelectedFormat("miniseries");
             }
           }}
-          className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all border ${
+          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all border ${
             selectedFormat === "miniseries"
-              ? "bg-purple-600 text-white border-purple-500 shadow-sm"
-              : "bg-cine-900/80 text-purple-300 hover:text-white hover:bg-cine-800 border-purple-500/30"
+              ? "bg-purple-600 text-white border-purple-400 shadow-md"
+              : "bg-cine-900/90 text-purple-300 hover:text-white hover:bg-cine-800 border-purple-500/30"
           }`}
         >
-          📺 Miniseries
+          <Tv className="w-3.5 h-3.5 text-purple-400" />
+          <span>Miniseries</span>
         </button>
         {quickGenres.map((genre) => (
           <button

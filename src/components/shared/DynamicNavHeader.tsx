@@ -64,6 +64,7 @@ export default function DynamicNavHeader() {
   // Launcher Principal (Centro de Mando), Ranking Global y Perfil Público Unificado
   if (
     pathname === "/" ||
+    pathname === "/friends" ||
     pathname === "/leaderboard" ||
     pathname === "/ranking" ||
     pathname.startsWith("/u/")
@@ -114,7 +115,7 @@ export default function DynamicNavHeader() {
             </Link>
 
             <Link
-              href="/tv/friends"
+              href="/friends"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Users className="w-3.5 h-3.5 text-sky-400" />
@@ -309,7 +310,7 @@ export default function DynamicNavHeader() {
               <span>Videojuegos</span>
             </Link>
             <Link
-              href="/tv/friends"
+              href="/friends"
               onClick={() => setIsMobileNavOpen(false)}
               className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
             >

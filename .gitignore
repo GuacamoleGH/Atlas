@@ -48,6 +48,13 @@ next-env.d.ts
 *.sqlite-journal
 dev.db
 
+# user uploads
+/public/uploads/*
+!/public/uploads/.gitkeep
+!/public/uploads/avatars/
+/public/uploads/avatars/*
+!/public/uploads/avatars/.gitkeep
+
 # ides & editors
 .vscode/
 .idea/

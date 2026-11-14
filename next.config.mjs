@@ -35,7 +35,6 @@ const nextConfig = {
       { source: "/watchlist", destination: "/tv/watchlist", permanent: true },
       { source: "/watched", destination: "/tv/watched", permanent: true },
       { source: "/recommendations", destination: "/tv/recommendations", permanent: true },
-      { source: "/friends", destination: "/tv/friends", permanent: true },
       { source: "/tv/leaderboard", destination: "/leaderboard", permanent: true },
       { source: "/tv/ranking", destination: "/leaderboard", permanent: true },
       { source: "/ranking", destination: "/leaderboard", permanent: true },

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import {
@@ -22,6 +22,7 @@ import {
   Clock,
   Layers,
   Tv,
+  Sparkles,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -47,6 +48,8 @@ import WatchedCatalogSection, {
 import WatchlistSection from "@/components/profile/WatchlistSection";
 import AffinityCard from "@/components/profile/AffinityCard";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import EditCinephileProfileModal from "@/components/movies/EditCinephileProfileModal";
+import EditGamerProfileModal from "@/components/games/EditGamerProfileModal";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
 
@@ -153,6 +156,8 @@ function PublicProfileContent() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isWrappedOpen, setIsWrappedOpen] = useState(false);
+  const [isEditCineOpen, setIsEditCineOpen] = useState(false);
+  const [isEditGamerOpen, setIsEditGamerOpen] = useState(false);
 
   // Sincronizar parámetro de búsqueda con el estado
   useEffect(() => {
@@ -161,32 +166,31 @@ function PublicProfileContent() {
     }
   }, [tabParam]);
 
-  useEffect(() => {
+  const fetchPublicProfile = useCallback(async () => {
     if (!username) return;
-
-    const fetchPublicProfile = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const res = await fetch(`/api/u/${encodeURIComponent(username)}`);
-        if (res.status === 404) {
-          setError("El usuario que buscas no existe en Atlas.");
-          return;
-        }
-        if (!res.ok) {
-          throw new Error("No se pudo cargar el perfil.");
-        }
-        const json = await res.json();
-        setData(json);
-      } catch (err: any) {
-        setError(err.message || "Error de conexión.");
-      } finally {
-        setIsLoading(false);
+    try {
+      setIsLoading(true);
+      setError(null);
+      const res = await fetch(`/api/u/${encodeURIComponent(username)}`);
+      if (res.status === 404) {
+        setError("El usuario que buscas no existe en Atlas.");
+        return;
       }
-    };
-
-    fetchPublicProfile();
+      if (!res.ok) {
+        throw new Error("No se pudo cargar el perfil.");
+      }
+      const json = await res.json();
+      setData(json);
+    } catch (err: any) {
+      setError(err.message || "Error de conexión.");
+    } finally {
+      setIsLoading(false);
+    }
   }, [username]);
+
+  useEffect(() => {
+    fetchPublicProfile();
+  }, [fetchPublicProfile]);
 
   const handleUniverseChange = (newUniverse: "cinema" | "gaming") => {
     sounds.switch();
@@ -432,7 +436,7 @@ function PublicProfileContent() {
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
             <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
               {/* Avatar */}
-              <div className="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
+              <div className="relative group/avatar w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
                 {user.image ? (
                   <img
                     src={user.image}
@@ -443,6 +447,24 @@ function PublicProfileContent() {
                   <div className="w-full h-full flex items-center justify-center font-black text-white text-3xl bg-gradient-to-br from-amber-600 to-yellow-800">
                     {(user.name || user.username || "U")[0].toUpperCase()}
                   </div>
+                )}
+                {isOwner && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sounds.playClick();
+                      setIsEditCineOpen(true);
+                    }}
+                    className="absolute inset-0 w-full h-full bg-black/80 backdrop-blur-xs opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 flex flex-col items-center justify-center text-center p-0 m-0 cursor-pointer"
+                    title="Editar foto y perfil cinéfilo"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-1.5 text-amber-300">
+                      <Sparkles className="w-6 h-6 text-amber-400" />
+                      <span className="text-[11px] font-bold tracking-wide leading-none text-center">
+                        Cambiar
+                      </span>
+                    </div>
+                  </button>
                 )}
               </div>
 
@@ -482,14 +504,18 @@ function PublicProfileContent() {
               {/* Botones de acción */}
               <div className="flex flex-row sm:flex-col gap-2.5 shrink-0 self-start sm:self-center sm:ml-auto">
                 {isOwner && (
-                  <Link
-                    href="/profile"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sounds.playClick();
+                      setIsEditCineOpen(true);
+                    }}
                     className="justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-amber-500/20 text-cine-200 hover:text-white border border-cine-700 hover:border-amber-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                     title="Editar perfil cinéfilo"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                     <span>Editar Perfil</span>
-                  </Link>
+                  </button>
                 )}
 
                 <button
@@ -544,7 +570,7 @@ function PublicProfileContent() {
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
             <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
               {/* Avatar */}
-              <div className="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-purple-500/40 shadow-[0_0_20px_rgba(168,85,247,0.3)] shrink-0 bg-cine-900 flex items-center justify-center">
+              <div className="relative group/avatar w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-purple-500/40 shadow-[0_0_20px_rgba(168,85,247,0.3)] shrink-0 bg-cine-900 flex items-center justify-center">
                 {user.image ? (
                   <img
                     src={user.image}
@@ -555,6 +581,24 @@ function PublicProfileContent() {
                   <div className="w-full h-full flex items-center justify-center font-black text-white text-3xl bg-gradient-to-br from-purple-700 to-indigo-900">
                     {(user.name || user.username || "U")[0].toUpperCase()}
                   </div>
+                )}
+                {isOwner && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sounds.playClick();
+                      setIsEditGamerOpen(true);
+                    }}
+                    className="absolute inset-0 w-full h-full bg-black/80 backdrop-blur-xs opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 flex flex-col items-center justify-center text-center p-0 m-0 cursor-pointer"
+                    title="Editar foto y perfil gamer"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-1.5 text-purple-300">
+                      <Sparkles className="w-6 h-6 text-purple-400" />
+                      <span className="text-[11px] font-bold tracking-wide leading-none text-center">
+                        Cambiar
+                      </span>
+                    </div>
+                  </button>
                 )}
               </div>
 
@@ -594,14 +638,18 @@ function PublicProfileContent() {
               {/* Botones de acción */}
               <div className="flex flex-row sm:flex-col gap-2.5 shrink-0 self-start sm:self-center sm:ml-auto">
                 {isOwner && (
-                  <Link
-                    href="/games/profile"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sounds.playClick();
+                      setIsEditGamerOpen(true);
+                    }}
                     className="justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-purple-500/20 text-cine-200 hover:text-white border border-cine-700 hover:border-purple-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                     title="Editar perfil gamer"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                     <span>Editar Perfil</span>
-                  </Link>
+                  </button>
                 )}
 
                 <button
@@ -1441,6 +1489,30 @@ function PublicProfileContent() {
             : topFiveGames.slice(0, 3)
         }
       />
+
+      {/* Modales de Edición de Perfil para el Propietario */}
+      {isOwner && (
+        <>
+          <EditCinephileProfileModal
+            isOpen={isEditCineOpen}
+            onClose={() => setIsEditCineOpen(false)}
+            onSaved={fetchPublicProfile}
+            initialName={user.name || user.username || ""}
+            initialBio={user.bio}
+            initialAvatar={user.image}
+            initialIsWatchlistPublic={cinema.isWatchlistPublic}
+          />
+          <EditGamerProfileModal
+            isOpen={isEditGamerOpen}
+            onClose={() => setIsEditGamerOpen(false)}
+            onSaved={fetchPublicProfile}
+            initialName={user.name || user.username || ""}
+            initialBio={user.bio}
+            initialAvatar={user.image}
+            initialIsBacklogPublic={gaming.isBacklogPublic}
+          />
+        </>
+      )}
     </div>
   );
 }

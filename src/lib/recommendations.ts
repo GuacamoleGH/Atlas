@@ -209,6 +209,7 @@ export interface RecommendationRow {
 
 export interface RecommendationsResponse {
   rows: RecommendationRow[];
+  allCandidates?: RecommendationItem[];
   isColdStart: boolean;
   watchedCount: number;
   cachedAt?: string;
@@ -961,22 +962,22 @@ export async function getRecommendations(
   scoredCandidates.sort((a, b) => b.affinityScore - a.affinityScore);
 
   // ==========================================
-  // FILA 1: «Creemos que te va a gustar» (Top 60 con diversidad)
+  // FILA 1: «Creemos que te va a gustar» (Top 20 con diversidad)
   // ==========================================
   const featuredCandidates: RecommendationItem[] = [];
   const primaryGenreCount: Record<number, number> = {};
   const seedContributionCount: Record<string, number> = {};
-  const maxPerGenre = Math.ceil(60 / 3); // 20
+  const maxPerGenre = Math.ceil(20 / 3); // 7
 
   for (const cand of scoredCandidates) {
-    if (featuredCandidates.length >= 60) break;
+    if (featuredCandidates.length >= 20) break;
 
     const primaryG = normalizeGenreIds(cand.genreIds)[0] || 0;
     const gCount = primaryGenreCount[primaryG] || 0;
     const sTitle = cand.scoreBreakdown.seedTitle || "discover";
     const sCount = seedContributionCount[sTitle] || 0;
 
-    if (gCount < maxPerGenre && sCount < 6) {
+    if (gCount < maxPerGenre && sCount < 3) {
       featuredCandidates.push(cand);
       primaryGenreCount[primaryG] = gCount + 1;
       seedContributionCount[sTitle] = sCount + 1;
@@ -984,9 +985,9 @@ export async function getRecommendations(
   }
 
   // Si quedaron huecos por las restricciones de diversidad, rellenar con los siguientes
-  if (featuredCandidates.length < 60) {
+  if (featuredCandidates.length < 20) {
     for (const cand of scoredCandidates) {
-      if (featuredCandidates.length >= 60) break;
+      if (featuredCandidates.length >= 20) break;
       if (!featuredCandidates.some((f) => f.id === cand.id)) {
         featuredCandidates.push(cand);
       }
@@ -1003,6 +1004,9 @@ export async function getRecommendations(
     },
   ];
 
+  // Evitar duplicados exactos entre filas consecutivas
+  const shownItemIds = new Set<string>(featuredCandidates.map((f) => f.id));
+
   // ==========================================
   // FILA 2, 3, 4: «Porque viste {título}» (hasta 3 semillas con >= 4 resultados)
   // ==========================================
@@ -1010,24 +1014,29 @@ export async function getRecommendations(
   for (const seed of profile.seeds) {
     if (seedRowsAdded >= 3) break;
 
-    // Buscar candidatos asociados a esta semilla
+    // Buscar candidatos asociados a esta semilla priorizando nuevos descubrimientos
     const directSeedCandidates = scoredCandidates
-      .filter((c) => c.scoreBreakdown.seedTitle === seed.title)
-      .slice(0, 15);
+      .filter((c) => c.scoreBreakdown.seedTitle === seed.title);
 
-    if (directSeedCandidates.length >= 4) {
+    const freshCandidates = directSeedCandidates.filter((c) => !shownItemIds.has(c.id));
+    const finalSeedCandidates = (
+      freshCandidates.length >= 4 ? freshCandidates : directSeedCandidates
+    ).slice(0, 15);
+
+    if (finalSeedCandidates.length >= 4) {
       rows.push({
         id: `seed-${seed.mediaType}-${seed.tmdbId}`,
         title: `Porque viste ${seed.title}`,
         subtitle: `Títulos con temática y estilo muy afines a ${seed.title}.`,
         type: "seed",
-        items: directSeedCandidates,
+        items: finalSeedCandidates,
         seedInfo: {
           title: seed.title,
           mediaType: seed.mediaType,
           tmdbId: seed.tmdbId,
         },
       });
+      finalSeedCandidates.forEach((c) => shownItemIds.add(c.id));
       seedRowsAdded++;
     }
   }
@@ -1192,6 +1201,7 @@ export async function getRecommendations(
     isColdStart: false,
     watchedCount: profile.totalWatched,
     rows,
+    allCandidates: scoredCandidates,
     cachedAt: new Date().toISOString(),
   };
 
@@ -1211,7 +1221,9 @@ export async function getPersonalizedMovieRecommendations(
   if (!userId) return [];
   try {
     const res = await getRecommendations(userId);
-    const allItems = res.rows.flatMap((r) => r.items);
+    const allItems = res.allCandidates && res.allCandidates.length > 0
+      ? res.allCandidates
+      : res.rows.flatMap((r) => r.items);
     const movies = allItems.filter((i) => i.mediaType === "movie");
     const uniqueMap = new Map<number, typeof movies[0]>();
     for (const m of movies) {
@@ -1246,7 +1258,9 @@ export async function getPersonalizedSeriesRecommendations(
   if (!userId) return [];
   try {
     const res = await getRecommendations(userId);
-    const allItems = res.rows.flatMap((r) => r.items);
+    const allItems = res.allCandidates && res.allCandidates.length > 0
+      ? res.allCandidates
+      : res.rows.flatMap((r) => r.items);
     const series = allItems.filter((i) => i.mediaType === "tv");
     const uniqueMap = new Map<number, typeof series[0]>();
     for (const s of series) {
