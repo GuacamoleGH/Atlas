@@ -123,7 +123,7 @@ export async function GET(
             platform: um.platform,
             knowledgeScore: um.ballKnowledge,
             knowledgeType: "sofa" as const,
-            date: (um.watchedDate || um.updatedAt).toISOString(),
+            date: (um.updatedAt || um.createdAt).toISOString(),
           });
         }
       }

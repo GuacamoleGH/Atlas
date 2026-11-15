@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
           knowledgeScore: um.ballKnowledge,
           knowledgeType: "sofa",
           platform: um.platform,
-          date: (um.watchedDate || um.updatedAt).toISOString(),
+          date: (um.updatedAt || um.createdAt).toISOString(),
         });
       }
 
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
           knowledgeScore: us.ballKnowledge,
           knowledgeType: "sofa",
           platform: us.platform,
-          date: (us.watchedDate || us.updatedAt).toISOString(),
+          date: (us.updatedAt || us.createdAt).toISOString(),
         });
       }
     }
@@ -242,7 +242,7 @@ export async function GET(request: NextRequest) {
           knowledgeType: "game",
           platform: ug.platform,
           hoursPlayed: ug.hoursPlayed,
-          date: (ug.completedDate || ug.updatedAt).toISOString(),
+          date: (ug.updatedAt || ug.createdAt).toISOString(),
         });
       }
     }
@@ -261,10 +261,26 @@ export async function GET(request: NextRequest) {
     }
 
     // 5. ORDENACIÓN
+    const hasRating = (r: UnifiedReview) =>
+      typeof r.userRating === "number" && !isNaN(r.userRating);
+
     if (sort === "highest") {
-      filtered.sort((a, b) => (b.userRating || 0) - (a.userRating || 0));
+      filtered = filtered.filter(hasRating);
+      filtered.sort((a, b) => {
+        if (b.userRating! !== a.userRating!) {
+          return b.userRating! - a.userRating!;
+        }
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
     } else if (sort === "lowest") {
-      filtered.sort((a, b) => (a.userRating || 0) - (b.userRating || 0));
+      // En menor puntuación no aparecen las que no tienen puntuación
+      filtered = filtered.filter(hasRating);
+      filtered.sort((a, b) => {
+        if (a.userRating! !== b.userRating!) {
+          return a.userRating! - b.userRating!;
+        }
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
     } else {
       // "recent" por defecto
       filtered.sort(
