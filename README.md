@@ -1,13 +1,12 @@
 # 🌍 Atlas: Multi-Universo Personal (Cinephile & Gamer Hub)
 
-> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming, Recomendaciones Personalizadas estilo Netflix y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, Recomendaciones Inteligentes RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Motores de Recomendaciones Basados en Contenido («Para ti» en Cine y Videojuegos), Aprendizaje Negativo & Bloqueo Progresivo, Filtro «Hecho en España» 🇪🇸, Tarjetas Interactivas Unificadas, Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.2)**. Desplegado en **servidor propio (Self-Hosted)** con base de datos **PostgreSQL** y accesible en **[atlas.guacamolegh.es](https://atlas.guacamolegh.es)**.
+> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming, Recomendaciones Personalizadas estilo Netflix y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, Recomendaciones Inteligentes RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Motores de Recomendaciones Basados en Contenido («Para ti» en Cine y Videojuegos), Aprendizaje Negativo & Bloqueo Progresivo, Filtro «Hecho en España» 🇪🇸, Tarjetas Interactivas Unificadas, Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.2)**. Desarrollado con base de datos **PostgreSQL** y accesible en **[atlas.guacamolegh.es](https://atlas.guacamolegh.es)**.
 
 <div align="center">
 
 [![Web Oficial](https://img.shields.io/badge/🌐_Web_Oficial-atlas.guacamolegh.es-0ea5e9?style=for-the-badge)](https://atlas.guacamolegh.es)
 [![Next.js](https://img.shields.io/badge/Next.js_14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Self-Hosted](https://img.shields.io/badge/Self--Hosted-Linux_Server-22c55e?style=for-the-badge&logo=linux&logoColor=white)](https://atlas.guacamolegh.es)
 
 **🔗 Acceso en vivo:** [https://atlas.guacamolegh.es](https://atlas.guacamolegh.es)
 
@@ -107,7 +106,7 @@
 - **Autenticación Multi-Proveedor:**
   - Integración completa con **NextAuth.js** con registro seguro y verificación por credenciales (contraseñas encriptadas con `bcryptjs`).
   - Inicio de sesión rápido y seguro con **Google OAuth** y **Discord OAuth**.
-  - Sesiones persistentes JWT y vinculación automática de cuentas en base de datos PostgreSQL local/servidor.
+  - Sesiones persistentes JWT y vinculación automática de cuentas en base de datos PostgreSQL.
 - **Gestión de Invitados & Control de Acceso:**
   - Modo invitado libre para explorar y consultar catálogos, detalles de obras y muros de reseñas.
   - Redirección con retorno inteligente (`/login?callbackUrl=...`) al intentar personalizar perfiles, guardar reseñas o votar.
@@ -171,7 +170,7 @@
 ```
 Atlas/
 ├── repair-git.bat             # Script de 1-clic para reparar índice de Git en Windows
-├── BUILD.md                   # Guía exhaustiva de compilación, despliegue y self-hosting
+├── BUILD.md                   # Guía exhaustiva de compilación y configuración
 ├── prisma/
 │   ├── schema.prisma          # Modelos User, Account, Session, Movie, UserMovie, Series, Game, UserGame
 │   ├── seed.js                # Sembrador inicial para Cinephile Hub
@@ -304,7 +303,7 @@ Atlas/
 npm run dev
 ```
 
-### Compilar y Servir en Producción:
+### Compilar y Ejecutar en Producción:
 
 ```bash
 npm run build
@@ -330,10 +329,8 @@ npm run git:fix
 
 ---
 
-## 🚀 Despliegue en Servidor Local (Self-Hosted)
+## 📖 Documentación Adicional
 
-Atlas corre en infraestructura propia bajo el dominio **[atlas.guacamolegh.es](https://atlas.guacamolegh.es)** conectado a una instancia dedicada de **PostgreSQL**.
+Para más detalles sobre la compilación y variables de entorno, consulta el documento:
 
-Para ver la guía completa paso a paso de compilación, variables de entorno, configuración con PM2/Systemd y proxy reverso con Nginx/Caddy, consulta el documento:
-
-👉 **[Consulta la Guía Completa de Compilación y Despliegue (BUILD.md)](./BUILD.md)**
+👉 **[Consulta la Guía de Compilación (BUILD.md)](./BUILD.md)**
